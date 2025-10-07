@@ -44,17 +44,22 @@ class PitchViewModelTest {
         val settings = viewModel.settings.value
         val pitchState = viewModel.pitchState.value
         val isRecording = viewModel.isRecording.value
+        val isTanpuraPlaying = viewModel.isTanpuraPlaying.value
 
-        assertThat(settings.saNote).isEqualTo("C4")
-        assertThat(settings.saFrequency).isWithin(0.01).of(261.63)
+        assertThat(settings.saNote).isEqualTo("C3")
+        assertThat(settings.saFrequency).isWithin(0.01).of(130.81)
         assertThat(settings.toleranceCents).isEqualTo(15.0)
         assertThat(settings.use22Shruti).isFalse()
+        assertThat(settings.isTanpuraEnabled).isFalse()
+        assertThat(settings.tanpuraString1).isEqualTo("P")
+        assertThat(settings.tanpuraVolume).isEqualTo(0.5f)
 
         assertThat(pitchState.currentNote).isNull()
         assertThat(pitchState.currentFrequency).isNull()
         assertThat(pitchState.confidence).isEqualTo(0f)
 
         assertThat(isRecording).isFalse()
+        assertThat(isTanpuraPlaying).isFalse()
     }
 
     @Test
@@ -289,7 +294,7 @@ class PitchViewModelTest {
         advanceUntilIdle()
         settingsValues.add(viewModel.settings.value.saNote)
 
-        assertThat(settingsValues).containsExactly("C4", "D4", "E4").inOrder()
+        assertThat(settingsValues).containsExactly("C3", "D4", "E4").inOrder()
     }
 
     @Test
@@ -312,4 +317,147 @@ class PitchViewModelTest {
         assertThat(pitchState.currentFrequency).isNull()
         assertThat(pitchState.confidence).isEqualTo(0f)
     }
+
+    // Tanpura tests
+
+    @Test
+    fun `initial tanpura state is not playing`() {
+        assertThat(viewModel.isTanpuraPlaying.value).isFalse()
+        assertThat(viewModel.settings.value.isTanpuraEnabled).isFalse()
+    }
+
+    @Test
+    fun `tanpura string 1 has default value of P`() {
+        assertThat(viewModel.settings.value.tanpuraString1).isEqualTo("P")
+    }
+
+    @Test
+    fun `tanpura volume has default value of 0_5`() {
+        assertThat(viewModel.settings.value.tanpuraVolume).isEqualTo(0.5f)
+    }
+
+    @Test
+    fun `updateTanpuraString1 changes string 1 setting`() = runTest {
+        viewModel.updateTanpuraString1("S")
+        advanceUntilIdle()
+
+        assertThat(viewModel.settings.value.tanpuraString1).isEqualTo("S")
+    }
+
+    @Test
+    fun `updateTanpuraString1 accepts all 12 swaras`() = runTest {
+        val swaras = listOf("S", "r", "R", "g", "G", "m", "M", "P", "d", "D", "n", "N")
+
+        swaras.forEach { swara ->
+            viewModel.updateTanpuraString1(swara)
+            advanceUntilIdle()
+
+            assertThat(viewModel.settings.value.tanpuraString1).isEqualTo(swara)
+        }
+    }
+
+    @Test
+    fun `updateTanpuraString1 does not affect other settings`() = runTest {
+        viewModel.updateSa("D4")
+        viewModel.updateTolerance(20.0)
+        advanceUntilIdle()
+
+        val saNoteBefore = viewModel.settings.value.saNote
+        val toleranceBefore = viewModel.settings.value.toleranceCents
+
+        viewModel.updateTanpuraString1("G")
+        advanceUntilIdle()
+
+        val settings = viewModel.settings.value
+
+        assertThat(settings.tanpuraString1).isEqualTo("G")
+        assertThat(settings.saNote).isEqualTo(saNoteBefore)
+        assertThat(settings.toleranceCents).isEqualTo(toleranceBefore)
+    }
+
+    @Test
+    fun `getTanpuraAvailableNotes returns all 12 notes`() {
+        val notes = viewModel.getTanpuraAvailableNotes()
+
+        assertThat(notes).hasSize(12)
+        assertThat(notes).containsAtLeast("S", "r", "R", "g", "G", "m", "M", "P", "d", "D", "n", "N")
+    }
+
+    @Test
+    fun `tanpura string 1 can be changed multiple times`() = runTest {
+        val sequence = listOf("P", "S", "G", "m", "D")
+
+        sequence.forEach { note ->
+            viewModel.updateTanpuraString1(note)
+            advanceUntilIdle()
+
+            assertThat(viewModel.settings.value.tanpuraString1).isEqualTo(note)
+        }
+    }
+
+    @Test
+    fun `tanpura settings remain consistent across Sa changes`() = runTest {
+        viewModel.updateTanpuraString1("D")
+        advanceUntilIdle()
+
+        val string1Before = viewModel.settings.value.tanpuraString1
+        val volumeBefore = viewModel.settings.value.tanpuraVolume
+
+        viewModel.updateSa("A4")
+        advanceUntilIdle()
+
+        val settings = viewModel.settings.value
+
+        // Tanpura settings should not change when Sa changes
+        assertThat(settings.tanpuraString1).isEqualTo(string1Before)
+        assertThat(settings.tanpuraVolume).isEqualTo(volumeBefore)
+    }
+
+    @Test
+    fun `tanpura settings remain consistent across tolerance changes`() = runTest {
+        viewModel.updateTanpuraString1("m")
+        advanceUntilIdle()
+
+        val string1Before = viewModel.settings.value.tanpuraString1
+
+        viewModel.updateTolerance(25.0)
+        advanceUntilIdle()
+
+        assertThat(viewModel.settings.value.tanpuraString1).isEqualTo(string1Before)
+    }
+
+    @Test
+    fun `tanpura settings remain consistent across tuning system changes`() = runTest {
+        viewModel.updateTanpuraString1("R")
+        advanceUntilIdle()
+
+        val string1Before = viewModel.settings.value.tanpuraString1
+
+        viewModel.updateTuningSystem(true)
+        advanceUntilIdle()
+
+        assertThat(viewModel.settings.value.tanpuraString1).isEqualTo(string1Before)
+    }
+
+    @Test
+    fun `common tanpura configurations work correctly`() = runTest {
+        // Test common tanpura string 1 configurations
+        val commonConfigs = listOf(
+            "P",  // Pancham (most common)
+            "S",  // Shadaj (when tonic on string 1)
+            "m",  // Madhyam (for certain ragas)
+            "N"   // Nishad (for certain ragas)
+        )
+
+        commonConfigs.forEach { note ->
+            viewModel.updateTanpuraString1(note)
+            advanceUntilIdle()
+
+            assertThat(viewModel.settings.value.tanpuraString1).isEqualTo(note)
+        }
+    }
+
+    // Note: Tests for toggleTanpura() would require mocking AudioTrack
+    // which is part of the Android framework and requires instrumentation tests
+    // The business logic around tanpura state management is tested above
 }
