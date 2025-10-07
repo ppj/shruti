@@ -94,9 +94,6 @@ object SaParser {
      * Returns list of note-frequency pairs for dropdown selector
      */
     fun getSaOptionsInRange(): List<Pair<String, Double>> = listOf(
-        "F2" to parseToFrequency("F2")!!,
-        "F#2" to parseToFrequency("F#2")!!,
-        "G2" to parseToFrequency("G2")!!,
         "G#2" to parseToFrequency("G#2")!!,
         "A2" to parseToFrequency("A2")!!,
         "A#2" to parseToFrequency("A#2")!!,
@@ -111,7 +108,6 @@ object SaParser {
         "G3" to parseToFrequency("G3")!!,
         "G#3" to parseToFrequency("G#3")!!,
         "A3" to parseToFrequency("A3")!!,
-        "A#3" to parseToFrequency("A#3")!!,
-        "B3" to parseToFrequency("B3")!!
+        "A#3" to parseToFrequency("A#3")!!
     )
 }
