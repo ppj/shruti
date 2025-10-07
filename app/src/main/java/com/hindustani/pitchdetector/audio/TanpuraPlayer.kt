@@ -90,26 +90,26 @@ class TanpuraPlayer(
                 val string1Freq = saFrequency * (noteRatios[string1Note] ?: 1.0) / 2.0
                 val string2Freq = saFrequency  // Tonic Sa
                 val string3Freq = saFrequency  // Tonic Sa
-                val string4Freq = saFrequency * 2.0  // Upper octave Sa
+                val string4Freq = saFrequency / 2.0  // Lower octave Sa
 
                 // Tanpura plucking pattern: String1, skip, String2, String3, String4, skip, repeat
-                // This creates a 6-beat cycle (3 seconds at 120 BPM)
-                // With 3s sustain, strings naturally overlap throughout the cycle
+                // This creates a 6-beat cycle (3.6 seconds at 100 BPM)
+                // With 6s sustain, strings have very rich overlap - multiple strings always ringing
                 // When cycle repeats, String4 from previous cycle overlaps with new String1
                 //
                 // Key insight: Unlike sequential playback, real tanpura has multiple strings
                 // ringing simultaneously creating a continuous, seamless drone
 
-                // Each string sustains for 3 seconds (reduced for faster startup)
-                // Still provides deep drone with sufficient overlap
-                val sustainDuration = 3.0
+                // Each string sustains for 6 seconds for very deep, continuous drone
+                // Provides very rich overlap with multiple strings always ringing
+                val sustainDuration = 6.0
 
-                // Time between each beat (steady rhythm 120 BPM)
-                // Beat duration of 0.5s = 120 BPM
-                val beatInterval = 0.5
+                // Time between each beat (steady rhythm 100 BPM)
+                // Beat duration of 0.6s = 100 BPM
+                val beatInterval = 0.6
 
                 // Pre-generate all 4 strings with very slight amplitude variations for naturalism
-                // Optimized: 3s duration + 14 harmonics = ~3-4 second startup time
+                // 6s duration + 20 harmonics = ~8-10 second startup but very rich sound
                 Log.d(TAG, "Generating string samples...")
                 val string1Samples = generateStringPluck(string1Freq, sustainDuration, 0.98)
                 val string2Samples = generateStringPluck(string2Freq, sustainDuration, 1.0)
@@ -400,24 +400,31 @@ class TanpuraPlayer(
         val numSamples = (sampleRate * duration).toInt()
         val samples = ShortArray(numSamples)
 
-        // Tanpura harmonic series with jivari effect
-        // Deep, drony sound: very strong fundamental and lower harmonics
-        // Optimized to 14 harmonics for faster generation while maintaining rich tone
+        // Tanpura harmonic series based on jawari/jowari effect
+        // Research shows: 4th, 7th, 11th, 17th partials are STRONGER than fundamental
+        // Upper harmonics dominate, giving characteristic buzzing, overtone-rich sound
+        // Extending to 20 harmonics as research indicates partials have power up to 20th
         val harmonics = listOf(
-            1.0 to 1.0,       // Fundamental (strongest - the core of the drone)
-            2.0 to 0.85,      // Octave (very strong for depth)
-            3.0 to 0.68,      // Fifth (prominent)
-            4.0 to 0.55,      // Double octave (strong)
-            5.0 to 0.45,      // Major third
-            6.0 to 0.38,      // Fifth + octave
-            7.0 to 0.32,      // Minor seventh
-            8.0 to 0.26,      // Triple octave
-            9.0 to 0.20,      // Major ninth
-            10.0 to 0.16,     // Major third + octave
-            11.0 to 0.12,     // Eleventh
-            12.0 to 0.10,     // Fifth + double octave
-            13.0 to 0.08,     // Thirteenth
-            14.0 to 0.06      // Minor seventh + octave
+            1.0 to 0.55,      // Fundamental (weaker than key harmonics for jawari effect)
+            2.0 to 0.85,      // Octave (strong - pitch heard 1-2 octaves above base)
+            3.0 to 0.75,      // Fifth (strong)
+            4.0 to 1.0,       // DOMINANT - stronger than fundamental (jawari)
+            5.0 to 0.65,      // Major third
+            6.0 to 0.58,      // Fifth + octave
+            7.0 to 0.95,      // DOMINANT - stronger than fundamental (jawari)
+            8.0 to 0.48,      // Triple octave
+            9.0 to 0.42,      // Major ninth
+            10.0 to 0.38,     // Major third + octave
+            11.0 to 0.85,     // DOMINANT - stronger than fundamental (jawari)
+            12.0 to 0.32,     // Fifth + double octave
+            13.0 to 0.28,     // Thirteenth
+            14.0 to 0.25,     // Minor seventh + octave
+            15.0 to 0.22,     // Major seventh + octave
+            16.0 to 0.18,     // Quadruple octave
+            17.0 to 0.75,     // DOMINANT - stronger than fundamental (jawari)
+            18.0 to 0.15,     // Ninth + octave
+            19.0 to 0.12,     // Nineteenth
+            20.0 to 0.10      // Twentieth (subtle but present)
         )
 
         for (i in 0 until numSamples) {
@@ -430,35 +437,48 @@ class TanpuraPlayer(
                     (t / 0.1) * (1.0 - 0.3 * exp(-t * 15))  // Slightly curved attack
                 }
                 else -> {
-                    // Slow exponential decay for sustained drone (3-4 seconds)
-                    exp(-t * 0.45)  // Decay adjusted for 3s sustain
+                    // Very slow exponential decay for long sustained drone (6 seconds)
+                    exp(-t * 0.25)  // Decay adjusted for 6s sustain
                 }
             }
 
-            // Very subtle jivari shimmer (much gentler than before)
-            // Real tanpura shimmer comes from harmonic interactions, not obvious modulation
-            val subtleShimmer = 1.0 + 0.015 * sin(2.0 * PI * 1.8 * t) * exp(-t * 1.2)
+            // Subtle inharmonicity for realistic string behavior
+            // Harmonics are slightly sharp due to string stiffness
+            // This prevents overly "perfect" synthetic sound
+            val inharmonicityCoeff = 0.0002
 
             // Generate sample with additive synthesis
             var sample = 0.0
             for ((harmonicNum, amplitude) in harmonics) {
-                val harmonicFreq = frequency * harmonicNum
+                // Add inharmonicity: harmonics are slightly sharp (not exact integer multiples)
+                // This is due to string stiffness in real instruments
+                val inharmonicFactor = kotlin.math.sqrt(1.0 + inharmonicityCoeff * harmonicNum * harmonicNum)
+                val harmonicFreq = frequency * harmonicNum * inharmonicFactor
 
                 // No frequency modulation - keep harmonics stable
                 val phase = 2.0 * PI * harmonicFreq * t
 
-                // Each harmonic decays at slightly different rate (more realistic)
-                // Lower harmonics sustain longest (deep drone), higher harmonics fade gradually
-                val harmonicDecay = exp(-t * (0.2 + harmonicNum * 0.02))
+                // Quadratic frequency-dependent damping: higher harmonics decay MUCH faster
+                // This prevents metallic/guitar-like sound
+                // Research shows natural strings have damping proportional to frequency squared
+                val harmonicDecay = exp(-t * (0.15 + harmonicNum * harmonicNum * 0.004))
+
+                // Independent per-harmonic amplitude modulation (waxing/waning)
+                // Creates the characteristic "cascading" effect where harmonics peak at different times
+                // Each harmonic oscillates at slightly different rate with unique phase offset
+                val modulationFreq = 1.5 + (harmonicNum * 0.15)  // Each harmonic has different modulation rate
+                val modulationPhase = harmonicNum * 0.4  // Stagger the phases
+                val modulationDepth = 0.12 * exp(-t * 0.8)  // Modulation fades over time
+                val harmonicModulation = 1.0 + modulationDepth * sin(2.0 * PI * modulationFreq * t + modulationPhase)
 
                 // Very subtle random-like phase variation per harmonic (from harmonic interference)
                 val harmonicPhaseShift = sin(harmonicNum * 0.7) * 0.05
 
-                sample += amplitude * harmonicDecay * sin(phase + harmonicPhaseShift)
+                sample += amplitude * harmonicDecay * harmonicModulation * sin(phase + harmonicPhaseShift)
             }
 
-            // Apply envelope, very subtle shimmer, amplitude variation, and volume
-            sample *= envelope * subtleShimmer * amplitudeVariation * volume
+            // Apply envelope, amplitude variation, and volume
+            sample *= envelope * amplitudeVariation * volume
 
             // Normalize and convert to 16-bit PCM
             val amplitudeSum = harmonics.sumOf { it.second }
