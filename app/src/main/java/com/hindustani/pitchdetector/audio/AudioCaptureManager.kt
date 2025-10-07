@@ -1,0 +1,103 @@
+package com.hindustani.pitchdetector.audio
+
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+
+/**
+ * Manages real-time audio capture from device microphone
+ */
+class AudioCaptureManager(
+    private val sampleRate: Int = 44100
+) {
+    private var audioRecord: AudioRecord? = null
+    private var captureJob: Job? = null
+
+    private val bufferSize = AudioRecord.getMinBufferSize(
+        sampleRate,
+        AudioFormat.CHANNEL_IN_MONO,
+        AudioFormat.ENCODING_PCM_16BIT
+    ).let { minSize ->
+        // Use 2x minimum buffer size for better stability
+        maxOf(minSize * 2, 4096)
+    }
+
+    /**
+     * Starts capturing audio and calls the callback with audio data
+     * @param onAudioData Callback function that receives audio samples as FloatArray
+     * @return Job that can be used to control the capture coroutine
+     */
+    fun startCapture(onAudioData: (FloatArray) -> Unit): Job {
+        // Stop any existing capture
+        stop()
+
+        return CoroutineScope(Dispatchers.IO).launch {
+            try {
+                audioRecord = AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize
+                )
+
+                if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
+                    throw IllegalStateException("AudioRecord initialization failed")
+                }
+
+                val buffer = ShortArray(bufferSize)
+                audioRecord?.startRecording()
+
+                while (isActive) {
+                    val samplesRead = audioRecord?.read(buffer, 0, bufferSize) ?: 0
+
+                    if (samplesRead > 0) {
+                        // Convert 16-bit PCM to normalized float (-1.0 to 1.0)
+                        val floatBuffer = FloatArray(samplesRead) { i ->
+                            buffer[i] / 32768f
+                        }
+                        onAudioData(floatBuffer)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                stop()
+            }
+        }.also { job ->
+            captureJob = job
+        }
+    }
+
+    /**
+     * Stops audio capture and releases resources
+     */
+    fun stop() {
+        captureJob?.cancel()
+        captureJob = null
+
+        audioRecord?.apply {
+            try {
+                if (state == AudioRecord.STATE_INITIALIZED) {
+                    stop()
+                }
+                release()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        audioRecord = null
+    }
+
+    /**
+     * Checks if audio capture is currently active
+     */
+    fun isCapturing(): Boolean {
+        return captureJob?.isActive == true
+    }
+}

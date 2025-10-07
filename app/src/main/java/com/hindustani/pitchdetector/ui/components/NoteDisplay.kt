@@ -1,0 +1,47 @@
+package com.hindustani.pitchdetector.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
+
+/**
+ * Displays the current detected note
+ */
+@Composable
+fun NoteDisplay(
+    swara: String,
+    centsDeviation: Double,
+    modifier: Modifier = Modifier
+) {
+    // Large circular note display
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(150.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                shape = CircleShape
+            )
+    ) {
+        Text(
+            text = swara,
+            style = MaterialTheme.typography.displayLarge,
+            fontSize = 72.sp,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
