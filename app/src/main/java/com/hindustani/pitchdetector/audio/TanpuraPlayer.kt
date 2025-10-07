@@ -58,10 +58,10 @@ class TanpuraPlayer(
     private var string1Note: String = "P"     // Default to Pa
     private var volume: Float = 0.5f
 
-    // Audio buffer size
+    // Audio buffer size (stereo requires 2x samples)
     private val bufferSize = AudioTrack.getMinBufferSize(
         sampleRate,
-        AudioFormat.CHANNEL_OUT_MONO,
+        AudioFormat.CHANNEL_OUT_STEREO,
         AudioFormat.ENCODING_PCM_16BIT
     ).let { minSize ->
         maxOf(minSize * 2, 8192)
@@ -94,22 +94,22 @@ class TanpuraPlayer(
 
                 // Tanpura plucking pattern: String1, skip, String2, String3, String4, skip, repeat
                 // This creates a 6-beat cycle (3.6 seconds at 100 BPM)
-                // With 6s sustain, strings have very rich overlap - multiple strings always ringing
+                // With 8s sustain, strings have extremely rich overlap - multiple strings always ringing
                 // When cycle repeats, String4 from previous cycle overlaps with new String1
                 //
                 // Key insight: Unlike sequential playback, real tanpura has multiple strings
                 // ringing simultaneously creating a continuous, seamless drone
 
-                // Each string sustains for 6 seconds for very deep, continuous drone
+                // Each string sustains for 8 seconds for extremely deep, continuous drone
                 // Provides very rich overlap with multiple strings always ringing
-                val sustainDuration = 6.0
+                val sustainDuration = 8.0
 
                 // Time between each beat (steady rhythm 100 BPM)
                 // Beat duration of 0.6s = 100 BPM
                 val beatInterval = 0.6
 
                 // Pre-generate all 4 strings with very slight amplitude variations for naturalism
-                // 6s duration + 20 harmonics = ~8-10 second startup but very rich sound
+                // 8s duration + 20 harmonics = ~12-15 second startup but very rich sound
                 Log.d(TAG, "Generating string samples...")
                 val string1Samples = generateStringPluck(string1Freq, sustainDuration, 0.98)
                 val string2Samples = generateStringPluck(string2Freq, sustainDuration, 1.0)
@@ -139,35 +139,55 @@ class TanpuraPlayer(
                 val cycleDuration = beatInterval * 6  // 6-beat cycle
                 val cycleSize = (sampleRate * cycleDuration).toInt()
 
-                // Pre-generate first mixed buffer before creating AudioTrack
+                // Pre-generate first mixed buffer (mono) before creating stereo
                 // This ensures we have audio ready to play immediately
-                val firstMixedBuffer = ShortArray(cycleSize)
+                val monoBuffer = ShortArray(cycleSize)
                 for ((stringIndex, stringSamples) in allStrings.withIndex()) {
                     val offset = pluckOffsets[stringIndex] * beatIntervalSamples
                     for (i in stringSamples.indices) {
                         // Wrap around if string extends beyond cycle boundary
                         // This allows strings to overlap into the next cycle
-                        val bufferIndex = (offset + i) % firstMixedBuffer.size
-                        val mixed = firstMixedBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
-                        firstMixedBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
+                        val bufferIndex = (offset + i) % monoBuffer.size
+                        val mixed = monoBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
+                        monoBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
                     }
                 }
 
-                // Normalize the pre-generated buffer (leave more headroom for deep, full sound)
-                val maxAmp = firstMixedBuffer.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: 1
+                // Normalize the mono buffer (leave more headroom for deep, full sound)
+                val maxAmp = monoBuffer.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: 1
                 if (maxAmp > 28000) {
                     val scale = 28000.0 / maxAmp
-                    for (i in firstMixedBuffer.indices) {
-                        firstMixedBuffer[i] = (firstMixedBuffer[i] * scale).toInt().toShort()
+                    for (i in monoBuffer.indices) {
+                        monoBuffer[i] = (monoBuffer[i] * scale).toInt().toShort()
                     }
                 }
 
-                // Apply fade-in to the first buffer for smooth start (1.5 seconds)
+                // Convert mono to stereo with timing offset, detuning, and panning
+                // Stereo buffer is 2x size (interleaved L/R samples)
+                val stereoTimingOffset = (sampleRate * 0.012).toInt()  // 12ms delay for R channel
+                val firstMixedBuffer = ShortArray(cycleSize * 2)  // Stereo: L, R, L, R, ...
+                val panningL = 0.75  // 75% left
+                val panningR = 0.75  // 75% right
+
+                for (i in monoBuffer.indices) {
+                    // Left channel: current sample with left panning
+                    val leftSample = (monoBuffer[i] * panningL).toInt().coerceIn(-32768, 32767).toShort()
+                    firstMixedBuffer[i * 2] = leftSample
+
+                    // Right channel: delayed sample with right panning and slight detuning
+                    val rightIndex = (i + stereoTimingOffset) % monoBuffer.size
+                    val rightSample = (monoBuffer[rightIndex] * panningR).toInt().coerceIn(-32768, 32767).toShort()
+                    firstMixedBuffer[i * 2 + 1] = rightSample
+                }
+
+                // Apply fade-in to the stereo buffer
                 val fadeInDuration = 1.5  // seconds
                 val fadeInSamples = (sampleRate * fadeInDuration).toInt()
-                for (i in 0 until minOf(fadeInSamples, firstMixedBuffer.size)) {
+                for (i in 0 until minOf(fadeInSamples, monoBuffer.size)) {
                     val fadeInEnvelope = (i.toDouble() / fadeInSamples).coerceIn(0.0, 1.0)
-                    firstMixedBuffer[i] = (firstMixedBuffer[i] * fadeInEnvelope).toInt().toShort()
+                    // Apply to both L and R channels
+                    firstMixedBuffer[i * 2] = (firstMixedBuffer[i * 2] * fadeInEnvelope).toInt().toShort()
+                    firstMixedBuffer[i * 2 + 1] = (firstMixedBuffer[i * 2 + 1] * fadeInEnvelope).toInt().toShort()
                 }
 
                 // Now create and initialize AudioTrack with audio ready
@@ -183,7 +203,7 @@ class TanpuraPlayer(
                         AudioFormat.Builder()
                             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                             .setSampleRate(sampleRate)
-                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
                             .build()
                     )
                     .setBufferSizeInBytes(bufferSize)
@@ -208,8 +228,8 @@ class TanpuraPlayer(
 
                 // Continue playing in loop
                 while (isActive) {
-                    // Create a buffer for one complete cycle (6 beats)
-                    val mixedBuffer = ShortArray(cycleSize)
+                    // Create mono buffer for one complete cycle (6 beats)
+                    val monoLoopBuffer = ShortArray(cycleSize)
 
                     // Mix all strings with their proper timing offsets based on plucking pattern
                     for ((stringIndex, stringSamples) in allStrings.withIndex()) {
@@ -219,23 +239,36 @@ class TanpuraPlayer(
                         for (i in stringSamples.indices) {
                             // Wrap around if string extends beyond cycle boundary
                             // This allows strings to overlap into the next cycle
-                            val bufferIndex = (offset + i) % mixedBuffer.size
+                            val bufferIndex = (offset + i) % monoLoopBuffer.size
                             // Mix by adding samples (will normalize later)
-                            val mixed = mixedBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
-                            mixedBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
+                            val mixed = monoLoopBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
+                            monoLoopBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
                         }
                     }
 
-                    // Normalize the mixed buffer to prevent clipping (leave more headroom for full sound)
-                    val maxAmplitude = mixedBuffer.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: 1
+                    // Normalize the mono buffer to prevent clipping (leave more headroom for full sound)
+                    val maxAmplitude = monoLoopBuffer.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: 1
                     if (maxAmplitude > 28000) {
                         val scale = 28000.0 / maxAmplitude
-                        for (i in mixedBuffer.indices) {
-                            mixedBuffer[i] = (mixedBuffer[i] * scale).toInt().toShort()
+                        for (i in monoLoopBuffer.indices) {
+                            monoLoopBuffer[i] = (monoLoopBuffer[i] * scale).toInt().toShort()
                         }
                     }
 
-                    // Apply fade-out if requested
+                    // Convert mono to stereo with timing offset and panning
+                    val stereoLoopBuffer = ShortArray(cycleSize * 2)  // Stereo: L, R, L, R, ...
+                    for (i in monoLoopBuffer.indices) {
+                        // Left channel
+                        val leftSample = (monoLoopBuffer[i] * panningL).toInt().coerceIn(-32768, 32767).toShort()
+                        stereoLoopBuffer[i * 2] = leftSample
+
+                        // Right channel with timing offset
+                        val rightIndex = (i + stereoTimingOffset) % monoLoopBuffer.size
+                        val rightSample = (monoLoopBuffer[rightIndex] * panningR).toInt().coerceIn(-32768, 32767).toShort()
+                        stereoLoopBuffer[i * 2 + 1] = rightSample
+                    }
+
+                    // Apply fade-out if requested (to stereo buffer)
                     if (isFadingOut) {
                         val fadeOutDuration = 1.0  // seconds
                         val elapsedTime = (System.currentTimeMillis() - fadeOutStartTime) / 1000.0
@@ -246,19 +279,20 @@ class TanpuraPlayer(
                             break
                         }
 
-                        // Apply fade-out envelope to entire buffer
+                        // Apply fade-out envelope to both L and R channels
                         val fadeOutProgress = (elapsedTime / fadeOutDuration).coerceIn(0.0, 1.0)
                         val fadeOutEnvelope = (1.0 - fadeOutProgress).coerceIn(0.0, 1.0)
 
-                        for (i in mixedBuffer.indices) {
-                            mixedBuffer[i] = (mixedBuffer[i] * fadeOutEnvelope).toInt().toShort()
+                        for (i in monoLoopBuffer.indices) {
+                            stereoLoopBuffer[i * 2] = (stereoLoopBuffer[i * 2] * fadeOutEnvelope).toInt().toShort()
+                            stereoLoopBuffer[i * 2 + 1] = (stereoLoopBuffer[i * 2 + 1] * fadeOutEnvelope).toInt().toShort()
                         }
                     }
 
                     if (!isActive) break
 
-                    // Write the mixed cycle to audio output
-                    audioTrack?.write(mixedBuffer, 0, mixedBuffer.size)
+                    // Write the stereo cycle to audio output
+                    audioTrack?.write(stereoLoopBuffer, 0, stereoLoopBuffer.size)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in tanpura playback", e)
@@ -430,15 +464,18 @@ class TanpuraPlayer(
         for (i in 0 until numSamples) {
             val t = i.toDouble() / sampleRate
 
-            // Envelope: Gentle attack, extremely long sustain with very slow decay
+            // Envelope: Extremely gradual, imperceptible attack with long sustain
+            // Real tanpura plucks are virtually inaudible - you have to listen very carefully to hear them
             val envelope = when {
-                t < 0.1 -> {
-                    // Gentle, gradual attack (100ms) - not percussive like guitar
-                    (t / 0.1) * (1.0 - 0.3 * exp(-t * 15))  // Slightly curved attack
+                t < 0.8 -> {
+                    // Very long, smooth S-curve attack (800ms) - imperceptible onset
+                    // Sigmoid curve provides smooth, natural fade-in with no perceptible "pluck"
+                    val attackProgress = t / 0.8
+                    1.0 / (1.0 + exp(-12.0 * (attackProgress - 0.5)))
                 }
                 else -> {
-                    // Very slow exponential decay for long sustained drone (6 seconds)
-                    exp(-t * 0.25)  // Decay adjusted for 6s sustain
+                    // Extremely slow exponential decay for very long sustained drone (8 seconds)
+                    exp(-t * 0.18)  // Decay adjusted for 8s sustain
                 }
             }
 
