@@ -7,6 +7,7 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -46,6 +47,12 @@ class TanpuraPlayer(
     private var audioTrack: AudioTrack? = null
     private var playbackJob: Job? = null
 
+    // Fade-out control
+    @Volatile
+    private var isFadingOut: Boolean = false
+    @Volatile
+    private var fadeOutStartTime: Long = 0
+
     // Tanpura configuration
     private var saFrequency: Double = 130.81  // Default C3
     private var string1Note: String = "P"     // Default to Pa
@@ -65,35 +72,44 @@ class TanpuraPlayer(
      */
     fun start(saFreq: Double, string1: String, vol: Float = 0.5f) {
         Log.d(TAG, "start() called: saFreq=$saFreq, string1=$string1, vol=$vol")
-        stop()  // Stop any existing playback
+        stopImmediately()  // Stop any existing playback immediately (no fade-out)
 
         this.saFrequency = saFreq
         this.string1Note = string1
         this.volume = vol.coerceIn(0f, 1f)
 
+        // Reset fade-out state
+        isFadingOut = false
+        fadeOutStartTime = 0
+
         playbackJob = CoroutineScope(Dispatchers.IO).launch {
             try {
                 Log.d(TAG, "Tanpura playback coroutine started")
                 // Calculate frequencies for all 4 strings
-                val string1Freq = saFrequency * (noteRatios[string1Note] ?: 1.0)
-                val string2Freq = saFrequency
-                val string3Freq = saFrequency
+                // String 1: User-selected note in lower octave
+                val string1Freq = saFrequency * (noteRatios[string1Note] ?: 1.0) / 2.0
+                val string2Freq = saFrequency  // Tonic Sa
+                val string3Freq = saFrequency  // Tonic Sa
                 val string4Freq = saFrequency * 2.0  // Upper octave Sa
 
-                // Tanpura plucking pattern with overlapping sustains
-                // Real tanpura: strings sustain 3-10 seconds, plucked at steady tempo
+                // Tanpura plucking pattern: String1, skip, String2, String3, String4, skip, repeat
+                // This creates a 6-beat cycle (3 seconds at 120 BPM)
+                // With 3s sustain, strings naturally overlap throughout the cycle
+                // When cycle repeats, String4 from previous cycle overlaps with new String1
                 //
                 // Key insight: Unlike sequential playback, real tanpura has multiple strings
                 // ringing simultaneously creating a continuous, seamless drone
 
-                // Each string sustains for 7 seconds (very long sustain for deep drone)
-                val sustainDuration = 7.0
+                // Each string sustains for 3 seconds (reduced for faster startup)
+                // Still provides deep drone with sufficient overlap
+                val sustainDuration = 3.0
 
-                // Time between plucks (steady rhythm ~75 BPM)
-                // With 7s sustain and 0.8s interval, we get ~8-9x overlap = seamless drone
-                val pluckInterval = 0.8
+                // Time between each beat (steady rhythm 120 BPM)
+                // Beat duration of 0.5s = 120 BPM
+                val beatInterval = 0.5
 
                 // Pre-generate all 4 strings with very slight amplitude variations for naturalism
+                // Optimized: 3s duration + 14 harmonics = ~3-4 second startup time
                 Log.d(TAG, "Generating string samples...")
                 val string1Samples = generateStringPluck(string1Freq, sustainDuration, 0.98)
                 val string2Samples = generateStringPluck(string2Freq, sustainDuration, 1.0)
@@ -101,24 +117,39 @@ class TanpuraPlayer(
                 val string4Samples = generateStringPluck(string4Freq, sustainDuration, 0.96)
                 Log.d(TAG, "String samples generated")
 
+                // Plucking pattern offsets (in beats):
+                // String 1: beat 0
+                // Skip: beat 1 (no pluck)
+                // String 2: beat 2
+                // String 3: beat 3
+                // String 4: beat 4
+                // Skip: beat 5 (no pluck)
+                // Cycle repeats at beat 6 (String 4 still sustaining from beat 4)
+                val pluckOffsets = listOf(
+                    0,  // String 1 at beat 0
+                    2,  // String 2 at beat 2
+                    3,  // String 3 at beat 3
+                    4   // String 4 at beat 4
+                )
+
                 val allStrings = listOf(string1Samples, string2Samples, string3Samples, string4Samples)
 
                 // Calculate buffer size for continuous playback
-                val pluckIntervalSamples = (sampleRate * pluckInterval).toInt()
-                val cycleDuration = pluckInterval * 4  // 4 strings
+                val beatIntervalSamples = (sampleRate * beatInterval).toInt()
+                val cycleDuration = beatInterval * 6  // 6-beat cycle
                 val cycleSize = (sampleRate * cycleDuration).toInt()
 
                 // Pre-generate first mixed buffer before creating AudioTrack
                 // This ensures we have audio ready to play immediately
                 val firstMixedBuffer = ShortArray(cycleSize)
                 for ((stringIndex, stringSamples) in allStrings.withIndex()) {
-                    val offset = stringIndex * pluckIntervalSamples
+                    val offset = pluckOffsets[stringIndex] * beatIntervalSamples
                     for (i in stringSamples.indices) {
-                        val bufferIndex = offset + i
-                        if (bufferIndex < firstMixedBuffer.size) {
-                            val mixed = firstMixedBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
-                            firstMixedBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
-                        }
+                        // Wrap around if string extends beyond cycle boundary
+                        // This allows strings to overlap into the next cycle
+                        val bufferIndex = (offset + i) % firstMixedBuffer.size
+                        val mixed = firstMixedBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
+                        firstMixedBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
                     }
                 }
 
@@ -129,6 +160,14 @@ class TanpuraPlayer(
                     for (i in firstMixedBuffer.indices) {
                         firstMixedBuffer[i] = (firstMixedBuffer[i] * scale).toInt().toShort()
                     }
+                }
+
+                // Apply fade-in to the first buffer for smooth start (1.5 seconds)
+                val fadeInDuration = 1.5  // seconds
+                val fadeInSamples = (sampleRate * fadeInDuration).toInt()
+                for (i in 0 until minOf(fadeInSamples, firstMixedBuffer.size)) {
+                    val fadeInEnvelope = (i.toDouble() / fadeInSamples).coerceIn(0.0, 1.0)
+                    firstMixedBuffer[i] = (firstMixedBuffer[i] * fadeInEnvelope).toInt().toShort()
                 }
 
                 // Now create and initialize AudioTrack with audio ready
@@ -169,21 +208,21 @@ class TanpuraPlayer(
 
                 // Continue playing in loop
                 while (isActive) {
-                    // Create a buffer for one complete cycle
+                    // Create a buffer for one complete cycle (6 beats)
                     val mixedBuffer = ShortArray(cycleSize)
 
-                    // Mix all strings with their proper timing offsets
+                    // Mix all strings with their proper timing offsets based on plucking pattern
                     for ((stringIndex, stringSamples) in allStrings.withIndex()) {
-                        val offset = stringIndex * pluckIntervalSamples
+                        val offset = pluckOffsets[stringIndex] * beatIntervalSamples
 
                         // Add this string to the mix
                         for (i in stringSamples.indices) {
-                            val bufferIndex = offset + i
-                            if (bufferIndex < mixedBuffer.size) {
-                                // Mix by adding samples (will normalize later)
-                                val mixed = mixedBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
-                                mixedBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
-                            }
+                            // Wrap around if string extends beyond cycle boundary
+                            // This allows strings to overlap into the next cycle
+                            val bufferIndex = (offset + i) % mixedBuffer.size
+                            // Mix by adding samples (will normalize later)
+                            val mixed = mixedBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
+                            mixedBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
                         }
                     }
 
@@ -193,6 +232,26 @@ class TanpuraPlayer(
                         val scale = 28000.0 / maxAmplitude
                         for (i in mixedBuffer.indices) {
                             mixedBuffer[i] = (mixedBuffer[i] * scale).toInt().toShort()
+                        }
+                    }
+
+                    // Apply fade-out if requested
+                    if (isFadingOut) {
+                        val fadeOutDuration = 1.0  // seconds
+                        val elapsedTime = (System.currentTimeMillis() - fadeOutStartTime) / 1000.0
+
+                        if (elapsedTime >= fadeOutDuration) {
+                            // Fade-out complete, stop playback
+                            Log.d(TAG, "Fade-out complete, stopping playback")
+                            break
+                        }
+
+                        // Apply fade-out envelope to entire buffer
+                        val fadeOutProgress = (elapsedTime / fadeOutDuration).coerceIn(0.0, 1.0)
+                        val fadeOutEnvelope = (1.0 - fadeOutProgress).coerceIn(0.0, 1.0)
+
+                        for (i in mixedBuffer.indices) {
+                            mixedBuffer[i] = (mixedBuffer[i] * fadeOutEnvelope).toInt().toShort()
                         }
                     }
 
@@ -220,10 +279,12 @@ class TanpuraPlayer(
     }
 
     /**
-     * Stop playing the tanpura
+     * Stop playing immediately without fade-out (used internally when restarting)
      */
-    fun stop() {
-        Log.d(TAG, "stop() called")
+    private fun stopImmediately() {
+        Log.d(TAG, "stopImmediately() called")
+        isFadingOut = false
+        fadeOutStartTime = 0
         playbackJob?.cancel()
         playbackJob = null
 
@@ -245,6 +306,67 @@ class TanpuraPlayer(
     }
 
     /**
+     * Stop playing the tanpura with fade-out
+     */
+    fun stop() {
+        Log.d(TAG, "stop() called")
+
+        if (playbackJob?.isActive == true) {
+            // Trigger fade-out
+            Log.d(TAG, "Triggering fade-out")
+            isFadingOut = true
+            fadeOutStartTime = System.currentTimeMillis()
+
+            // Launch cleanup coroutine to clean up after fade-out completes
+            CoroutineScope(Dispatchers.IO).launch {
+                // Wait for fade-out to complete (1 second + small buffer)
+                delay(1200)
+
+                Log.d(TAG, "Cleaning up after fade-out")
+                playbackJob?.cancel()
+                playbackJob = null
+
+                audioTrack?.apply {
+                    try {
+                        val state = playState
+                        Log.d(TAG, "AudioTrack playState: $state")
+                        if (state == AudioTrack.PLAYSTATE_PLAYING) {
+                            stop()
+                            Log.d(TAG, "AudioTrack stopped")
+                        }
+                        release()
+                        Log.d(TAG, "AudioTrack released")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error stopping AudioTrack", e)
+                    }
+                }
+                audioTrack = null
+
+                // Reset fade-out state
+                isFadingOut = false
+                fadeOutStartTime = 0
+            }
+        } else {
+            // Not playing, clean up immediately
+            playbackJob?.cancel()
+            playbackJob = null
+            audioTrack?.apply {
+                try {
+                    if (playState == AudioTrack.PLAYSTATE_PLAYING) {
+                        stop()
+                    }
+                    release()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error stopping AudioTrack", e)
+                }
+            }
+            audioTrack = null
+            isFadingOut = false
+            fadeOutStartTime = 0
+        }
+    }
+
+    /**
      * Update tanpura parameters while playing
      */
     fun updateParameters(saFreq: Double, string1: String, vol: Float = 0.5f) {
@@ -252,7 +374,7 @@ class TanpuraPlayer(
         val wasPlaying = isPlaying()
         Log.d(TAG, "wasPlaying: $wasPlaying")
         if (wasPlaying) {
-            stop()
+            // start() will handle stopping the current playback
             start(saFreq, string1, vol)
         }
     }
@@ -280,7 +402,7 @@ class TanpuraPlayer(
 
         // Tanpura harmonic series with jivari effect
         // Deep, drony sound: very strong fundamental and lower harmonics
-        // Reduced higher harmonics for less "guitar-like" brightness
+        // Optimized to 14 harmonics for faster generation while maintaining rich tone
         val harmonics = listOf(
             1.0 to 1.0,       // Fundamental (strongest - the core of the drone)
             2.0 to 0.85,      // Octave (very strong for depth)
@@ -295,12 +417,7 @@ class TanpuraPlayer(
             11.0 to 0.12,     // Eleventh
             12.0 to 0.10,     // Fifth + double octave
             13.0 to 0.08,     // Thirteenth
-            14.0 to 0.06,     // Minor seventh + octave
-            15.0 to 0.05,     // Major seventh + octave
-            16.0 to 0.04,     // Quadruple octave
-            18.0 to 0.03,     // Ninth + octave (subtle)
-            20.0 to 0.02,     // Major third + double octave (very subtle)
-            24.0 to 0.015     // High harmonics for subtle shimmer only
+            14.0 to 0.06      // Minor seventh + octave
         )
 
         for (i in 0 until numSamples) {
@@ -313,8 +430,8 @@ class TanpuraPlayer(
                     (t / 0.1) * (1.0 - 0.3 * exp(-t * 15))  // Slightly curved attack
                 }
                 else -> {
-                    // Extremely slow exponential decay for deep, sustained drone (7-10 seconds)
-                    exp(-t * 0.25)  // Much slower decay for continuous drone feel
+                    // Slow exponential decay for sustained drone (3-4 seconds)
+                    exp(-t * 0.45)  // Decay adjusted for 3s sustain
                 }
             }
 
