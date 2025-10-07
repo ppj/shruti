@@ -111,10 +111,10 @@ class TanpuraPlayer(
                 // Pre-generate all 4 strings with very slight amplitude variations for naturalism
                 // 8s duration + 20 harmonics = ~12-15 second startup but very rich sound
                 Log.d(TAG, "Generating string samples...")
-                val string1Samples = generateStringPluck(string1Freq, sustainDuration, 0.98)
+                val string1Samples = generateStringPluck(string1Freq, sustainDuration, 0.98, attackDuration = 0.4)
                 val string2Samples = generateStringPluck(string2Freq, sustainDuration, 1.0)
                 val string3Samples = generateStringPluck(string3Freq, sustainDuration, 1.0)
-                val string4Samples = generateStringPluck(string4Freq, sustainDuration, 0.96)
+                val string4Samples = generateStringPluck(string4Freq, sustainDuration, 0.96, attackDuration = 0.6)
                 Log.d(TAG, "String samples generated")
 
                 // Plucking pattern offsets (in beats):
@@ -430,7 +430,12 @@ class TanpuraPlayer(
      * @param duration Duration of the pluck in seconds
      * @param amplitudeVariation Slight variation in amplitude (0.9-1.1) for naturalism
      */
-    private fun generateStringPluck(frequency: Double, duration: Double, amplitudeVariation: Double = 1.0): ShortArray {
+    private fun generateStringPluck(
+        frequency: Double,
+        duration: Double,
+        amplitudeVariation: Double = 1.0,
+        attackDuration: Double = 0.8
+    ): ShortArray {
         val numSamples = (sampleRate * duration).toInt()
         val samples = ShortArray(numSamples)
 
@@ -467,14 +472,13 @@ class TanpuraPlayer(
             // Envelope: Extremely gradual, imperceptible attack with long sustain
             // Real tanpura plucks are virtually inaudible - you have to listen very carefully to hear them
             val envelope = when {
-                t < 0.8 -> {
-                    // Very long, smooth S-curve attack (800ms) - imperceptible onset
-                    // Sigmoid curve provides smooth, natural fade-in with no perceptible "pluck"
-                    val attackProgress = t / 0.8
+                t < attackDuration -> {
+                    // Smooth S-curve attack (duration = attackDuration seconds) - imperceptible onset
+                    val attackProgress = t / attackDuration
                     1.0 / (1.0 + exp(-12.0 * (attackProgress - 0.5)))
                 }
                 else -> {
-                    // Extremely slow exponential decay for very long sustained drone (8 seconds)
+                    // Extremely slow exponential decay for very long sustained drone (8 seconds total design)
                     exp(-t * 0.18)  // Decay adjusted for 8s sustain
                 }
             }
