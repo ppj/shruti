@@ -16,9 +16,9 @@ A real-time pitch detection Android app for Hindustani classical music students.
 ### User-Friendly Features
 - **Flexible Sa (Tonic) Selection**: Input Sa using Western notation (C4, A#3, Bb4, etc.)
 - **Built-in Tanpura/Drone**: 4-string tanpura with gapless looping for practice accompaniment
-  - Configurable String 1 (P, M, S, N) for different ragas
+  - Configurable String 1 (P, m, M, S, N) for different ragas
   - Instant playback using pre-recorded high-quality samples
-  - 60 variations covering G#2 to A#3 tonic range
+  - 75 variations covering G#2 to A#3 tonic range (15 Sa values × 5 String 1 notes)
 - **Clean Interface**: Uncluttered design focused on essential controls
 - **Progressive Learning**: Adjustable difficulty levels for skill development
 - **Low Latency**: Optimized for real-time feedback with minimal delay
