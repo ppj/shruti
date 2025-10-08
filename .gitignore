@@ -87,3 +87,11 @@ lint/tmp/
 
 # macOS
 .DS_Store
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

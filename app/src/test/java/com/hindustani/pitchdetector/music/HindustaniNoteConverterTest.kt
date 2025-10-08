@@ -131,45 +131,6 @@ class HindustaniNoteConverterTest {
         }
     }
 
-    @Test
-    fun `22-shruti system provides more notes than 12-note system`() {
-        val converter12 = HindustaniNoteConverter(
-            saFrequency = saFrequency,
-            toleranceCents = 15.0,
-            use22Shruti = false
-        )
-
-        val converter22 = HindustaniNoteConverter(
-            saFrequency = saFrequency,
-            toleranceCents = 15.0,
-            use22Shruti = true
-        )
-
-        val swaras12 = converter12.getAvailableSwaras()
-        val swaras22 = converter22.getAvailableSwaras()
-
-        assertThat(swaras12).hasSize(12)
-        assertThat(swaras22).hasSize(21) // 22-shruti system has 21 unique notes
-        assertThat(swaras22.size).isGreaterThan(swaras12.size)
-    }
-
-    @Test
-    fun `getFrequencyForSwara returns correct frequencies`() {
-        val saFreq = converter.getFrequencyForSwara("S")
-        val pFreq = converter.getFrequencyForSwara("P")
-
-        assertThat(saFreq).isNotNull()
-        assertThat(pFreq).isNotNull()
-
-        assertThat(saFreq!!).isWithin(0.01).of(saFrequency)
-        assertThat(pFreq!!).isWithin(0.01).of(saFrequency * 3.0 / 2.0)
-    }
-
-    @Test
-    fun `getFrequencyForSwara returns null for invalid swara`() {
-        val frequency = converter.getFrequencyForSwara("X")
-        assertThat(frequency).isNull()
-    }
 
     @Test
     fun `cents deviation calculation is accurate`() {
@@ -231,22 +192,6 @@ class HindustaniNoteConverterTest {
         assertThat(result.isPerfect).isTrue()
     }
 
-    @Test
-    fun `just intonation ratios are accurate`() {
-        // Verify that the frequency ratios match Just Intonation
-        val pFreq = converter.getFrequencyForSwara("P")!!
-        val ratio = pFreq / saFrequency
-
-        // P should be exactly 3/2 (1.5)
-        assertThat(ratio).isWithin(0.0001).of(1.5)
-
-        val mFreq = converter.getFrequencyForSwara("m")!!
-        val mRatio = mFreq / saFrequency
-
-        // m should be exactly 4/3
-        assertThat(mRatio).isWithin(0.0001).of(4.0 / 3.0)
-    }
-
     // Octave detection tests
 
     @Test
@@ -293,31 +238,6 @@ class HindustaniNoteConverterTest {
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
 
-    @Test
-    fun `formatSwaraWithOctave formats mandra correctly`() {
-        val lowerSa = saFrequency / 2.0
-        val result = converter.convertFrequency(lowerSa)
-        val formatted = converter.formatSwaraWithOctave(result)
-
-        assertThat(formatted).isEqualTo(".S")
-    }
-
-    @Test
-    fun `formatSwaraWithOctave formats madhya correctly`() {
-        val result = converter.convertFrequency(saFrequency)
-        val formatted = converter.formatSwaraWithOctave(result)
-
-        assertThat(formatted).isEqualTo("S")
-    }
-
-    @Test
-    fun `formatSwaraWithOctave formats taar correctly`() {
-        val upperSa = saFrequency * 2.0
-        val result = converter.convertFrequency(upperSa)
-        val formatted = converter.formatSwaraWithOctave(result)
-
-        assertThat(formatted).isEqualTo("S'")
-    }
 
     @Test
     fun `octave boundaries are detected correctly`() {

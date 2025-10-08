@@ -91,54 +91,22 @@ class SaParserTest {
     }
 
     @Test
-    fun `isValidNotation returns true for valid notes`() {
-        val validNotes = listOf("C4", "C#3", "Db5", "A4", "G#2", "Bb6")
-
-        validNotes.forEach { note ->
-            assertThat(SaParser.isValidNotation(note)).isTrue()
-        }
-    }
-
-    @Test
-    fun `isValidNotation returns false for invalid notes`() {
-        val invalidNotes = listOf("H4", "C", "4C", "C##4", "C4#", "")
-
-        invalidNotes.forEach { note ->
-            assertThat(SaParser.isValidNotation(note)).isFalse()
-        }
-    }
-
-    @Test
-    fun `getNoteName extracts note correctly`() {
-        assertThat(SaParser.getNoteName("C4")).isEqualTo("C")
-        assertThat(SaParser.getNoteName("C#4")).isEqualTo("C#")
-        assertThat(SaParser.getNoteName("Bb3")).isEqualTo("Bb")
-    }
-
-    @Test
-    fun `getOctave extracts octave correctly`() {
-        assertThat(SaParser.getOctave("C4")).isEqualTo(4)
-        assertThat(SaParser.getOctave("C#3")).isEqualTo(3)
-        assertThat(SaParser.getOctave("Bb5")).isEqualTo(5)
-    }
-
-    @Test
-    fun `getCommonSaValues returns list of common Sa frequencies`() {
-        val commonSaValues = SaParser.getCommonSaValues()
+    fun `getSaOptionsInRange returns list of Sa frequencies in vocal range`() {
+        val saOptions = SaParser.getSaOptionsInRange()
 
         // Should have multiple entries
-        assertThat(commonSaValues).isNotEmpty()
+        assertThat(saOptions).isNotEmpty()
 
         // Each entry should have a valid note and frequency
-        commonSaValues.forEach { (note, frequency) ->
-            assertThat(SaParser.isValidNotation(note)).isTrue()
+        saOptions.forEach { (note, frequency) ->
+            assertThat(SaParser.parseToFrequency(note)).isNotNull()
             assertThat(frequency).isGreaterThan(0.0)
         }
 
-        // Should include C4 (common middle Sa)
-        val c4Entry = commonSaValues.find { it.first == "C4" }
-        assertThat(c4Entry).isNotNull()
-        assertThat(c4Entry!!.second).isWithin(0.01).of(261.63)
+        // Should include C3 (common Sa)
+        val c3Entry = saOptions.find { it.first == "C3" }
+        assertThat(c3Entry).isNotNull()
+        assertThat(c3Entry!!.second).isWithin(0.01).of(130.81)
     }
 
     @Test

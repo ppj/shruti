@@ -25,6 +25,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
 
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
+    private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer(application.applicationContext)
 
     private val _settings = MutableStateFlow(UserSettings())
     val settings: StateFlow<UserSettings> = _settings.asStateFlow()
@@ -34,6 +35,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
+
+    private val _isTanpuraPlaying = MutableStateFlow(false)
+    val isTanpuraPlaying: StateFlow<Boolean> = _isTanpuraPlaying.asStateFlow()
 
     private var processingJob: Job? = null
 
@@ -159,6 +163,15 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                     saFrequency = frequency
                 )
             }
+
+            // Update tanpura if it's currently playing
+            if (_isTanpuraPlaying.value) {
+                tanpuraPlayer.updateParameters(
+                    saFreq = frequency,
+                    string1 = _settings.value.tanpuraString1,
+                    vol = _settings.value.tanpuraVolume
+                )
+            }
         }
     }
 
@@ -181,10 +194,69 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Toggle tanpura on/off
+     */
+    fun toggleTanpura() {
+        if (_isTanpuraPlaying.value) {
+            stopTanpura()
+        } else {
+            startTanpura()
+        }
+    }
+
+    /**
+     * Start tanpura playback
+     */
+    private fun startTanpura() {
+        tanpuraPlayer.start(
+            saFreq = _settings.value.saFrequency,
+            string1 = _settings.value.tanpuraString1,
+            vol = _settings.value.tanpuraVolume
+        )
+        _isTanpuraPlaying.value = true
+        _settings.update { it.copy(isTanpuraEnabled = true) }
+    }
+
+    /**
+     * Stop tanpura playback
+     */
+    private fun stopTanpura() {
+        tanpuraPlayer.stop()
+        _isTanpuraPlaying.value = false
+        _settings.update { it.copy(isTanpuraEnabled = false) }
+    }
+
+    /**
+     * Update tanpura string 1 note
+     */
+    fun updateTanpuraString1(swara: String) {
+        _settings.update {
+            it.copy(tanpuraString1 = swara)
+        }
+
+        // Update tanpura if it's currently playing
+        if (_isTanpuraPlaying.value) {
+            tanpuraPlayer.updateParameters(
+                saFreq = _settings.value.saFrequency,
+                string1 = swara,
+                vol = _settings.value.tanpuraVolume
+            )
+        }
+    }
+
+    /**
+     * Get available notes for tanpura string 1
+     */
+    fun getTanpuraAvailableNotes(): List<String> {
+        return tanpuraPlayer.getAvailableNotes()
+    }
+
+    /**
      * Clean up resources
      */
     override fun onCleared() {
         super.onCleared()
         stopRecording()
+        stopTanpura()
     }
 }

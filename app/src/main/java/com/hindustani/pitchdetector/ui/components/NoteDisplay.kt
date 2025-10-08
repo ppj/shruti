@@ -24,7 +24,6 @@ import kotlin.math.roundToInt
 @Composable
 fun NoteDisplay(
     swara: String,
-    centsDeviation: Double,
     modifier: Modifier = Modifier
 ) {
     // Large circular note display

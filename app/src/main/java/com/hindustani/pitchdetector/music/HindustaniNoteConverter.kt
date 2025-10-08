@@ -116,36 +116,6 @@ class HindustaniNoteConverter(
         )
     }
 
-    /**
-     * Format swara with octave notation
-     * Returns formatted string like ".S" (mandra), "S" (madhya), "S'" (taar)
-     */
-    fun formatSwaraWithOctave(note: HindustaniNote): String {
-        return when (note.octave) {
-            Octave.MANDRA -> ".${note.swara}"  // Mandra saptak: .S .R .G
-            Octave.MADHYA -> note.swara         // Madhya saptak: S R G
-            Octave.TAAR -> "${note.swara}'"    // Taar saptak: S' R' G'
-        }
-    }
-
-    /**
-     * Get all available swaras for the current tuning system
-     */
-    fun getAvailableSwaras(): List<String> {
-        return if (use22Shruti) {
-            shruti22Ratios.keys.toList()
-        } else {
-            justIntonationRatios.keys.toList()
-        }
-    }
-
-    /**
-     * Get frequency for a specific swara
-     */
-    fun getFrequencyForSwara(swara: String): Double? {
-        val ratios = if (use22Shruti) shruti22Ratios else justIntonationRatios
-        return ratios[swara]?.let { saFrequency * it }
-    }
 
     private fun log2(value: Double): Double = ln(value) / ln(2.0)
 }
