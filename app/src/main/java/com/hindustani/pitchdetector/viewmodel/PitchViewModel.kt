@@ -25,7 +25,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
 
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
-    private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer()
+    private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer(application.applicationContext)
 
     private val _settings = MutableStateFlow(UserSettings())
     val settings: StateFlow<UserSettings> = _settings.asStateFlow()

@@ -134,8 +134,7 @@ fun MainScreen(
         }
 
         NoteDisplay(
-            swara = displaySwara,
-            centsDeviation = currentNote?.centsDeviation ?: 0.0
+            swara = displaySwara
         )
 
         Spacer(modifier = Modifier.height(32.dp))
