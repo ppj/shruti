@@ -51,7 +51,17 @@ SA_FREQUENCIES = {
 }
 
 # String 1 notes to generate (most common)
-STRING1_NOTES = ["P", "M", "S", "N"]
+# Using "ms" for madhyam shuddha and "Mt" for madhyam tivra to avoid case conflicts on macOS
+STRING1_NOTES = ["P", "ms", "Mt", "S", "N"]
+
+# Map display names to note ratios
+NOTE_NAME_MAP = {
+    "P": "P",
+    "ms": "m",   # shuddha madhyam
+    "Mt": "M",   # tivra madhyam
+    "S": "S",
+    "N": "N"
+}
 
 # Tanpura harmonic structure with jawari effect
 HARMONICS = [
@@ -139,8 +149,11 @@ def generate_tanpura_cycle(sa_frequency, string1_note):
     """
     Generate one complete 6-beat tanpura cycle as stereo audio.
     """
+    # Map filename note to ratio note (e.g., "ma" -> "m", "Ma" -> "M")
+    ratio_note = NOTE_NAME_MAP.get(string1_note, string1_note)
+
     # Calculate string frequencies
-    string1_freq = sa_frequency * NOTE_RATIOS[string1_note] / 2.0  # Lower octave
+    string1_freq = sa_frequency * NOTE_RATIOS[ratio_note] / 2.0  # Lower octave
     string2_freq = sa_frequency  # Tonic Sa
     string3_freq = sa_frequency  # Tonic Sa
     string4_freq = sa_frequency / 2.0  # Lower octave Sa
