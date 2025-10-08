@@ -15,6 +15,10 @@ A real-time pitch detection Android app for Hindustani classical music students.
 
 ### User-Friendly Features
 - **Flexible Sa (Tonic) Selection**: Input Sa using Western notation (C4, A#3, Bb4, etc.)
+- **Built-in Tanpura/Drone**: 4-string tanpura with gapless looping for practice accompaniment
+  - Configurable String 1 (P, M, S, N) for different ragas
+  - Instant playback using pre-recorded high-quality samples
+  - 60 variations covering G#2 to A#3 tonic range
 - **Clean Interface**: Uncluttered design focused on essential controls
 - **Progressive Learning**: Adjustable difficulty levels for skill development
 - **Low Latency**: Optimized for real-time feedback with minimal delay
@@ -42,6 +46,12 @@ A real-time pitch detection Android app for Hindustani classical music students.
   - 44.1 kHz sample rate
   - Mono channel PCM 16-bit
   - Optimized buffer sizes for low latency
+
+- **TanpuraPlayer**: Pre-recorded tanpura playback engine
+  - MediaCodec-based OGG Vorbis decoder
+  - AudioTrack streaming for gapless looping
+  - 4-string tanpura with jawari effect
+  - Instant startup (~200-400ms)
 
 #### Music Theory Engine
 - **HindustaniNoteConverter**: Frequency to swara conversion
@@ -207,7 +217,8 @@ Microtonal variations for advanced musicians:
 app/src/main/java/com/hindustani/pitchdetector/
 ├── audio/
 │   ├── AudioCaptureManager.kt       # Microphone audio capture
-│   └── PYINDetector.kt              # PYIN pitch detection algorithm
+│   ├── PYINDetector.kt              # PYIN pitch detection algorithm
+│   └── TanpuraPlayer.kt             # Tanpura playback engine
 ├── music/
 │   ├── HindustaniNoteConverter.kt   # Frequency to swara conversion
 │   └── SaParser.kt                  # Western notation parser
@@ -257,7 +268,6 @@ Potential features for future versions:
 - Recording/playback of practice sessions
 - Progress tracking and analytics
 - Raga-specific practice modes
-- Built-in tanpura/drone sound
 - Metronome integration
 - Dark mode support
 - Export practice logs
