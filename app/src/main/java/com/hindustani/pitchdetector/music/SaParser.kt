@@ -41,53 +41,7 @@ object SaParser {
         return 440.0 * 2.0.pow(semitonesFromA4 / 12.0)
     }
 
-    /**
-     * Get the note name without octave
-     */
-    fun getNoteName(westernNote: String): String? {
-        val regex = Regex("([A-G][#b]?)([0-9])")
-        val match = regex.matchEntire(westernNote.trim()) ?: return null
-        return match.groupValues[1]
-    }
 
-    /**
-     * Get the octave number
-     */
-    fun getOctave(westernNote: String): Int? {
-        val regex = Regex("([A-G][#b]?)([0-9])")
-        val match = regex.matchEntire(westernNote.trim()) ?: return null
-        return match.groupValues[2].toIntOrNull()
-    }
-
-    /**
-     * Validate Western notation format
-     */
-    fun isValidNotation(westernNote: String): Boolean {
-        val regex = Regex("([A-G][#b]?)([0-9])")
-        return regex.matches(westernNote.trim())
-    }
-
-    /**
-     * Common Sa values for Hindustani classical music
-     */
-    fun getCommonSaValues(): List<Pair<String, Double>> = listOf(
-        "C3" to parseToFrequency("C3")!!,
-        "C#3" to parseToFrequency("C#3")!!,
-        "D3" to parseToFrequency("D3")!!,
-        "D#3" to parseToFrequency("D#3")!!,
-        "E3" to parseToFrequency("E3")!!,
-        "F3" to parseToFrequency("F3")!!,
-        "F#3" to parseToFrequency("F#3")!!,
-        "G3" to parseToFrequency("G3")!!,
-        "G#3" to parseToFrequency("G#3")!!,
-        "A3" to parseToFrequency("A3")!!,
-        "A#3" to parseToFrequency("A#3")!!,
-        "B3" to parseToFrequency("B3")!!,
-        "C4" to parseToFrequency("C4")!!,
-        "C#4" to parseToFrequency("C#4")!!,
-        "D4" to parseToFrequency("D4")!!,
-        "D#4" to parseToFrequency("D#4")!!
-    )
 
     /**
      * Get Sa options in typical vocal range (F2 to B3)

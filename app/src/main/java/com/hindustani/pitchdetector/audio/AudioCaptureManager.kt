@@ -93,11 +93,4 @@ class AudioCaptureManager(
         }
         audioRecord = null
     }
-
-    /**
-     * Checks if audio capture is currently active
-     */
-    fun isCapturing(): Boolean {
-        return captureJob?.isActive == true
-    }
 }
