@@ -1,197 +1,111 @@
 package com.hindustani.pitchdetector.audio
 
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.exp
-import kotlin.math.sin
 
 /**
- * Generates and plays synthetic tanpura sound with 4 strings
- * String 1: Variable (user selected note)
+ * Plays pre-recorded tanpura sound with 4 strings from OGG files
+ * Uses AudioTrack with decoded PCM for truly gapless looping
+ *
+ * String 1: Variable (user selected note: P, M, S, or N)
  * String 2: Sa (tonic root)
  * String 3: Sa (tonic root)
- * String 4: SA (upper octave tonic)
+ * String 4: Lower octave Sa
  */
-class TanpuraPlayer(
-    private val sampleRate: Int = 44100
-) {
+class TanpuraPlayer(private val context: Context) {
     companion object {
         private const val TAG = "TanpuraPlayer"
+        private const val SAMPLE_RATE = 44100
+
+        // Map frequencies to Sa note names for file lookup
+        // Covers G#2 to A#3 (15 semitones)
+        private val SA_FREQUENCY_MAP = mapOf(
+            103.83 to "gs2",
+            110.00 to "a2",
+            116.54 to "as2",
+            123.47 to "b2",
+            130.81 to "c3",
+            138.59 to "cs3",
+            146.83 to "d3",
+            155.56 to "ds3",
+            164.81 to "e3",
+            174.61 to "f3",
+            185.00 to "fs3",
+            196.00 to "g3",
+            207.65 to "gs3",
+            220.00 to "a3",
+            233.08 to "as3"
+        )
+
+        // Available String 1 notes (most common)
+        private val AVAILABLE_STRING1_NOTES = listOf("P", "M", "S", "N")
     }
-    // Just Intonation ratios for all 12 notes
-    private val noteRatios = mapOf(
-        "S" to 1.0,
-        "r" to 16.0 / 15.0,
-        "R" to 9.0 / 8.0,
-        "g" to 6.0 / 5.0,
-        "G" to 5.0 / 4.0,
-        "m" to 4.0 / 3.0,
-        "M" to 45.0 / 32.0,
-        "P" to 3.0 / 2.0,
-        "d" to 8.0 / 5.0,
-        "D" to 5.0 / 3.0,
-        "n" to 16.0 / 9.0,
-        "N" to 15.0 / 8.0
-    )
 
     private var audioTrack: AudioTrack? = null
     private var playbackJob: Job? = null
-
-    // Fade-out control
-    @Volatile
-    private var isFadingOut: Boolean = false
-    @Volatile
-    private var fadeOutStartTime: Long = 0
+    private var pcmData: ShortArray? = null
 
     // Tanpura configuration
-    private var saFrequency: Double = 130.81  // Default C3
-    private var string1Note: String = "P"     // Default to Pa
-    private var volume: Float = 0.5f
-
-    // Audio buffer size (stereo requires 2x samples)
-    private val bufferSize = AudioTrack.getMinBufferSize(
-        sampleRate,
-        AudioFormat.CHANNEL_OUT_STEREO,
-        AudioFormat.ENCODING_PCM_16BIT
-    ).let { minSize ->
-        maxOf(minSize * 2, 8192)
-    }
+    private var currentSaFrequency: Double = 130.81  // Default C3
+    private var currentString1Note: String = "P"     // Default to Pa
+    private var currentVolume: Float = 0.5f
 
     /**
      * Start playing the tanpura
      */
     fun start(saFreq: Double, string1: String, vol: Float = 0.5f) {
         Log.d(TAG, "start() called: saFreq=$saFreq, string1=$string1, vol=$vol")
-        stopImmediately()  // Stop any existing playback immediately (no fade-out)
 
-        this.saFrequency = saFreq
-        this.string1Note = string1
-        this.volume = vol.coerceIn(0f, 1f)
+        // Stop existing playback
+        stop()
 
-        // Reset fade-out state
-        isFadingOut = false
-        fadeOutStartTime = 0
+        // Store configuration
+        currentSaFrequency = saFreq
+        currentString1Note = string1
+        currentVolume = vol.coerceIn(0f, 1f)
 
         playbackJob = CoroutineScope(Dispatchers.IO).launch {
             try {
-                Log.d(TAG, "Tanpura playback coroutine started")
-                // Calculate frequencies for all 4 strings
-                // String 1: User-selected note in lower octave
-                val string1Freq = saFrequency * (noteRatios[string1Note] ?: 1.0) / 2.0
-                val string2Freq = saFrequency  // Tonic Sa
-                val string3Freq = saFrequency  // Tonic Sa
-                val string4Freq = saFrequency / 2.0  // Lower octave Sa
+                // Find closest Sa frequency in our map
+                val saName = findClosestSaName(saFreq)
 
-                // Tanpura plucking pattern: String1, skip, String2, String3, String4, skip, repeat
-                // This creates a 6-beat cycle (3.6 seconds at 100 BPM)
-                // With 8s sustain, strings have extremely rich overlap - multiple strings always ringing
-                // When cycle repeats, String4 from previous cycle overlaps with new String1
-                //
-                // Key insight: Unlike sequential playback, real tanpura has multiple strings
-                // ringing simultaneously creating a continuous, seamless drone
+                // Construct filename: tanpura/<sa>_<string1>.ogg
+                val filename = "tanpura/${saName}_${string1}.ogg"
 
-                // Each string sustains for 8 seconds for extremely deep, continuous drone
-                // Provides very rich overlap with multiple strings always ringing
-                val sustainDuration = 8.0
+                Log.d(TAG, "Loading and decoding file: $filename")
 
-                // Time between each beat (steady rhythm 100 BPM)
-                // Beat duration of 0.6s = 100 BPM
-                val beatInterval = 0.6
-
-                // Pre-generate all 4 strings with very slight amplitude variations for naturalism
-                // 8s duration + 20 harmonics = ~12-15 second startup but very rich sound
-                Log.d(TAG, "Generating string samples...")
-                val string1Samples = generateStringPluck(string1Freq, sustainDuration, 0.98, attackDuration = 0.4)
-                val string2Samples = generateStringPluck(string2Freq, sustainDuration, 1.0)
-                val string3Samples = generateStringPluck(string3Freq, sustainDuration, 1.0)
-                val string4Samples = generateStringPluck(string4Freq, sustainDuration, 0.96, attackDuration = 0.6)
-                Log.d(TAG, "String samples generated")
-
-                // Plucking pattern offsets (in beats):
-                // String 1: beat 0
-                // Skip: beat 1 (no pluck)
-                // String 2: beat 2
-                // String 3: beat 3
-                // String 4: beat 4
-                // Skip: beat 5 (no pluck)
-                // Cycle repeats at beat 6 (String 4 still sustaining from beat 4)
-                val pluckOffsets = listOf(
-                    0,  // String 1 at beat 0
-                    2,  // String 2 at beat 2
-                    3,  // String 3 at beat 3
-                    4   // String 4 at beat 4
-                )
-
-                val allStrings = listOf(string1Samples, string2Samples, string3Samples, string4Samples)
-
-                // Calculate buffer size for continuous playback
-                val beatIntervalSamples = (sampleRate * beatInterval).toInt()
-                val cycleDuration = beatInterval * 6  // 6-beat cycle
-                val cycleSize = (sampleRate * cycleDuration).toInt()
-
-                // Pre-generate first mixed buffer (mono) before creating stereo
-                // This ensures we have audio ready to play immediately
-                val monoBuffer = ShortArray(cycleSize)
-                for ((stringIndex, stringSamples) in allStrings.withIndex()) {
-                    val offset = pluckOffsets[stringIndex] * beatIntervalSamples
-                    for (i in stringSamples.indices) {
-                        // Wrap around if string extends beyond cycle boundary
-                        // This allows strings to overlap into the next cycle
-                        val bufferIndex = (offset + i) % monoBuffer.size
-                        val mixed = monoBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
-                        monoBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
-                    }
+                // Decode OGG to PCM
+                val decodedPcm = decodeOggToPcm(filename)
+                if (decodedPcm == null || decodedPcm.isEmpty()) {
+                    Log.e(TAG, "Failed to decode audio file")
+                    return@launch
                 }
 
-                // Normalize the mono buffer (leave more headroom for deep, full sound)
-                val maxAmp = monoBuffer.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: 1
-                if (maxAmp > 28000) {
-                    val scale = 28000.0 / maxAmp
-                    for (i in monoBuffer.indices) {
-                        monoBuffer[i] = (monoBuffer[i] * scale).toInt().toShort()
-                    }
+                pcmData = decodedPcm
+                Log.d(TAG, "Decoded ${decodedPcm.size} samples")
+
+                // Calculate buffer size
+                val bufferSize = AudioTrack.getMinBufferSize(
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_OUT_STEREO,
+                    AudioFormat.ENCODING_PCM_16BIT
+                ).let { minSize ->
+                    maxOf(minSize * 2, 8192)
                 }
 
-                // Convert mono to stereo with timing offset, detuning, and panning
-                // Stereo buffer is 2x size (interleaved L/R samples)
-                val stereoTimingOffset = (sampleRate * 0.012).toInt()  // 12ms delay for R channel
-                val firstMixedBuffer = ShortArray(cycleSize * 2)  // Stereo: L, R, L, R, ...
-                val panningL = 0.75  // 75% left
-                val panningR = 0.75  // 75% right
-
-                for (i in monoBuffer.indices) {
-                    // Left channel: current sample with left panning
-                    val leftSample = (monoBuffer[i] * panningL).toInt().coerceIn(-32768, 32767).toShort()
-                    firstMixedBuffer[i * 2] = leftSample
-
-                    // Right channel: delayed sample with right panning and slight detuning
-                    val rightIndex = (i + stereoTimingOffset) % monoBuffer.size
-                    val rightSample = (monoBuffer[rightIndex] * panningR).toInt().coerceIn(-32768, 32767).toShort()
-                    firstMixedBuffer[i * 2 + 1] = rightSample
-                }
-
-                // Apply fade-in to the stereo buffer
-                val fadeInDuration = 1.5  // seconds
-                val fadeInSamples = (sampleRate * fadeInDuration).toInt()
-                for (i in 0 until minOf(fadeInSamples, monoBuffer.size)) {
-                    val fadeInEnvelope = (i.toDouble() / fadeInSamples).coerceIn(0.0, 1.0)
-                    // Apply to both L and R channels
-                    firstMixedBuffer[i * 2] = (firstMixedBuffer[i * 2] * fadeInEnvelope).toInt().toShort()
-                    firstMixedBuffer[i * 2 + 1] = (firstMixedBuffer[i * 2 + 1] * fadeInEnvelope).toInt().toShort()
-                }
-
-                // Now create and initialize AudioTrack with audio ready
-                Log.d(TAG, "Creating AudioTrack...")
+                // Create AudioTrack
                 audioTrack = AudioTrack.Builder()
                     .setAudioAttributes(
                         AudioAttributes.Builder()
@@ -202,7 +116,7 @@ class TanpuraPlayer(
                     .setAudioFormat(
                         AudioFormat.Builder()
                             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                            .setSampleRate(sampleRate)
+                            .setSampleRate(SAMPLE_RATE)
                             .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
                             .build()
                     )
@@ -210,101 +124,55 @@ class TanpuraPlayer(
                     .setTransferMode(AudioTrack.MODE_STREAM)
                     .build()
 
-                val trackState = audioTrack?.state
-                Log.d(TAG, "AudioTrack created with state: $trackState")
-
-                if (trackState != AudioTrack.STATE_INITIALIZED) {
-                    Log.e(TAG, "AudioTrack initialization failed! State: $trackState")
-                    throw IllegalStateException("AudioTrack initialization failed")
+                if (audioTrack?.state != AudioTrack.STATE_INITIALIZED) {
+                    Log.e(TAG, "AudioTrack initialization failed")
+                    return@launch
                 }
 
-                // Write initial data before starting playback
-                val written = audioTrack?.write(firstMixedBuffer, 0, firstMixedBuffer.size) ?: 0
-                Log.d(TAG, "Wrote initial buffer: $written samples")
+                // Set volume
+                audioTrack?.setVolume(currentVolume)
 
-                // Now start playback
+                // Start playback
                 audioTrack?.play()
-                Log.d(TAG, "AudioTrack play() called, playback started")
+                Log.d(TAG, "AudioTrack started, beginning gapless loop")
 
-                // Continue playing in loop
+                // Continuous gapless looping
+                var position = 0
+                val writeSize = minOf(bufferSize / 2, decodedPcm.size)
+
                 while (isActive) {
-                    // Create mono buffer for one complete cycle (6 beats)
-                    val monoLoopBuffer = ShortArray(cycleSize)
+                    // Write chunk to AudioTrack
+                    val written = audioTrack?.write(
+                        decodedPcm,
+                        position,
+                        minOf(writeSize, decodedPcm.size - position)
+                    ) ?: 0
 
-                    // Mix all strings with their proper timing offsets based on plucking pattern
-                    for ((stringIndex, stringSamples) in allStrings.withIndex()) {
-                        val offset = pluckOffsets[stringIndex] * beatIntervalSamples
+                    if (written > 0) {
+                        position += written
 
-                        // Add this string to the mix
-                        for (i in stringSamples.indices) {
-                            // Wrap around if string extends beyond cycle boundary
-                            // This allows strings to overlap into the next cycle
-                            val bufferIndex = (offset + i) % monoLoopBuffer.size
-                            // Mix by adding samples (will normalize later)
-                            val mixed = monoLoopBuffer[bufferIndex].toInt() + stringSamples[i].toInt()
-                            monoLoopBuffer[bufferIndex] = mixed.coerceIn(-32768, 32767).toShort()
+                        // Loop seamlessly
+                        if (position >= decodedPcm.size) {
+                            position = 0
                         }
+                    } else {
+                        Log.w(TAG, "AudioTrack write returned $written")
+                        break
                     }
-
-                    // Normalize the mono buffer to prevent clipping (leave more headroom for full sound)
-                    val maxAmplitude = monoLoopBuffer.maxOfOrNull { kotlin.math.abs(it.toInt()) } ?: 1
-                    if (maxAmplitude > 28000) {
-                        val scale = 28000.0 / maxAmplitude
-                        for (i in monoLoopBuffer.indices) {
-                            monoLoopBuffer[i] = (monoLoopBuffer[i] * scale).toInt().toShort()
-                        }
-                    }
-
-                    // Convert mono to stereo with timing offset and panning
-                    val stereoLoopBuffer = ShortArray(cycleSize * 2)  // Stereo: L, R, L, R, ...
-                    for (i in monoLoopBuffer.indices) {
-                        // Left channel
-                        val leftSample = (monoLoopBuffer[i] * panningL).toInt().coerceIn(-32768, 32767).toShort()
-                        stereoLoopBuffer[i * 2] = leftSample
-
-                        // Right channel with timing offset
-                        val rightIndex = (i + stereoTimingOffset) % monoLoopBuffer.size
-                        val rightSample = (monoLoopBuffer[rightIndex] * panningR).toInt().coerceIn(-32768, 32767).toShort()
-                        stereoLoopBuffer[i * 2 + 1] = rightSample
-                    }
-
-                    // Apply fade-out if requested (to stereo buffer)
-                    if (isFadingOut) {
-                        val fadeOutDuration = 1.0  // seconds
-                        val elapsedTime = (System.currentTimeMillis() - fadeOutStartTime) / 1000.0
-
-                        if (elapsedTime >= fadeOutDuration) {
-                            // Fade-out complete, stop playback
-                            Log.d(TAG, "Fade-out complete, stopping playback")
-                            break
-                        }
-
-                        // Apply fade-out envelope to both L and R channels
-                        val fadeOutProgress = (elapsedTime / fadeOutDuration).coerceIn(0.0, 1.0)
-                        val fadeOutEnvelope = (1.0 - fadeOutProgress).coerceIn(0.0, 1.0)
-
-                        for (i in monoLoopBuffer.indices) {
-                            stereoLoopBuffer[i * 2] = (stereoLoopBuffer[i * 2] * fadeOutEnvelope).toInt().toShort()
-                            stereoLoopBuffer[i * 2 + 1] = (stereoLoopBuffer[i * 2 + 1] * fadeOutEnvelope).toInt().toShort()
-                        }
-                    }
-
-                    if (!isActive) break
-
-                    // Write the stereo cycle to audio output
-                    audioTrack?.write(stereoLoopBuffer, 0, stereoLoopBuffer.size)
                 }
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error in tanpura playback", e)
-                // Clean up AudioTrack on error
+            } finally {
+                // Cleanup
                 audioTrack?.apply {
                     try {
                         if (playState == AudioTrack.PLAYSTATE_PLAYING) {
                             stop()
                         }
                         release()
-                    } catch (ex: Exception) {
-                        Log.e(TAG, "Error cleaning up AudioTrack", ex)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error cleaning up AudioTrack", e)
                     }
                 }
                 audioTrack = null
@@ -313,91 +181,122 @@ class TanpuraPlayer(
     }
 
     /**
-     * Stop playing immediately without fade-out (used internally when restarting)
+     * Decode OGG file to PCM samples
      */
-    private fun stopImmediately() {
-        Log.d(TAG, "stopImmediately() called")
-        isFadingOut = false
-        fadeOutStartTime = 0
+    private fun decodeOggToPcm(filename: String): ShortArray? {
+        val extractor = MediaExtractor()
+        var codec: MediaCodec? = null
+
+        try {
+            // Open asset file
+            val afd = context.assets.openFd(filename)
+            extractor.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            afd.close()
+
+            // Find audio track
+            var trackIndex = -1
+            var format: MediaFormat? = null
+            for (i in 0 until extractor.trackCount) {
+                val trackFormat = extractor.getTrackFormat(i)
+                val mime = trackFormat.getString(MediaFormat.KEY_MIME) ?: ""
+                if (mime.startsWith("audio/")) {
+                    trackIndex = i
+                    format = trackFormat
+                    break
+                }
+            }
+
+            if (trackIndex < 0 || format == null) {
+                Log.e(TAG, "No audio track found")
+                return null
+            }
+
+            extractor.selectTrack(trackIndex)
+
+            // Create decoder
+            val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
+            codec = MediaCodec.createDecoderByType(mime)
+            codec.configure(format, null, null, 0)
+            codec.start()
+
+            val bufferInfo = MediaCodec.BufferInfo()
+            val pcmBuffer = mutableListOf<Short>()
+            var isEOS = false
+
+            // Decode loop
+            while (!isEOS) {
+                // Input
+                if (!isEOS) {
+                    val inputIndex = codec.dequeueInputBuffer(10000)
+                    if (inputIndex >= 0) {
+                        val inputBuffer = codec.getInputBuffer(inputIndex)
+                        if (inputBuffer != null) {
+                            val sampleSize = extractor.readSampleData(inputBuffer, 0)
+                            if (sampleSize < 0) {
+                                codec.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                                isEOS = true
+                            } else {
+                                val presentationTime = extractor.sampleTime
+                                codec.queueInputBuffer(inputIndex, 0, sampleSize, presentationTime, 0)
+                                extractor.advance()
+                            }
+                        }
+                    }
+                }
+
+                // Output
+                val outputIndex = codec.dequeueOutputBuffer(bufferInfo, 10000)
+                if (outputIndex >= 0) {
+                    val outputBuffer = codec.getOutputBuffer(outputIndex)
+                    if (outputBuffer != null && bufferInfo.size > 0) {
+                        // Convert to ShortArray
+                        val samples = ShortArray(bufferInfo.size / 2)
+                        outputBuffer.position(bufferInfo.offset)
+                        outputBuffer.asShortBuffer().get(samples)
+                        pcmBuffer.addAll(samples.toList())
+                    }
+
+                    codec.releaseOutputBuffer(outputIndex, false)
+
+                    if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                        break
+                    }
+                }
+            }
+
+            return pcmBuffer.toShortArray()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error decoding OGG to PCM", e)
+            return null
+        } finally {
+            codec?.stop()
+            codec?.release()
+            extractor.release()
+        }
+    }
+
+    /**
+     * Stop playing the tanpura
+     */
+    fun stop() {
+        Log.d(TAG, "stop() called")
+
         playbackJob?.cancel()
         playbackJob = null
 
         audioTrack?.apply {
             try {
-                val state = playState
-                Log.d(TAG, "AudioTrack playState: $state")
-                if (state == AudioTrack.PLAYSTATE_PLAYING) {
+                if (playState == AudioTrack.PLAYSTATE_PLAYING) {
                     stop()
-                    Log.d(TAG, "AudioTrack stopped")
                 }
                 release()
-                Log.d(TAG, "AudioTrack released")
             } catch (e: Exception) {
                 Log.e(TAG, "Error stopping AudioTrack", e)
             }
         }
         audioTrack = null
-    }
-
-    /**
-     * Stop playing the tanpura with fade-out
-     */
-    fun stop() {
-        Log.d(TAG, "stop() called")
-
-        if (playbackJob?.isActive == true) {
-            // Trigger fade-out
-            Log.d(TAG, "Triggering fade-out")
-            isFadingOut = true
-            fadeOutStartTime = System.currentTimeMillis()
-
-            // Launch cleanup coroutine to clean up after fade-out completes
-            CoroutineScope(Dispatchers.IO).launch {
-                // Wait for fade-out to complete (1 second + small buffer)
-                delay(1200)
-
-                Log.d(TAG, "Cleaning up after fade-out")
-                playbackJob?.cancel()
-                playbackJob = null
-
-                audioTrack?.apply {
-                    try {
-                        val state = playState
-                        Log.d(TAG, "AudioTrack playState: $state")
-                        if (state == AudioTrack.PLAYSTATE_PLAYING) {
-                            stop()
-                            Log.d(TAG, "AudioTrack stopped")
-                        }
-                        release()
-                        Log.d(TAG, "AudioTrack released")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error stopping AudioTrack", e)
-                    }
-                }
-                audioTrack = null
-
-                // Reset fade-out state
-                isFadingOut = false
-                fadeOutStartTime = 0
-            }
-        } else {
-            // Not playing, clean up immediately
-            playbackJob?.cancel()
-            playbackJob = null
-            audioTrack?.apply {
-                try {
-                    if (playState == AudioTrack.PLAYSTATE_PLAYING) {
-                        stop()
-                    }
-                    release()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error stopping AudioTrack", e)
-                }
-            }
-            audioTrack = null
-            isFadingOut = false
-            fadeOutStartTime = 0
-        }
+        pcmData = null
     }
 
     /**
@@ -405,11 +304,20 @@ class TanpuraPlayer(
      */
     fun updateParameters(saFreq: Double, string1: String, vol: Float = 0.5f) {
         Log.d(TAG, "updateParameters() called: saFreq=$saFreq, string1=$string1, vol=$vol")
-        val wasPlaying = isPlaying()
-        Log.d(TAG, "wasPlaying: $wasPlaying")
-        if (wasPlaying) {
-            // start() will handle stopping the current playback
+
+        // Check if we need to reload a different file
+        val saName = findClosestSaName(saFreq)
+        val currentSaName = findClosestSaName(currentSaFrequency)
+
+        val needsReload = saName != currentSaName || string1 != currentString1Note
+
+        if (needsReload && isPlaying()) {
+            // Restart with new parameters
             start(saFreq, string1, vol)
+        } else if (isPlaying()) {
+            // Just update volume
+            currentVolume = vol.coerceIn(0f, 1f)
+            audioTrack?.setVolume(currentVolume)
         }
     }
 
@@ -417,128 +325,24 @@ class TanpuraPlayer(
      * Check if tanpura is currently playing
      */
     fun isPlaying(): Boolean {
-        val playing = playbackJob?.isActive == true
-        Log.d(TAG, "isPlaying() returning: $playing")
-        return playing
-    }
-
-    /**
-     * Generate a single string pluck with realistic tanpura timbre
-     * Uses additive synthesis with jivari effect (buzzing harmonics)
-     *
-     * @param frequency The fundamental frequency of the string
-     * @param duration Duration of the pluck in seconds
-     * @param amplitudeVariation Slight variation in amplitude (0.9-1.1) for naturalism
-     */
-    private fun generateStringPluck(
-        frequency: Double,
-        duration: Double,
-        amplitudeVariation: Double = 1.0,
-        attackDuration: Double = 0.8
-    ): ShortArray {
-        val numSamples = (sampleRate * duration).toInt()
-        val samples = ShortArray(numSamples)
-
-        // Tanpura harmonic series based on jawari/jowari effect
-        // Research shows: 4th, 7th, 11th, 17th partials are STRONGER than fundamental
-        // Upper harmonics dominate, giving characteristic buzzing, overtone-rich sound
-        // Extending to 20 harmonics as research indicates partials have power up to 20th
-        val harmonics = listOf(
-            1.0 to 0.55,      // Fundamental (weaker than key harmonics for jawari effect)
-            2.0 to 0.85,      // Octave (strong - pitch heard 1-2 octaves above base)
-            3.0 to 0.75,      // Fifth (strong)
-            4.0 to 1.0,       // DOMINANT - stronger than fundamental (jawari)
-            5.0 to 0.65,      // Major third
-            6.0 to 0.58,      // Fifth + octave
-            7.0 to 0.95,      // DOMINANT - stronger than fundamental (jawari)
-            8.0 to 0.48,      // Triple octave
-            9.0 to 0.42,      // Major ninth
-            10.0 to 0.38,     // Major third + octave
-            11.0 to 0.85,     // DOMINANT - stronger than fundamental (jawari)
-            12.0 to 0.32,     // Fifth + double octave
-            13.0 to 0.28,     // Thirteenth
-            14.0 to 0.25,     // Minor seventh + octave
-            15.0 to 0.22,     // Major seventh + octave
-            16.0 to 0.18,     // Quadruple octave
-            17.0 to 0.75,     // DOMINANT - stronger than fundamental (jawari)
-            18.0 to 0.15,     // Ninth + octave
-            19.0 to 0.12,     // Nineteenth
-            20.0 to 0.10      // Twentieth (subtle but present)
-        )
-
-        for (i in 0 until numSamples) {
-            val t = i.toDouble() / sampleRate
-
-            // Envelope: Extremely gradual, imperceptible attack with long sustain
-            // Real tanpura plucks are virtually inaudible - you have to listen very carefully to hear them
-            val envelope = when {
-                t < attackDuration -> {
-                    // Smooth S-curve attack (duration = attackDuration seconds) - imperceptible onset
-                    val attackProgress = t / attackDuration
-                    1.0 / (1.0 + exp(-12.0 * (attackProgress - 0.5)))
-                }
-                else -> {
-                    // Extremely slow exponential decay for very long sustained drone (8 seconds total design)
-                    exp(-t * 0.18)  // Decay adjusted for 8s sustain
-                }
-            }
-
-            // Subtle inharmonicity for realistic string behavior
-            // Harmonics are slightly sharp due to string stiffness
-            // This prevents overly "perfect" synthetic sound
-            val inharmonicityCoeff = 0.0002
-
-            // Generate sample with additive synthesis
-            var sample = 0.0
-            for ((harmonicNum, amplitude) in harmonics) {
-                // Add inharmonicity: harmonics are slightly sharp (not exact integer multiples)
-                // This is due to string stiffness in real instruments
-                val inharmonicFactor = kotlin.math.sqrt(1.0 + inharmonicityCoeff * harmonicNum * harmonicNum)
-                val harmonicFreq = frequency * harmonicNum * inharmonicFactor
-
-                // No frequency modulation - keep harmonics stable
-                val phase = 2.0 * PI * harmonicFreq * t
-
-                // Quadratic frequency-dependent damping: higher harmonics decay MUCH faster
-                // This prevents metallic/guitar-like sound
-                // Research shows natural strings have damping proportional to frequency squared
-                val harmonicDecay = exp(-t * (0.15 + harmonicNum * harmonicNum * 0.004))
-
-                // Independent per-harmonic amplitude modulation (waxing/waning)
-                // Creates the characteristic "cascading" effect where harmonics peak at different times
-                // Each harmonic oscillates at slightly different rate with unique phase offset
-                val modulationFreq = 1.5 + (harmonicNum * 0.15)  // Each harmonic has different modulation rate
-                val modulationPhase = harmonicNum * 0.4  // Stagger the phases
-                val modulationDepth = 0.12 * exp(-t * 0.8)  // Modulation fades over time
-                val harmonicModulation = 1.0 + modulationDepth * sin(2.0 * PI * modulationFreq * t + modulationPhase)
-
-                // Very subtle random-like phase variation per harmonic (from harmonic interference)
-                val harmonicPhaseShift = sin(harmonicNum * 0.7) * 0.05
-
-                sample += amplitude * harmonicDecay * harmonicModulation * sin(phase + harmonicPhaseShift)
-            }
-
-            // Apply envelope, amplitude variation, and volume
-            sample *= envelope * amplitudeVariation * volume
-
-            // Normalize and convert to 16-bit PCM
-            val amplitudeSum = harmonics.sumOf { it.second }
-            sample /= amplitudeSum
-
-            // Soft clipping for natural saturation
-            sample = sample.coerceIn(-1.0, 1.0)
-
-            // Convert to 16-bit signed integer with fuller amplitude for deep drone
-            samples[i] = (sample * 32767 * 0.8).toInt().coerceIn(-32768, 32767).toShort()
-        }
-
-        return samples
+        return playbackJob?.isActive == true
     }
 
     /**
      * Get list of available notes for string 1
      */
     fun getAvailableNotes(): List<String> {
-        return noteRatios.keys.toList()
+        return AVAILABLE_STRING1_NOTES
+    }
+
+    /**
+     * Find the closest Sa name for a given frequency
+     */
+    private fun findClosestSaName(frequency: Double): String {
+        // Find the closest frequency in our map
+        val closestFreq = SA_FREQUENCY_MAP.keys.minByOrNull { abs(it - frequency) }
+            ?: 130.81  // Default to C3 if nothing found
+
+        return SA_FREQUENCY_MAP[closestFreq] ?: "c3"
     }
 }
