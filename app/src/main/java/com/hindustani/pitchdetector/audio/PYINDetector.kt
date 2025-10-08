@@ -21,7 +21,12 @@ class PYINDetector(
             return PitchResult(null, 0f)
         }
 
-        val yinBuffer = FloatArray(audioBuffer.size / 2)
+        // YIN buffer size should cover the range of periods we want to detect
+        // For 80-1000 Hz at 44100 Hz sample rate:
+        // Min period (1000 Hz) = 44.1 samples
+        // Max period (80 Hz) = 551 samples
+        // Use half the audio buffer size or 2048, whichever is smaller
+        val yinBuffer = FloatArray(minOf(audioBuffer.size / 2, 2048))
 
         // Step 1: Calculate difference function
         calculateDifferenceFunction(audioBuffer, yinBuffer)
@@ -52,7 +57,8 @@ class PYINDetector(
     private fun calculateDifferenceFunction(audioBuffer: FloatArray, yinBuffer: FloatArray) {
         for (tau in yinBuffer.indices) {
             var sum = 0f
-            for (i in 0 until yinBuffer.size) {
+            val maxI = audioBuffer.size - tau - 1
+            for (i in 0 until maxI) {
                 val delta = audioBuffer[i] - audioBuffer[i + tau]
                 sum += delta * delta
             }
@@ -66,7 +72,11 @@ class PYINDetector(
 
         for (tau in 1 until yinBuffer.size) {
             runningSum += yinBuffer[tau]
-            yinBuffer[tau] *= tau / runningSum
+            if (runningSum > 0) {
+                yinBuffer[tau] = yinBuffer[tau] * tau / runningSum
+            } else {
+                yinBuffer[tau] = 1f
+            }
         }
     }
 
