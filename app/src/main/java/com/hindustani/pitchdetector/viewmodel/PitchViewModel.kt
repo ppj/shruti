@@ -7,6 +7,7 @@ import com.hindustani.pitchdetector.audio.AudioCaptureManager
 import com.hindustani.pitchdetector.audio.PYINDetector
 import com.hindustani.pitchdetector.data.PitchState
 import com.hindustani.pitchdetector.data.UserSettings
+import com.hindustani.pitchdetector.data.UserSettingsRepository
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
 import com.hindustani.pitchdetector.music.SaParser
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +28,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
     private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer(application.applicationContext)
+    private val userSettingsRepository = UserSettingsRepository(application.applicationContext)
 
     private val _settings = MutableStateFlow(UserSettings())
     val settings: StateFlow<UserSettings> = _settings.asStateFlow()
@@ -44,6 +47,21 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     // Smoothing for needle movement
     private var smoothedCentsDeviation: Double = 0.0
     private val smoothingAlpha = 0.25  // 0.25 = responsive but smooth, lower = smoother but slower
+
+    init {
+        viewModelScope.launch {
+            val initialSettings = userSettingsRepository.userSettings.first()
+            _settings.value = initialSettings
+            updateSa(initialSettings.defaultSaNote) // set the sa note to the default
+        }
+
+        viewModelScope.launch {
+            userSettingsRepository.userSettings.collect {
+                userSettings ->
+                _settings.value = userSettings
+            }
+        }
+    }
 
     /**
      * Toggle recording on/off
@@ -149,6 +167,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSa(westernNote: String) {
         val frequency = SaParser.parseToFrequency(westernNote)
         if (frequency != null) {
+            viewModelScope.launch {
+                userSettingsRepository.updateSaNote(westernNote)
+            }
             _settings.update {
                 it.copy(
                     saNote = westernNote,
@@ -176,9 +197,22 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Update default Sa (tonic) note
+     */
+    fun updateDefaultSa(westernNote: String) {
+        viewModelScope.launch {
+            userSettingsRepository.updateDefaultSaNote(westernNote)
+        }
+    }
+
+
+    /**
      * Update tolerance in cents
      */
     fun updateTolerance(cents: Double) {
+        viewModelScope.launch {
+            userSettingsRepository.updateTolerance(cents)
+        }
         _settings.update {
             it.copy(toleranceCents = cents)
         }
@@ -188,6 +222,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tuning system (12-note vs 22-shruti)
      */
     fun updateTuningSystem(use22Shruti: Boolean) {
+        viewModelScope.launch {
+            userSettingsRepository.updateTuningSystem(use22Shruti)
+        }
         _settings.update {
             it.copy(use22Shruti = use22Shruti)
         }

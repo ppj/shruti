@@ -10,5 +10,6 @@ data class UserSettings(
     val use22Shruti: Boolean = false,
     val isTanpuraEnabled: Boolean = false,
     val tanpuraString1: String = "P",
-    val tanpuraVolume: Float = 0.5f
+    val tanpuraVolume: Float = 0.5f,
+    val defaultSaNote: String = "C3"
 )

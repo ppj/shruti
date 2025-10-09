@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.music.SaParser
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import kotlin.math.roundToInt
 
@@ -21,6 +22,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
+    var isSaDropdownExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -40,6 +42,48 @@ fun SettingsScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
+            // Default Sa Note
+            Text(
+                text = "Default Sa (Tonic)",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            ExposedDropdownMenuBox(
+                expanded = isSaDropdownExpanded,
+                onExpandedChange = { isSaDropdownExpanded = !isSaDropdownExpanded }
+            ) {
+                OutlinedTextField(
+                    value = settings.defaultSaNote,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Select Default Sa") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isSaDropdownExpanded)
+                    },
+                    modifier = Modifier
+                        .menuAnchor() // Anchor the dropdown menu
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = isSaDropdownExpanded,
+                    onDismissRequest = { isSaDropdownExpanded = false }
+                ) {
+                    SaParser.getSaOptions().forEach { saNote ->
+                        DropdownMenuItem(
+                            text = { Text(saNote) },
+                            onClick = {
+                                viewModel.updateDefaultSa(saNote)
+                                isSaDropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+
             // Tolerance Slider
             Text(
                 text = "Tolerance: ±${settings.toleranceCents.roundToInt()} cents",
@@ -125,8 +169,8 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "• Expert (±5-8¢): For advanced musicians\n" +
-                                "• Intermediate (±10-15¢): For regular practice\n" +
+                        text = "• Expert (±5-8¢): For advanced musicians\n" + 
+                                "• Intermediate (±10-15¢): For regular practice\n" + 
                                 "• Beginner (±20-30¢): For those starting out",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
