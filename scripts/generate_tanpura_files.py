@@ -10,7 +10,7 @@ import soundfile as sf
 
 # Audio configuration
 SAMPLE_RATE = 44100
-SUSTAIN_DURATION = 8.0  # seconds per string
+SUSTAIN_DURATION = 10.0  # seconds per string (increased for smoother looping)
 BEAT_INTERVAL = 0.6  # 100 BPM
 CYCLE_BEATS = 6
 CYCLE_DURATION = BEAT_INTERVAL * CYCLE_BEATS
@@ -63,7 +63,7 @@ NOTE_NAME_MAP = {
     "N": "N"
 }
 
-# Tanpura harmonic structure with jawari effect
+# Tanpura harmonic structure with jawari effect (keeping original 20)
 HARMONICS = [
     (1.0, 0.55),   # Fundamental (weaker than key harmonics)
     (2.0, 0.85),   # Octave
@@ -102,7 +102,7 @@ def generate_string_pluck(frequency, duration, amplitude_variation=1.0, attack_d
     envelope = np.where(
         t < attack_duration,
         1.0 / (1.0 + np.exp(-12.0 * (t / attack_duration - 0.5))),  # Sigmoid attack
-        np.exp(-t * 0.18)  # Slow decay for 8s sustain
+        np.exp(-t * 0.15)  # Slower decay for 10s sustain
     )
 
     # Inharmonicity coefficient (constant for all frequencies)
@@ -120,10 +120,10 @@ def generate_string_pluck(frequency, duration, amplitude_variation=1.0, attack_d
         # Quadratic frequency-dependent damping
         harmonic_decay = np.exp(-t * (0.15 + harmonic_num * harmonic_num * 0.004))
 
-        # Per-harmonic amplitude modulation (waxing/waning)
+        # Per-harmonic amplitude modulation (waxing/waning) - enhanced depth
         modulation_freq = 1.5 + (harmonic_num * 0.15)
         modulation_phase = harmonic_num * 0.4
-        modulation_depth = 0.12 * np.exp(-t * 0.8)
+        modulation_depth = 0.16 * np.exp(-t * 0.8)  # Increased from 0.12 to 0.16
         harmonic_modulation = 1.0 + modulation_depth * np.sin(2.0 * np.pi * modulation_freq * t + modulation_phase)
 
         # Phase variation per harmonic
@@ -195,7 +195,7 @@ def generate_tanpura_cycle(sa_frequency, string1_note):
         mono_buffer *= 0.85 / max_amp
 
     # Convert mono to stereo with timing offset and panning
-    stereo_timing_offset = int(SAMPLE_RATE * 0.012)  # 12ms delay for R channel
+    stereo_timing_offset = int(SAMPLE_RATE * 0.020)  # 20ms delay for R channel (enhanced width)
     panning_l = 0.75  # 75% left
     panning_r = 0.75  # 75% right
 
