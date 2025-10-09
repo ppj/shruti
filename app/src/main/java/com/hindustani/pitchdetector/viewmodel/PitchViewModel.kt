@@ -251,6 +251,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             vol = _settings.value.tanpuraVolume
         )
         _isTanpuraPlaying.value = true
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraEnabled(true)
+        }
         _settings.update { it.copy(isTanpuraEnabled = true) }
     }
 
@@ -260,6 +263,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private fun stopTanpura() {
         tanpuraPlayer.stop()
         _isTanpuraPlaying.value = false
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraEnabled(false)
+        }
         _settings.update { it.copy(isTanpuraEnabled = false) }
     }
 
@@ -267,6 +273,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tanpura string 1 note
      */
     fun updateTanpuraString1(swara: String) {
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraString1(swara)
+        }
         _settings.update {
             it.copy(tanpuraString1 = swara)
         }

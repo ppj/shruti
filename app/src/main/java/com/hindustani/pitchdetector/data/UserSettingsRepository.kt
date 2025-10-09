@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +23,9 @@ class UserSettingsRepository(context: Context) {
         val TOLERANCE_CENTS = doublePreferencesKey("tolerance_cents")
         val USE_22_SHRUTI = booleanPreferencesKey("use_22_shruti")
         val DEFAULT_SA_NOTE = stringPreferencesKey("default_sa_note")
+        val IS_TANPURA_ENABLED = booleanPreferencesKey("is_tanpura_enabled")
+        val TANPURA_STRING1 = stringPreferencesKey("tanpura_string1")
+        val TANPURA_VOLUME = floatPreferencesKey("tanpura_volume")
     }
 
     val userSettings: Flow<UserSettings> = dataStore.data.map {
@@ -30,11 +34,17 @@ class UserSettingsRepository(context: Context) {
         val toleranceCents = preferences[PreferencesKeys.TOLERANCE_CENTS] ?: 15.0
         val use22Shruti = preferences[PreferencesKeys.USE_22_SHRUTI] ?: false
         val defaultSaNote = preferences[PreferencesKeys.DEFAULT_SA_NOTE] ?: "C3"
+        val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: false
+        val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: "P"
+        val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: 0.5f
         UserSettings(
             saNote = saNote,
             toleranceCents = toleranceCents,
             use22Shruti = use22Shruti,
-            defaultSaNote = defaultSaNote
+            defaultSaNote = defaultSaNote,
+            isTanpuraEnabled = isTanpuraEnabled,
+            tanpuraString1 = tanpuraString1,
+            tanpuraVolume = tanpuraVolume
         )
     }
 
@@ -64,6 +74,27 @@ class UserSettingsRepository(context: Context) {
         dataStore.edit {
             preferences ->
             preferences[PreferencesKeys.USE_22_SHRUTI] = use22Shruti
+        }
+    }
+
+    suspend fun updateTanpuraEnabled(enabled: Boolean) {
+        dataStore.edit {
+            preferences ->
+            preferences[PreferencesKeys.IS_TANPURA_ENABLED] = enabled
+        }
+    }
+
+    suspend fun updateTanpuraString1(string1: String) {
+        dataStore.edit {
+            preferences ->
+            preferences[PreferencesKeys.TANPURA_STRING1] = string1
+        }
+    }
+
+    suspend fun updateTanpuraVolume(volume: Float) {
+        dataStore.edit {
+            preferences ->
+            preferences[PreferencesKeys.TANPURA_VOLUME] = volume
         }
     }
 }
