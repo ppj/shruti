@@ -291,6 +291,27 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Update tanpura volume
+     */
+    fun updateTanpuraVolume(volume: Float) {
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraVolume(volume)
+        }
+        _settings.update {
+            it.copy(tanpuraVolume = volume)
+        }
+
+        // Update tanpura if it's currently playing
+        if (_isTanpuraPlaying.value) {
+            tanpuraPlayer.updateParameters(
+                saFreq = _settings.value.saFrequency,
+                string1 = _settings.value.tanpuraString1,
+                vol = volume
+            )
+        }
+    }
+
+    /**
      * Get available notes for tanpura string 1
      */
     fun getTanpuraAvailableNotes(): List<String> {

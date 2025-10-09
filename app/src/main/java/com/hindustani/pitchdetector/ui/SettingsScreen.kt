@@ -154,6 +154,39 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Tanpura Volume Slider
+            Text(
+                text = "Tanpura Volume: ${(settings.tanpuraVolume * 100).roundToInt()}%",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Slider(
+                value = settings.tanpuraVolume,
+                onValueChange = { viewModel.updateTanpuraVolume(it) },
+                valueRange = 0f..1f,
+                steps = 19,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    "Silent (0%)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "Full (100%)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             // Explanation text
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -169,8 +202,8 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "• Expert (±5-8¢): For advanced musicians\n" + 
-                                "• Intermediate (±10-15¢): For regular practice\n" + 
+                        text = "• Expert (±5-8¢): For advanced musicians\n" +
+                                "• Intermediate (±10-15¢): For regular practice\n" +
                                 "• Beginner (±20-30¢): For those starting out",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
