@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
 Generate pre-recorded OGG Vorbis files for tanpura playback.
-Creates 60 files: 4 String 1 notes (P, M, S, N) × 15 Sa values (G#2 to A#3)
+Creates 75 files: 5 String 1 notes (P, ms, Mt, S, N) × 15 Sa values (G#2 to A#3)
+
+Harmonic structure extracted from real Calcutta-standard male tanpura recording
+via spectral analysis (FFT). Key finding: H7 is the dominant harmonic (1.00),
+representing the authentic jawari effect, not H4/H11/H17 as commonly assumed.
+
+Source: https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html
+Analysis: Extracted String 2 (mid Sa - tonic) harmonics from stable 1-2s segment
+Validation: C3 frequency detected at 131.25 Hz (0.3% deviation from 130.81 Hz)
 """
 
 import numpy as np
@@ -10,7 +18,7 @@ import soundfile as sf
 
 # Audio configuration
 SAMPLE_RATE = 44100
-SUSTAIN_DURATION = 8.0  # seconds per string
+SUSTAIN_DURATION = 10.0  # seconds per string (increased for smoother looping)
 BEAT_INTERVAL = 0.6  # 100 BPM
 CYCLE_BEATS = 6
 CYCLE_DURATION = BEAT_INTERVAL * CYCLE_BEATS
@@ -28,7 +36,7 @@ NOTE_RATIOS = {
     "d": 8.0 / 5.0,
     "D": 5.0 / 3.0,
     "n": 16.0 / 9.0,
-    "N": 15.0 / 8.0
+    "N": 15.0 / 8.0,
 }
 
 # Sa values from G#2 to A#3 (15 semitones)
@@ -47,7 +55,7 @@ SA_FREQUENCIES = {
     "g3": 196.00,
     "gs3": 207.65,
     "a3": 220.00,
-    "as3": 233.08
+    "as3": 233.08,
 }
 
 # String 1 notes to generate (most common)
@@ -57,38 +65,42 @@ STRING1_NOTES = ["P", "ms", "Mt", "S", "N"]
 # Map display names to note ratios
 NOTE_NAME_MAP = {
     "P": "P",
-    "ms": "m",   # shuddha madhyam
-    "Mt": "M",   # tivra madhyam
+    "ms": "m",  # shuddha madhyam
+    "Mt": "M",  # tivra madhyam
     "S": "S",
-    "N": "N"
+    "N": "N",
 }
 
-# Tanpura harmonic structure with jawari effect
+# Harmonic structure extracted from real tanpura recording (String 2 - tonic Sa)
+# Source: https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html
+# Key finding: H7 is dominant (1.00) representing the authentic jawari effect
 HARMONICS = [
-    (1.0, 0.55),   # Fundamental (weaker than key harmonics)
-    (2.0, 0.85),   # Octave
-    (3.0, 0.75),   # Fifth
-    (4.0, 1.0),    # DOMINANT (jawari)
-    (5.0, 0.65),   # Major third
-    (6.0, 0.58),   # Fifth + octave
-    (7.0, 0.95),   # DOMINANT (jawari)
-    (8.0, 0.48),   # Triple octave
-    (9.0, 0.42),   # Major ninth
-    (10.0, 0.38),  # Major third + octave
-    (11.0, 0.85),  # DOMINANT (jawari)
-    (12.0, 0.32),  # Fifth + double octave
-    (13.0, 0.28),  # Thirteenth
-    (14.0, 0.25),  # Minor seventh + octave
-    (15.0, 0.22),  # Major seventh + octave
-    (16.0, 0.18),  # Quadruple octave
-    (17.0, 0.75),  # DOMINANT (jawari)
-    (18.0, 0.15),  # Ninth + octave
-    (19.0, 0.12),  # Nineteenth
-    (20.0, 0.10)   # Twentieth
+    (1.0, 0.26),  # Fundamental
+    (2.0, 0.26),  # Octave
+    (3.0, 0.04),  # Fifth
+    (4.0, 0.81),  # Jawari cluster
+    (5.0, 0.49),
+    (6.0, 0.49),
+    (7.0, 1.00),  # Dominant jawari peak
+    (8.0, 0.24),
+    (9.0, 0.54),  # Secondary peak
+    (10.0, 0.34),
+    (11.0, 0.45),
+    (12.0, 0.08),
+    (13.0, 0.07),
+    (14.0, 0.04),
+    (15.0, 0.03),
+    (16.0, 0.05),
+    (17.0, 0.33),  # Tertiary peak
+    (18.0, 0.05),
+    (19.0, 0.28),
+    (20.0, 0.09),
 ]
 
 
-def generate_string_pluck(frequency, duration, amplitude_variation=1.0, attack_duration=0.8, volume=0.5):
+def generate_string_pluck(
+    frequency, duration, amplitude_variation=1.0, attack_duration=0.8, volume=0.5
+):
     """
     Generate a single string pluck with realistic tanpura timbre using additive synthesis.
     """
@@ -98,80 +110,85 @@ def generate_string_pluck(frequency, duration, amplitude_variation=1.0, attack_d
     # Time array
     t = np.arange(num_samples) / SAMPLE_RATE
 
-    # Envelope: S-curve attack then exponential decay
+    # Envelope: sigmoid attack then exponential decay
     envelope = np.where(
         t < attack_duration,
-        1.0 / (1.0 + np.exp(-12.0 * (t / attack_duration - 0.5))),  # Sigmoid attack
-        np.exp(-t * 0.18)  # Slow decay for 8s sustain
+        1.0 / (1.0 + np.exp(-12.0 * (t / attack_duration - 0.5))),
+        np.exp(-t * 0.15),
     )
 
-    # Inharmonicity coefficient (constant for all frequencies)
     inharmonicity_coeff = 0.0002
 
-    # Generate harmonics with additive synthesis
     for harmonic_num, amplitude in HARMONICS:
-        # Add inharmonicity: harmonics are slightly sharp
-        inharmonic_factor = np.sqrt(1.0 + inharmonicity_coeff * harmonic_num * harmonic_num)
+        # Inharmonicity: harmonics are slightly sharp
+        inharmonic_factor = np.sqrt(
+            1.0 + inharmonicity_coeff * harmonic_num * harmonic_num
+        )
         harmonic_freq = frequency * harmonic_num * inharmonic_factor
-
-        # Phase
         phase = 2.0 * np.pi * harmonic_freq * t
 
-        # Quadratic frequency-dependent damping
+        # Frequency-dependent damping
         harmonic_decay = np.exp(-t * (0.15 + harmonic_num * harmonic_num * 0.004))
 
-        # Per-harmonic amplitude modulation (waxing/waning)
+        # Per-harmonic amplitude modulation (jawari waxing/waning effect)
         modulation_freq = 1.5 + (harmonic_num * 0.15)
         modulation_phase = harmonic_num * 0.4
-        modulation_depth = 0.12 * np.exp(-t * 0.8)
-        harmonic_modulation = 1.0 + modulation_depth * np.sin(2.0 * np.pi * modulation_freq * t + modulation_phase)
+        modulation_depth = 0.32 * np.exp(-t * 0.8)
+        harmonic_modulation = 1.0 + modulation_depth * np.sin(
+            2.0 * np.pi * modulation_freq * t + modulation_phase
+        )
 
-        # Phase variation per harmonic
+        # Phase variation
         harmonic_phase_shift = np.sin(harmonic_num * 0.7) * 0.05
 
-        # Add this harmonic to the sample
-        samples += amplitude * harmonic_decay * harmonic_modulation * np.sin(phase + harmonic_phase_shift)
+        samples += (
+            amplitude
+            * harmonic_decay
+            * harmonic_modulation
+            * np.sin(phase + harmonic_phase_shift)
+        )
 
     # Apply envelope, amplitude variation, and volume
     amplitude_sum = sum(amp for _, amp in HARMONICS)
     samples *= envelope * amplitude_variation * volume / amplitude_sum
-
-    # Soft clipping for natural saturation
-    samples = np.clip(samples, -1.0, 1.0)
-
-    # Scale to fuller amplitude
-    samples *= 0.8
+    samples = np.clip(samples, -1.0, 1.0)  # Soft clipping for natural saturation
+    samples *= 0.8  # Scale to fuller amplitude
 
     return samples
 
 
 def generate_tanpura_cycle(sa_frequency, string1_note):
-    """
-    Generate one complete 6-beat tanpura cycle as stereo audio.
-    """
-    # Map filename note to ratio note (e.g., "ma" -> "m", "Ma" -> "M")
+    """Generate one complete 6-beat tanpura cycle as stereo audio."""
     ratio_note = NOTE_NAME_MAP.get(string1_note, string1_note)
 
-    # Calculate string frequencies
-    string1_freq = sa_frequency * NOTE_RATIOS[ratio_note] / 2.0  # Lower octave
-    string2_freq = sa_frequency  # Tonic Sa
-    string3_freq = sa_frequency  # Tonic Sa
-    string4_freq = sa_frequency / 2.0  # Lower octave Sa
+    # String frequencies: 1=variable lower octave, 2&3=tonic Sa, 4=lower Sa
+    string1_freq = sa_frequency * NOTE_RATIOS[ratio_note] / 2.0
+    string2_freq = sa_frequency
+    string3_freq = sa_frequency
+    string4_freq = sa_frequency / 2.0
 
     # Generate individual strings with different attack durations
     print(f"  Generating String 1 ({string1_note})...")
-    string1_samples = generate_string_pluck(string1_freq, SUSTAIN_DURATION, amplitude_variation=0.98, attack_duration=0.4)
+    string1_samples = generate_string_pluck(
+        string1_freq, SUSTAIN_DURATION, amplitude_variation=0.98, attack_duration=0.4
+    )
 
     print(f"  Generating String 2 (Sa)...")
-    string2_samples = generate_string_pluck(string2_freq, SUSTAIN_DURATION, amplitude_variation=1.0, attack_duration=0.8)
+    string2_samples = generate_string_pluck(
+        string2_freq, SUSTAIN_DURATION, amplitude_variation=1.0, attack_duration=0.8
+    )
 
     print(f"  Generating String 3 (Sa)...")
-    string3_samples = generate_string_pluck(string3_freq, SUSTAIN_DURATION, amplitude_variation=1.0, attack_duration=0.8)
+    string3_samples = generate_string_pluck(
+        string3_freq, SUSTAIN_DURATION, amplitude_variation=1.0, attack_duration=0.8
+    )
 
     print(f"  Generating String 4 (lower Sa)...")
-    string4_samples = generate_string_pluck(string4_freq, SUSTAIN_DURATION, amplitude_variation=0.96, attack_duration=0.6)
+    string4_samples = generate_string_pluck(
+        string4_freq, SUSTAIN_DURATION, amplitude_variation=0.96, attack_duration=0.6
+    )
 
-    # Plucking pattern offsets (in beats)
+    # Mix strings with traditional plucking pattern (beats: 1, -, 3, 4, 5, -)
     pluck_offsets = [0, 2, 3, 4]  # String1, String2, String3, String4
     all_strings = [string1_samples, string2_samples, string3_samples, string4_samples]
 
@@ -183,7 +200,6 @@ def generate_tanpura_cycle(sa_frequency, string1_note):
     # Mix all strings with their timing offsets
     for string_index, string_samples in enumerate(all_strings):
         offset = pluck_offsets[string_index] * beat_interval_samples
-
         for i in range(len(string_samples)):
             # Wrap around if string extends beyond cycle boundary
             buffer_index = (offset + i) % cycle_size
@@ -194,24 +210,17 @@ def generate_tanpura_cycle(sa_frequency, string1_note):
     if max_amp > 0.85:
         mono_buffer *= 0.85 / max_amp
 
-    # Convert mono to stereo with timing offset and panning
-    stereo_timing_offset = int(SAMPLE_RATE * 0.012)  # 12ms delay for R channel
-    panning_l = 0.75  # 75% left
-    panning_r = 0.75  # 75% right
-
+    # Create stereo with Haas effect (20ms delay)
+    stereo_timing_offset = int(SAMPLE_RATE * 0.020)
+    panning_l = 0.75
+    panning_r = 0.75
     stereo_buffer = np.zeros((cycle_size, 2))
 
     for i in range(cycle_size):
-        # Left channel
-        stereo_buffer[i, 0] = mono_buffer[i] * panning_l
-
+        stereo_buffer[i, 0] = mono_buffer[i] * panning_l  # Left channel
         # Right channel with timing offset
         right_index = (i + stereo_timing_offset) % cycle_size
         stereo_buffer[i, 1] = mono_buffer[right_index] * panning_r
-
-    # No fade-in or fade-out needed - the modulo wrapping in mono_buffer creation
-    # already creates seamless loops. String 4's 8s sustain naturally wraps around
-    # and overlaps with String 1 at the loop point.
 
     return stereo_buffer
 
@@ -219,11 +228,15 @@ def generate_tanpura_cycle(sa_frequency, string1_note):
 def main():
     """Generate all tanpura OGG files."""
     # Create output directory
-    output_dir = Path(__file__).parent.parent / "app" / "src" / "main" / "assets" / "tanpura"
+    output_dir = (
+        Path(__file__).parent.parent / "app" / "src" / "main" / "assets" / "tanpura"
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Generating tanpura files in: {output_dir}")
-    print(f"Total files to generate: {len(SA_FREQUENCIES)} Sa values × {len(STRING1_NOTES)} String 1 notes = {len(SA_FREQUENCIES) * len(STRING1_NOTES)}")
+    print(
+        f"Total files to generate: {len(SA_FREQUENCIES)} Sa values × {len(STRING1_NOTES)} String 1 notes = {len(SA_FREQUENCIES) * len(STRING1_NOTES)}"
+    )
     print()
 
     file_count = 0
@@ -244,14 +257,14 @@ def main():
 
             # Save as OGG Vorbis
             print(f"  Writing to {filename}...")
-            sf.write(filepath, audio_data, SAMPLE_RATE, format='OGG', subtype='VORBIS')
+            sf.write(filepath, audio_data, SAMPLE_RATE, format="OGG", subtype="VORBIS")
 
             print(f"  ✓ Complete\n")
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Generation complete! {total_files} files created.")
     print(f"Output directory: {output_dir}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 if __name__ == "__main__":
