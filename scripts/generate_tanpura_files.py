@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
 Generate pre-recorded OGG Vorbis files for tanpura playback.
-Creates 60 files: 4 String 1 notes (P, M, S, N) × 15 Sa values (G#2 to A#3)
+Creates 75 files: 5 String 1 notes (P, ms, Mt, S, N) × 15 Sa values (G#2 to A#3)
+
+Harmonic structure extracted from real Calcutta-standard male tanpura recording
+via spectral analysis (FFT). Key finding: H7 is the dominant harmonic (1.00),
+representing the authentic jawari effect, not H4/H11/H17 as commonly assumed.
+
+Source: https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html
+Analysis: Extracted String 2 (mid Sa - tonic) harmonics from stable 1-2s segment
+Validation: C3 frequency detected at 131.25 Hz (0.3% deviation from 130.81 Hz)
 """
 
 import numpy as np

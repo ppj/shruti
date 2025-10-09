@@ -17,7 +17,8 @@ A real-time pitch detection Android app for Hindustani classical music students.
 - **Flexible Sa (Tonic) Selection**: Input Sa using Western notation (C4, A#3, Bb4, etc.)
 - **Built-in Tanpura/Drone**: 4-string tanpura with gapless looping for practice accompaniment
   - Configurable String 1 (P, m, M, S, N) for different ragas
-  - Instant playback using pre-recorded high-quality samples
+  - Instant playback using pre-recorded samples with authentic tanpura timbre
+  - Harmonic structure based on spectral analysis of real Calcutta-standard male tanpura
   - 75 variations covering G#2 to A#3 tonic range (15 Sa values × 5 String 1 notes)
 - **Clean Interface**: Uncluttered design focused on essential controls
 - **Progressive Learning**: Adjustable difficulty levels for skill development
@@ -50,8 +51,10 @@ A real-time pitch detection Android app for Hindustani classical music students.
 - **TanpuraPlayer**: Pre-recorded tanpura playback engine
   - MediaCodec-based OGG Vorbis decoder
   - AudioTrack streaming for gapless looping
-  - 4-string tanpura with jawari effect
+  - 4-string tanpura with authentic jawari effect
+  - Synthesized using additive synthesis with harmonics extracted from real recordings
   - Instant startup (~200-400ms)
+  - Source: [Calcutta Standard Male Tanpura](https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html)
 
 #### Music Theory Engine
 - **HindustaniNoteConverter**: Frequency to swara conversion
