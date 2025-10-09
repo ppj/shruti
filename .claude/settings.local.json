@@ -3,7 +3,10 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(find:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(source:*)",
+      "Bash(python:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
