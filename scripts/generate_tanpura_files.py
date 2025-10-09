@@ -63,28 +63,30 @@ NOTE_NAME_MAP = {
     "N": "N"
 }
 
-# Tanpura harmonic structure with jawari effect (keeping original 20)
+# Tanpura harmonic structure - EXTRACTED FROM REAL RECORDING
+# Analysis source: male-calcutta-c3.mp3 (String 2 - mid Sa tonic)
+# Key finding: H7 is DOMINANT (1.00), not H4/H11/H17 as previously assumed
 HARMONICS = [
-    (1.0, 0.55),   # Fundamental (weaker than key harmonics)
-    (2.0, 0.85),   # Octave
-    (3.0, 0.75),   # Fifth
-    (4.0, 1.0),    # DOMINANT (jawari)
-    (5.0, 0.65),   # Major third
-    (6.0, 0.58),   # Fifth + octave
-    (7.0, 0.95),   # DOMINANT (jawari)
-    (8.0, 0.48),   # Triple octave
-    (9.0, 0.42),   # Major ninth
-    (10.0, 0.38),  # Major third + octave
-    (11.0, 0.85),  # DOMINANT (jawari)
-    (12.0, 0.32),  # Fifth + double octave
-    (13.0, 0.28),  # Thirteenth
-    (14.0, 0.25),  # Minor seventh + octave
-    (15.0, 0.22),  # Major seventh + octave
-    (16.0, 0.18),  # Quadruple octave
-    (17.0, 0.75),  # DOMINANT (jawari)
-    (18.0, 0.15),  # Ninth + octave
-    (19.0, 0.12),  # Nineteenth
-    (20.0, 0.10)   # Twentieth
+    (1.0, 0.26),   # Fundamental - much weaker than expected
+    (2.0, 0.26),   # Octave - much weaker
+    (3.0, 0.04),   # Fifth - very weak
+    (4.0, 0.81),   # Jawari cluster start - strong but not dominant
+    (5.0, 0.49),   # Jawari cluster
+    (6.0, 0.49),   # Jawari cluster
+    (7.0, 1.00),   # DOMINANT - jawari peak (THE KEY!)
+    (8.0, 0.24),   # Drop after dominant
+    (9.0, 0.54),   # Secondary peak
+    (10.0, 0.34),  # Moderate
+    (11.0, 0.45),  # Still present but not dominant
+    (12.0, 0.08),  # Weak
+    (13.0, 0.07),  # Weak
+    (14.0, 0.04),  # Very weak
+    (15.0, 0.03),  # Very weak
+    (16.0, 0.05),  # Very weak
+    (17.0, 0.33),  # Moderate tertiary peak
+    (18.0, 0.05),  # Very weak
+    (19.0, 0.28),  # Moderate peak - stronger than expected
+    (20.0, 0.09)   # Weak
 ]
 
 
@@ -120,10 +122,10 @@ def generate_string_pluck(frequency, duration, amplitude_variation=1.0, attack_d
         # Quadratic frequency-dependent damping
         harmonic_decay = np.exp(-t * (0.15 + harmonic_num * harmonic_num * 0.004))
 
-        # Per-harmonic amplitude modulation (waxing/waning) - enhanced depth
+        # Per-harmonic amplitude modulation (waxing/waning) - from real analysis
         modulation_freq = 1.5 + (harmonic_num * 0.15)
         modulation_phase = harmonic_num * 0.4
-        modulation_depth = 0.16 * np.exp(-t * 0.8)  # Increased from 0.12 to 0.16
+        modulation_depth = 0.32 * np.exp(-t * 0.8)  # Real tanpura: 0.32 (2x our previous 0.16)
         harmonic_modulation = 1.0 + modulation_depth * np.sin(2.0 * np.pi * modulation_freq * t + modulation_phase)
 
         # Phase variation per harmonic
