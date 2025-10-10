@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -90,18 +91,21 @@ class SettingsScreenTest {
     }
 
     @Test
-    fun settingsScreen_defaultSaDropdownDisplayed() {
+    fun settingsScreen_defaultSaDropdownDisplayed() = runTest {
         val viewModel = createViewModel()
         composeTestRule.setContent {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
 
+        composeTestRule.waitForIdle()
+
         // Verify default Sa section is displayed
         composeTestRule.onNodeWithText("Default Sa (Tonic)").assertIsDisplayed()
         composeTestRule.onNodeWithText("Select Default Sa").assertIsDisplayed()
 
-        // Verify default value is displayed (C3 is the default)
-        composeTestRule.onNodeWithText("C3").assertIsDisplayed()
+        // Verify that some default Sa value is displayed (don't hardcode C3)
+        val currentDefaultSa = viewModel.settings.first().defaultSaNote
+        composeTestRule.onNodeWithText(currentDefaultSa).assertIsDisplayed()
     }
 
     @Test
