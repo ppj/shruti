@@ -118,7 +118,7 @@ fun MainScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Current note display
         val currentNote = pitchState.currentNote
@@ -137,7 +137,7 @@ fun MainScreen(
             swara = displaySwara
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Pitch accuracy indicator
         PitchIndicator(
@@ -148,7 +148,7 @@ fun MainScreen(
             isSharp = pitchState.currentNote?.isSharp ?: false
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Tanpura controls
         Card(
@@ -273,6 +273,6 @@ fun MainScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
