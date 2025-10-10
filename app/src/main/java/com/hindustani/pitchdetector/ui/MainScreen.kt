@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
-import com.hindustani.pitchdetector.music.SaParser
 import com.hindustani.pitchdetector.ui.components.NoteDisplay
-import com.hindustani.pitchdetector.ui.components.PitchIndicator
+import com.hindustani.pitchdetector.ui.components.PitchBar
+import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import kotlin.math.roundToInt
 
@@ -31,10 +31,6 @@ fun MainScreen(
     val isTanpuraPlaying by viewModel.isTanpuraPlaying.collectAsState()
     val settings by viewModel.settings.collectAsState()
 
-    // Dropdown state for Sa selector
-    var showSaDropdown by remember { mutableStateOf(false) }
-    val saOptions = remember { SaParser.getSaOptionsInRange() }
-
     // Dropdown state for tanpura string 1 selector
     var showTanpuraDropdown by remember { mutableStateOf(false) }
     val tanpuraAvailableNotes = remember { viewModel.getTanpuraAvailableNotes() }
@@ -45,78 +41,31 @@ fun MainScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header with Sa dropdown selector
+        // Header with Settings button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Sa dropdown selector
-            Box {
-                Row(
-                    modifier = Modifier
-                        .clickable {
-                            // Stop recording when opening dropdown
-                            if (isRecording) {
-                                viewModel.toggleRecording()
-                            }
-                            showSaDropdown = true
-                        }
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Sa: ${pitchState.saNote}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Select Sa",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showSaDropdown,
-                    onDismissRequest = { showSaDropdown = false }
-                ) {
-                    saOptions.forEach { (note, frequency) ->
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = note,
-                                        style = if (note == pitchState.saNote)
-                                            MaterialTheme.typography.bodyLarge.copy(
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                        else
-                                            MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        text = "${frequency.roundToInt()} Hz",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color.Gray
-                                    )
-                                }
-                            },
-                            onClick = {
-                                viewModel.updateSa(note)
-                                showSaDropdown = false
-                            }
-                        )
-                    }
-                }
-            }
+            Text(
+                text = "Sa: ${pitchState.saNote}",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(8.dp)
+            )
 
             IconButton(onClick = onNavigateToSettings) {
                 Icon(Icons.Default.Settings, contentDescription = "Settings")
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Piano keyboard Sa selector
+        PianoKeyboardSelector(
+            selectedSa = pitchState.saNote,
+            onSaSelected = { note -> viewModel.updateSa(note) }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -139,8 +88,8 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Pitch accuracy indicator
-        PitchIndicator(
+        // Pitch accuracy bar
+        PitchBar(
             centsDeviation = pitchState.currentNote?.centsDeviation ?: 0.0,
             tolerance = pitchState.toleranceCents,
             isPerfect = pitchState.currentNote?.isPerfect ?: false,
@@ -185,7 +134,7 @@ fun MainScreen(
                     Box {
                         Row(
                             modifier = Modifier
-                                .clickable(enabled = !isRecording) {
+                                .clickable(enabled = !isTanpuraPlaying) {
                                     showTanpuraDropdown = true
                                 }
                                 .padding(4.dp),
@@ -239,8 +188,7 @@ fun MainScreen(
                 // Toggle button
                 Switch(
                     checked = isTanpuraPlaying,
-                    onCheckedChange = { viewModel.toggleTanpura() },
-                    enabled = !isRecording
+                    onCheckedChange = { viewModel.toggleTanpura() }
                 )
             }
         }
