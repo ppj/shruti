@@ -52,7 +52,23 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val initialSettings = userSettingsRepository.userSettings.first()
             _settings.value = initialSettings
-            updateSa(initialSettings.defaultSaNote) // set the sa note to the default
+
+            // Initialize with default Sa note (fresh start)
+            val frequency = SaParser.parseToFrequency(initialSettings.defaultSaNote)
+            if (frequency != null) {
+                _settings.update {
+                    it.copy(
+                        saNote = initialSettings.defaultSaNote,
+                        saFrequency = frequency
+                    )
+                }
+                _pitchState.update {
+                    it.copy(
+                        saNote = initialSettings.defaultSaNote,
+                        saFrequency = frequency
+                    )
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -162,14 +178,12 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Update Sa (tonic) note
+     * Update Sa (tonic) note (session-only, not persisted)
      */
     fun updateSa(westernNote: String) {
         val frequency = SaParser.parseToFrequency(westernNote)
         if (frequency != null) {
-            viewModelScope.launch {
-                userSettingsRepository.updateSaNote(westernNote)
-            }
+            // Update in-memory state only (don't persist)
             _settings.update {
                 it.copy(
                     saNote = westernNote,
