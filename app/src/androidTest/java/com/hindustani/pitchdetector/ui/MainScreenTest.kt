@@ -60,11 +60,8 @@ class MainScreenTest {
     }
 
     @Test
-    fun mainScreen_saIsSessionOnlyNotPersisted() {
+    fun mainScreen_saSelectionIsPersisted() {
         val viewModel = createViewModel()
-
-        // Get the default Sa from settings
-        val defaultSa = runBlocking { viewModel.settings.first().defaultSaNote }
 
         composeTestRule.setContent {
             MainScreen(viewModel = viewModel, onNavigateToSettings = {})
@@ -72,21 +69,21 @@ class MainScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Verify main screen starts with the default Sa
-        composeTestRule.onNodeWithText("Sa: $defaultSa", substring = true).assertIsDisplayed()
+        // Get the current Sa
+        val currentSa = runBlocking { viewModel.pitchState.first().saNote }
 
-        // Change Sa in main screen
-        composeTestRule.onNodeWithText("Sa: $defaultSa", substring = true).performClick()
+        // Change Sa in main screen to D3
+        composeTestRule.onNodeWithText("Sa: $currentSa", substring = true).performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("A3").performClick()
+        composeTestRule.onNodeWithText("D3").performClick()
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("Sa: A3", substring = true).assertIsDisplayed()
+        composeTestRule.onNodeWithText("Sa: D3", substring = true).assertIsDisplayed()
 
-        // Verify that the default Sa in settings is unchanged
-        val defaultSaAfter = runBlocking { viewModel.settings.first().defaultSaNote }
-        assert(defaultSaAfter == defaultSa) {
-            "Default Sa should not change when main screen Sa changes. Expected: $defaultSa, Got: $defaultSaAfter"
+        // Verify that the Sa persisted in settings
+        val persistedSa = runBlocking { viewModel.settings.first().saNote }
+        assert(persistedSa == "D3") {
+            "Sa should be persisted. Expected: D3, Got: $persistedSa"
         }
     }
 }

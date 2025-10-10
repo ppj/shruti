@@ -6,15 +6,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenTest {
 
@@ -35,8 +30,6 @@ class SettingsScreenTest {
 
         composeTestRule.onNodeWithText("Settings").assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Back").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Default Sa (Tonic)").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Select Default Sa").assertIsDisplayed()
         composeTestRule.onNodeWithText("Tolerance: ±15 cents", substring = true).assertIsDisplayed()
         composeTestRule.onNodeWithText("Tuning System").assertIsDisplayed()
         composeTestRule.onNodeWithText("12 Notes (Just Intonation)").assertIsDisplayed()
@@ -88,41 +81,5 @@ class SettingsScreenTest {
         // Verify slider labels are displayed
         composeTestRule.onNodeWithText("Silent (0%)").assertIsDisplayed()
         composeTestRule.onNodeWithText("Full (100%)").assertIsDisplayed()
-    }
-
-    @Test
-    fun settingsScreen_defaultSaDropdownDisplayed() = runTest {
-        val viewModel = createViewModel()
-        composeTestRule.setContent {
-            SettingsScreen(viewModel = viewModel, onNavigateBack = {})
-        }
-
-        composeTestRule.waitForIdle()
-
-        // Verify default Sa section is displayed
-        composeTestRule.onNodeWithText("Default Sa (Tonic)").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Select Default Sa").assertIsDisplayed()
-
-        // Verify that some default Sa value is displayed (don't hardcode C3)
-        val currentDefaultSa = viewModel.settings.first().defaultSaNote
-        composeTestRule.onNodeWithText(currentDefaultSa).assertIsDisplayed()
-    }
-
-    @Test
-    fun settingsScreen_defaultSaDropdownCanBeOpened() {
-        val viewModel = createViewModel()
-        composeTestRule.setContent {
-            SettingsScreen(viewModel = viewModel, onNavigateBack = {})
-        }
-
-        // Verify dropdown is clickable and doesn't crash when opened
-        composeTestRule.onNodeWithText("Select Default Sa").assertHasClickAction()
-        composeTestRule.onNodeWithText("Select Default Sa").performClick()
-
-        // Wait for any animations
-        composeTestRule.waitForIdle()
-
-        // Verify the field still exists after clicking (basic interaction test)
-        composeTestRule.onNodeWithText("Select Default Sa").assertExists()
     }
 }

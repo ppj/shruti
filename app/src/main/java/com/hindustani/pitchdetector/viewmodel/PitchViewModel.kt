@@ -53,18 +53,12 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             val initialSettings = userSettingsRepository.userSettings.first()
             _settings.value = initialSettings
 
-            // Initialize with default Sa note (fresh start)
-            val frequency = SaParser.parseToFrequency(initialSettings.defaultSaNote)
+            // Initialize with persisted Sa note
+            val frequency = SaParser.parseToFrequency(initialSettings.saNote)
             if (frequency != null) {
-                _settings.update {
-                    it.copy(
-                        saNote = initialSettings.defaultSaNote,
-                        saFrequency = frequency
-                    )
-                }
                 _pitchState.update {
                     it.copy(
-                        saNote = initialSettings.defaultSaNote,
+                        saNote = initialSettings.saNote,
                         saFrequency = frequency
                     )
                 }
@@ -75,6 +69,14 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             userSettingsRepository.userSettings.collect {
                 userSettings ->
                 _settings.value = userSettings
+                // Also update pitch state to reflect settings changes
+                _pitchState.update {
+                    it.copy(
+                        saNote = userSettings.saNote,
+                        saFrequency = userSettings.saFrequency,
+                        toleranceCents = userSettings.toleranceCents
+                    )
+                }
             }
         }
     }
@@ -178,20 +180,17 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Update Sa (tonic) note (session-only, not persisted)
+     * Update Sa (tonic) note and persist it
      */
     fun updateSa(westernNote: String) {
         val frequency = SaParser.parseToFrequency(westernNote)
         if (frequency != null) {
-            // Update in-memory state only (don't persist)
-            _settings.update {
-                it.copy(
-                    saNote = westernNote,
-                    saFrequency = frequency
-                )
+            // Persist to DataStore (flow collector will update _settings)
+            viewModelScope.launch {
+                userSettingsRepository.updateSaNote(westernNote)
             }
 
-            // Also update pitch state immediately for UI feedback
+            // Update pitch state immediately for UI feedback
             _pitchState.update {
                 it.copy(
                     saNote = westernNote,
@@ -211,24 +210,12 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Update default Sa (tonic) note
-     */
-    fun updateDefaultSa(westernNote: String) {
-        viewModelScope.launch {
-            userSettingsRepository.updateDefaultSaNote(westernNote)
-        }
-    }
-
-
-    /**
      * Update tolerance in cents
      */
     fun updateTolerance(cents: Double) {
+        // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
             userSettingsRepository.updateTolerance(cents)
-        }
-        _settings.update {
-            it.copy(toleranceCents = cents)
         }
     }
 
@@ -236,11 +223,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tuning system (12-note vs 22-shruti)
      */
     fun updateTuningSystem(use22Shruti: Boolean) {
+        // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
             userSettingsRepository.updateTuningSystem(use22Shruti)
-        }
-        _settings.update {
-            it.copy(use22Shruti = use22Shruti)
         }
     }
 
@@ -265,10 +250,10 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             vol = _settings.value.tanpuraVolume
         )
         _isTanpuraPlaying.value = true
+        // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
             userSettingsRepository.updateTanpuraEnabled(true)
         }
-        _settings.update { it.copy(isTanpuraEnabled = true) }
     }
 
     /**
@@ -277,24 +262,22 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private fun stopTanpura() {
         tanpuraPlayer.stop()
         _isTanpuraPlaying.value = false
+        // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
             userSettingsRepository.updateTanpuraEnabled(false)
         }
-        _settings.update { it.copy(isTanpuraEnabled = false) }
     }
 
     /**
      * Update tanpura string 1 note
      */
     fun updateTanpuraString1(swara: String) {
+        // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
             userSettingsRepository.updateTanpuraString1(swara)
         }
-        _settings.update {
-            it.copy(tanpuraString1 = swara)
-        }
 
-        // Update tanpura if it's currently playing
+        // Update tanpura immediately if it's currently playing
         if (_isTanpuraPlaying.value) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
@@ -308,14 +291,12 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tanpura volume
      */
     fun updateTanpuraVolume(volume: Float) {
+        // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
             userSettingsRepository.updateTanpuraVolume(volume)
         }
-        _settings.update {
-            it.copy(tanpuraVolume = volume)
-        }
 
-        // Update tanpura if it's currently playing
+        // Update tanpura immediately if it's currently playing
         if (_isTanpuraPlaying.value) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
