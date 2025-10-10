@@ -78,14 +78,6 @@ class UserSettingsRepositoryTest {
     }
 
     @Test
-    fun `updateDefaultSaNote persists value correctly`() = runTest {
-        repository.updateDefaultSaNote("A3")
-
-        val settings = repository.userSettings.first()
-        assertThat(settings.defaultSaNote).isEqualTo("A3")
-    }
-
-    @Test
     fun `updateSaNote persists value correctly`() = runTest {
         repository.updateSaNote("D4")
 
@@ -163,7 +155,6 @@ class UserSettingsRepositoryTest {
     @Test
     fun `multiple updates persist correctly`() = runTest {
         // Update multiple settings
-        repository.updateDefaultSaNote("B3")
         repository.updateSaNote("E4")
         repository.updateTolerance(10.0)
         repository.updateTuningSystem(true)
@@ -173,7 +164,6 @@ class UserSettingsRepositoryTest {
 
         // Verify all persisted
         val settings = repository.userSettings.first()
-        assertThat(settings.defaultSaNote).isEqualTo("B3")
         assertThat(settings.saNote).isEqualTo("E4")
         assertThat(settings.toleranceCents).isEqualTo(10.0)
         assertThat(settings.use22Shruti).isTrue()
@@ -184,12 +174,12 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun `sequential updates to same setting persist latest value`() = runTest {
-        repository.updateDefaultSaNote("C3")
-        repository.updateDefaultSaNote("D3")
-        repository.updateDefaultSaNote("E3")
+        repository.updateSaNote("C3")
+        repository.updateSaNote("D3")
+        repository.updateSaNote("E3")
 
         val settings = repository.userSettings.first()
-        assertThat(settings.defaultSaNote).isEqualTo("E3")
+        assertThat(settings.saNote).isEqualTo("E3")
     }
 
     @Test
@@ -221,33 +211,31 @@ class UserSettingsRepositoryTest {
     @Test
     fun `userSettings flow emits updated values after changes`() = runTest {
         // Set initial known value
-        repository.updateDefaultSaNote("G3")
+        repository.updateSaNote("G3")
         val initialSettings = repository.userSettings.first()
-        assertThat(initialSettings.defaultSaNote).isEqualTo("G3")
+        assertThat(initialSettings.saNote).isEqualTo("G3")
 
         // Update to new value
-        repository.updateDefaultSaNote("F#3")
+        repository.updateSaNote("F#3")
 
         // Flow should emit new value
         val updatedSettings = repository.userSettings.first()
-        assertThat(updatedSettings.defaultSaNote).isEqualTo("F#3")
+        assertThat(updatedSettings.saNote).isEqualTo("F#3")
     }
 
     @Test
     fun `updating one setting does not affect other settings`() = runTest {
         // Set all settings to non-default values
-        repository.updateDefaultSaNote("G3")
         repository.updateSaNote("A3")
         repository.updateTolerance(25.0)
         repository.updateTuningSystem(true)
 
         // Now update just one setting
-        repository.updateDefaultSaNote("B3")
+        repository.updateSaNote("B3")
 
-        // Verify only defaultSaNote changed
+        // Verify only saNote changed
         val settings = repository.userSettings.first()
-        assertThat(settings.defaultSaNote).isEqualTo("B3")
-        assertThat(settings.saNote).isEqualTo("A3")
+        assertThat(settings.saNote).isEqualTo("B3")
         assertThat(settings.toleranceCents).isEqualTo(25.0)
         assertThat(settings.use22Shruti).isTrue()
     }
@@ -278,21 +266,6 @@ class UserSettingsRepositoryTest {
         assertThat(settings.isTanpuraEnabled).isTrue()
         assertThat(settings.tanpuraString1).isEqualTo("N")
         assertThat(settings.tanpuraVolume).isEqualTo(0.9f)
-    }
-
-    @Test
-    fun `updateDefaultSaNote handles all valid Sa notes`() = runTest {
-        val validSaNotes = listOf(
-            "G#2", "A2", "A#2", "B2",
-            "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
-            "C4"
-        )
-
-        validSaNotes.forEach { saNote ->
-            repository.updateDefaultSaNote(saNote)
-            val settings = repository.userSettings.first()
-            assertThat(settings.defaultSaNote).isEqualTo(saNote)
-        }
     }
 
     @Test

@@ -23,7 +23,6 @@ class UserSettingsRepository(context: Context) {
         val SA_NOTE = stringPreferencesKey("sa_note")
         val TOLERANCE_CENTS = doublePreferencesKey("tolerance_cents")
         val USE_22_SHRUTI = booleanPreferencesKey("use_22_shruti")
-        val DEFAULT_SA_NOTE = stringPreferencesKey("default_sa_note")
         val IS_TANPURA_ENABLED = booleanPreferencesKey("is_tanpura_enabled")
         val TANPURA_STRING1 = stringPreferencesKey("tanpura_string1")
         val TANPURA_VOLUME = floatPreferencesKey("tanpura_volume")
@@ -34,7 +33,6 @@ class UserSettingsRepository(context: Context) {
         val saNote = preferences[PreferencesKeys.SA_NOTE] ?: "C3"
         val toleranceCents = preferences[PreferencesKeys.TOLERANCE_CENTS] ?: 15.0
         val use22Shruti = preferences[PreferencesKeys.USE_22_SHRUTI] ?: false
-        val defaultSaNote = preferences[PreferencesKeys.DEFAULT_SA_NOTE] ?: "C3"
         val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: false
         val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: "P"
         val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: 0.5f
@@ -45,20 +43,11 @@ class UserSettingsRepository(context: Context) {
             saFrequency = saFrequency,
             toleranceCents = toleranceCents,
             use22Shruti = use22Shruti,
-            defaultSaNote = defaultSaNote,
             isTanpuraEnabled = isTanpuraEnabled,
             tanpuraString1 = tanpuraString1,
             tanpuraVolume = tanpuraVolume
         )
     }
-
-    suspend fun updateDefaultSaNote(defaultSaNote: String) {
-        dataStore.edit {
-            preferences ->
-            preferences[PreferencesKeys.DEFAULT_SA_NOTE] = defaultSaNote
-        }
-    }
-
 
     suspend fun updateSaNote(saNote: String) {
         dataStore.edit {
