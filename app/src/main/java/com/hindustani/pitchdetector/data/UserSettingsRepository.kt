@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.hindustani.pitchdetector.music.SaParser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -37,8 +38,11 @@ class UserSettingsRepository(context: Context) {
         val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: false
         val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: "P"
         val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: 0.5f
+        // Calculate saFrequency from saNote
+        val saFrequency = SaParser.parseToFrequency(saNote) ?: 130.81
         UserSettings(
             saNote = saNote,
+            saFrequency = saFrequency,
             toleranceCents = toleranceCents,
             use22Shruti = use22Shruti,
             defaultSaNote = defaultSaNote,

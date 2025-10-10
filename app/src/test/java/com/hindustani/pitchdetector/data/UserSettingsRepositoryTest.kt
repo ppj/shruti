@@ -94,6 +94,33 @@ class UserSettingsRepositoryTest {
     }
 
     @Test
+    fun `saFrequency is calculated correctly from saNote`() = runTest {
+        // Test G#2
+        repository.updateSaNote("G#2")
+        var settings = repository.userSettings.first()
+        assertThat(settings.saNote).isEqualTo("G#2")
+        assertThat(settings.saFrequency).isWithin(0.01).of(103.83)
+
+        // Test C3
+        repository.updateSaNote("C3")
+        settings = repository.userSettings.first()
+        assertThat(settings.saNote).isEqualTo("C3")
+        assertThat(settings.saFrequency).isWithin(0.01).of(130.81)
+
+        // Test C#3
+        repository.updateSaNote("C#3")
+        settings = repository.userSettings.first()
+        assertThat(settings.saNote).isEqualTo("C#3")
+        assertThat(settings.saFrequency).isWithin(0.01).of(138.59)
+
+        // Test A3
+        repository.updateSaNote("A3")
+        settings = repository.userSettings.first()
+        assertThat(settings.saNote).isEqualTo("A3")
+        assertThat(settings.saFrequency).isWithin(0.01).of(220.0)
+    }
+
+    @Test
     fun `updateTolerance persists value correctly`() = runTest {
         repository.updateTolerance(20.0)
 
