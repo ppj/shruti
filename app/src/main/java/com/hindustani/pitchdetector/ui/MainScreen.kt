@@ -59,7 +59,7 @@ fun MainScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Piano keyboard Sa selector
         PianoKeyboardSelector(
@@ -67,7 +67,7 @@ fun MainScreen(
             onSaSelected = { note -> viewModel.updateSa(note) }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Current note display
         val currentNote = pitchState.currentNote
@@ -86,7 +86,7 @@ fun MainScreen(
             swara = displaySwara
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Pitch accuracy bar
         PitchBar(
@@ -97,7 +97,7 @@ fun MainScreen(
             isSharp = pitchState.currentNote?.isSharp ?: false
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Tanpura controls
         Card(

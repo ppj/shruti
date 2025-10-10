@@ -21,6 +21,7 @@ import kotlin.math.roundToInt
 /**
  * Piano keyboard selector for Sa (tonic) note selection
  * Displays a visual keyboard spanning G#2 to A#3 (15 notes)
+ * Fits within screen width without scrolling
  */
 @Composable
 fun PianoKeyboardSelector(
@@ -28,31 +29,32 @@ fun PianoKeyboardSelector(
     onSaSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Define the keyboard layout
-    // White keys: A2, B2, C3, D3, E3, F3, G3, A3
-    // Black keys positioned between white keys
-    val whiteKeys = listOf("A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3")
-    val blackKeys = mapOf(
-        0.5f to "A#2",  // Between A2 and B2
-        2.5f to "C#3",  // Between C3 and D3
-        3.5f to "D#3",  // Between D3 and E3
-        5.5f to "F#3",  // Between F3 and G3
-        6.5f to "G#3",  // Between G3 and A3
-    )
+    // All 15 notes in order: G#2, A2, A#2, B2, C3, C#3, D3, D#3, E3, F3, F#3, G3, G#3, A3, A#3
+    // White keys: A2, B2, C3, D3, E3, F3, G3, A3 (8 keys)
+    // Black keys: G#2, A#2, C#3, D#3, F#3, G#3, A#3 (7 keys)
 
-    // Special case: G#2 appears before A2, A#3 appears after A3
-    val specialBlackKeys = mapOf(
-        -0.7f to "G#2",  // Before A2
-        7.7f to "A#3"    // After A3
+    val whiteKeys = listOf("A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3")
+
+    // Black keys with their positions relative to white keys
+    // Position 0 = before first white key (A2)
+    // Position 0.5 = between A2 and B2, etc.
+    val blackKeysWithPositions = listOf(
+        -0.5f to "G#2",   // Before A2
+        0.65f to "A#2",   // Between A2 and B2
+        2.65f to "C#3",   // Between C3 and D3
+        3.65f to "D#3",   // Between D3 and E3
+        5.65f to "F#3",   // Between F3 and G3
+        6.65f to "G#3",   // Between G3 and A3
+        8.0f to "A#3"     // After A3
     )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(100.dp)
-            .padding(horizontal = 8.dp)
+            .height(90.dp)
+            .padding(horizontal = 4.dp)
     ) {
-        // White keys layer
+        // White keys layer - fill the width evenly
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -67,36 +69,22 @@ fun PianoKeyboardSelector(
             }
         }
 
-        // Black keys layer (positioned absolutely)
-        val keyWidth = 40.dp  // Approximate width per white key
+        // Black keys layer - positioned absolutely over white keys
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val whiteKeyWidth = maxWidth / 8  // 8 white keys total
 
-        // Regular black keys
-        blackKeys.forEach { (position, note) ->
-            Box(
-                modifier = Modifier
-                    .offset(x = keyWidth * position)
-                    .align(Alignment.TopStart)
-            ) {
-                BlackKey(
-                    note = note,
-                    isSelected = note == selectedSa,
-                    onClick = { onSaSelected(note) }
-                )
-            }
-        }
-
-        // Special black keys (G#2 and A#3)
-        specialBlackKeys.forEach { (position, note) ->
-            Box(
-                modifier = Modifier
-                    .offset(x = keyWidth * position + 8.dp)  // Adjust for padding
-                    .align(Alignment.TopStart)
-            ) {
-                BlackKey(
-                    note = note,
-                    isSelected = note == selectedSa,
-                    onClick = { onSaSelected(note) }
-                )
+            blackKeysWithPositions.forEach { (position, note) ->
+                Box(
+                    modifier = Modifier
+                        .offset(x = whiteKeyWidth * position)
+                        .align(Alignment.TopStart)
+                ) {
+                    BlackKey(
+                        note = note,
+                        isSelected = note == selectedSa,
+                        onClick = { onSaSelected(note) }
+                    )
+                }
             }
         }
     }
@@ -109,17 +97,15 @@ private fun WhiteKey(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val frequency = SaParser.parseToFrequency(note)
-
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .padding(horizontal = 1.dp)
+            .padding(horizontal = 0.5.dp)
             .shadow(
-                elevation = if (isSelected) 0.dp else 2.dp,
-                shape = RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp)
+                elevation = if (isSelected) 0.dp else 1.dp,
+                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
             )
-            .clip(RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
+            .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
             .background(
                 if (isSelected)
                     MaterialTheme.colorScheme.primaryContainer
@@ -127,36 +113,25 @@ private fun WhiteKey(
                     Color.White
             )
             .border(
-                width = 1.dp,
+                width = 0.5.dp,
                 color = if (isSelected)
                     MaterialTheme.colorScheme.primary
                 else
-                    Color.Gray,
-                shape = RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp)
+                    Color(0xFFCCCCCC),
+                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.BottomCenter
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 4.dp)
-        ) {
-            Text(
-                text = note,
-                fontSize = 11.sp,
-                color = if (isSelected)
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                else
-                    Color.Black
-            )
-            if (frequency != null && isSelected) {
-                Text(
-                    text = "${frequency.roundToInt()}Hz",
-                    fontSize = 8.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
-        }
+        Text(
+            text = note,
+            fontSize = 10.sp,
+            color = if (isSelected)
+                MaterialTheme.colorScheme.onPrimaryContainer
+            else
+                Color.Black,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
     }
 }
 
@@ -166,53 +141,32 @@ private fun BlackKey(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val frequency = SaParser.parseToFrequency(note)
-
     Box(
         modifier = Modifier
-            .width(28.dp)
-            .height(60.dp)
+            .width(24.dp)
+            .height(54.dp)
             .shadow(
-                elevation = if (isSelected) 0.dp else 4.dp,
-                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
+                elevation = if (isSelected) 1.dp else 3.dp,
+                shape = RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp)
             )
-            .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
+            .clip(RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp))
             .background(
                 if (isSelected)
                     MaterialTheme.colorScheme.primary
                 else
-                    Color(0xFF1C1C1C)
-            )
-            .border(
-                width = 1.dp,
-                color = if (isSelected)
-                    MaterialTheme.colorScheme.primary
-                else
-                    Color.Black,
-                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
+                    Color(0xFF2C2C2C)
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.BottomCenter
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Text(
+            text = note,
+            fontSize = 8.sp,
+            color = if (isSelected)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                Color.White,
             modifier = Modifier.padding(bottom = 4.dp)
-        ) {
-            Text(
-                text = note,
-                fontSize = 9.sp,
-                color = if (isSelected)
-                    MaterialTheme.colorScheme.onPrimary
-                else
-                    Color.White
-            )
-            if (frequency != null && isSelected) {
-                Text(
-                    text = "${frequency.roundToInt()}Hz",
-                    fontSize = 7.sp,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                )
-            }
-        }
+        )
     }
 }
