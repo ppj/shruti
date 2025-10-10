@@ -165,9 +165,9 @@ fun PitchBar(
 
         // Emoji status indicator
         val (emoji, statusText) = when {
-            isPerfect -> "😍" to "Perfect!"
-            isFlat -> "🥶" to "Flat"
-            isSharp -> "🥵" to "Sharp"
+            isPerfect -> "🟢" to "Perfect!"
+            isFlat -> "➡️" to "Sharpen"
+            isSharp -> "⬅️" to "Flatten"
             else -> "—" to "—"
         }
 

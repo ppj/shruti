@@ -43,7 +43,7 @@
 - Animated indicator dot that slides smoothly
 - Tolerance zone visualized as green band
 - Larger cents text above bar
-- **Emoji status feedback**: 😍 (perfect), 🥶 (flat/low), 🥵 (sharp/high)
+ **Emoji status feedback**: 🟢 (perfect), ➡️ (sharpen), ⬅️ (flatten)
 - Enhanced smoothing with spring animations
 
 ### 3. Independent Tanpura Toggle
@@ -83,7 +83,7 @@
    - Gradient brush for background bar
    - Animated indicator using `animateFloatAsState`
    - Spring damping for smoother motion
-   - **Update status emojis**: 😍 / 🥶 / 🥵
+   - **Update status emojis**: 🟢 / ➡️ / ⬅️
    - Adjust layout: wider aspect ratio (400dp × 80dp)
 
 ### Step 4: Remove Recording Dependencies
@@ -131,9 +131,9 @@
 
 | Status | Emoji | Meaning |
 |--------|-------|---------|
-| Perfect | 😍 | Pitch is within tolerance - love it! |
-| Flat (low) | 🥶 | Pitch too low - cold/flat |
-| Sharp (high) | 🥵 | Pitch too high - hot/sharp |
+| Perfect | 🟢 | Pitch is within tolerance - love it! |
+| Flat (low) | ➡️ | Pitch too low - sharpen (move right) |
+| Sharp (high) | ⬅️ | Pitch too high - flatten (move left) |
 
 ---
 
@@ -141,7 +141,7 @@
 
 ✅ **Better Sa selection**: Visual, intuitive keyboard vs abstract dropdown
 ✅ **Smoother pitch feedback**: Animated horizontal bar, less mechanical
-✅ **Fun emoji feedback**: Temperature metaphor (🥶/🥵) + celebration (😍)
+✅ **Instructional emoji feedback**: Directional arrows (➡️/⬅️) guide correction + perfect (🟢)
 ✅ **Improved workflow**: Tanpura and Sa changes without stopping practice
 ✅ **Modern aesthetic**: Cleaner, more polished UI components
 ✅ **Better UX flow**: Fewer interruptions during practice sessions
