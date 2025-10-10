@@ -47,12 +47,7 @@ class MainScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Get the current Sa to make test independent of default
-        val currentSa = runBlocking { viewModel.pitchState.first().saNote }
-
-        // Click on Sa dropdown and select a different note
-        composeTestRule.onNodeWithText("Sa: $currentSa", substring = true).performClick()
-        composeTestRule.waitForIdle()
+        // Click on A3 key in the piano keyboard
         composeTestRule.onNodeWithText("A3").performClick()
         composeTestRule.waitForIdle()
 
@@ -69,12 +64,7 @@ class MainScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Get the current Sa
-        val currentSa = runBlocking { viewModel.pitchState.first().saNote }
-
-        // Change Sa in main screen to D3
-        composeTestRule.onNodeWithText("Sa: $currentSa", substring = true).performClick()
-        composeTestRule.waitForIdle()
+        // Click on D3 key in the piano keyboard
         composeTestRule.onNodeWithText("D3").performClick()
         composeTestRule.waitForIdle()
 
