@@ -7,6 +7,7 @@ import com.hindustani.pitchdetector.audio.AudioCaptureManager
 import com.hindustani.pitchdetector.audio.PYINDetector
 import com.hindustani.pitchdetector.data.PitchState
 import com.hindustani.pitchdetector.data.UserSettings
+import com.hindustani.pitchdetector.data.UserSettingsRepository
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
 import com.hindustani.pitchdetector.music.SaParser
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +28,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
     private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer(application.applicationContext)
+    private val userSettingsRepository = UserSettingsRepository(application.applicationContext)
 
     private val _settings = MutableStateFlow(UserSettings())
     val settings: StateFlow<UserSettings> = _settings.asStateFlow()
@@ -44,6 +47,39 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     // Smoothing for needle movement
     private var smoothedCentsDeviation: Double = 0.0
     private val smoothingAlpha = 0.25  // 0.25 = responsive but smooth, lower = smoother but slower
+
+    init {
+        viewModelScope.launch {
+            val initialSettings = userSettingsRepository.userSettings.first()
+            _settings.value = initialSettings
+
+            // Initialize with persisted Sa note
+            val frequency = SaParser.parseToFrequency(initialSettings.saNote)
+            if (frequency != null) {
+                _pitchState.update {
+                    it.copy(
+                        saNote = initialSettings.saNote,
+                        saFrequency = frequency
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            userSettingsRepository.userSettings.collect {
+                userSettings ->
+                _settings.value = userSettings
+                // Also update pitch state to reflect settings changes
+                _pitchState.update {
+                    it.copy(
+                        saNote = userSettings.saNote,
+                        saFrequency = userSettings.saFrequency,
+                        toleranceCents = userSettings.toleranceCents
+                    )
+                }
+            }
+        }
+    }
 
     /**
      * Toggle recording on/off
@@ -144,19 +180,17 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Update Sa (tonic) note
+     * Update Sa (tonic) note and persist it
      */
     fun updateSa(westernNote: String) {
         val frequency = SaParser.parseToFrequency(westernNote)
         if (frequency != null) {
-            _settings.update {
-                it.copy(
-                    saNote = westernNote,
-                    saFrequency = frequency
-                )
+            // Persist to DataStore (flow collector will update _settings)
+            viewModelScope.launch {
+                userSettingsRepository.updateSaNote(westernNote)
             }
 
-            // Also update pitch state immediately for UI feedback
+            // Update pitch state immediately for UI feedback
             _pitchState.update {
                 it.copy(
                     saNote = westernNote,
@@ -179,8 +213,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tolerance in cents
      */
     fun updateTolerance(cents: Double) {
-        _settings.update {
-            it.copy(toleranceCents = cents)
+        // Persist to DataStore (flow collector will update _settings)
+        viewModelScope.launch {
+            userSettingsRepository.updateTolerance(cents)
         }
     }
 
@@ -188,8 +223,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tuning system (12-note vs 22-shruti)
      */
     fun updateTuningSystem(use22Shruti: Boolean) {
-        _settings.update {
-            it.copy(use22Shruti = use22Shruti)
+        // Persist to DataStore (flow collector will update _settings)
+        viewModelScope.launch {
+            userSettingsRepository.updateTuningSystem(use22Shruti)
         }
     }
 
@@ -214,7 +250,10 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             vol = _settings.value.tanpuraVolume
         )
         _isTanpuraPlaying.value = true
-        _settings.update { it.copy(isTanpuraEnabled = true) }
+        // Persist to DataStore (flow collector will update _settings)
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraEnabled(true)
+        }
     }
 
     /**
@@ -223,23 +262,46 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private fun stopTanpura() {
         tanpuraPlayer.stop()
         _isTanpuraPlaying.value = false
-        _settings.update { it.copy(isTanpuraEnabled = false) }
+        // Persist to DataStore (flow collector will update _settings)
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraEnabled(false)
+        }
     }
 
     /**
      * Update tanpura string 1 note
      */
     fun updateTanpuraString1(swara: String) {
-        _settings.update {
-            it.copy(tanpuraString1 = swara)
+        // Persist to DataStore (flow collector will update _settings)
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraString1(swara)
         }
 
-        // Update tanpura if it's currently playing
+        // Update tanpura immediately if it's currently playing
         if (_isTanpuraPlaying.value) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
                 string1 = swara,
                 vol = _settings.value.tanpuraVolume
+            )
+        }
+    }
+
+    /**
+     * Update tanpura volume
+     */
+    fun updateTanpuraVolume(volume: Float) {
+        // Persist to DataStore (flow collector will update _settings)
+        viewModelScope.launch {
+            userSettingsRepository.updateTanpuraVolume(volume)
+        }
+
+        // Update tanpura immediately if it's currently playing
+        if (_isTanpuraPlaying.value) {
+            tanpuraPlayer.updateParameters(
+                saFreq = _settings.value.saFrequency,
+                string1 = _settings.value.tanpuraString1,
+                vol = volume
             )
         }
     }

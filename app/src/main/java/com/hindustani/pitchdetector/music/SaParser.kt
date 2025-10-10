@@ -64,4 +64,10 @@ object SaParser {
         "A3" to parseToFrequency("A3")!!,
         "A#3" to parseToFrequency("A#3")!!
     )
+
+    /**
+     * Get Sa options in typical vocal range (F2 to B3)
+     * Returns list of note names for dropdown selector
+     */
+    fun getSaOptions(): List<String> = getSaOptionsInRange().map { it.first }
 }
