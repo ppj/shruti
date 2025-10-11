@@ -139,7 +139,7 @@ fun MainScreen(
                     painter = painterResource(id = R.drawable.ic_tanpura),
                     contentDescription = "Tanpura",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(60.dp)
                         .padding(end = 8.dp)
                 )
 
