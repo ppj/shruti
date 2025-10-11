@@ -71,13 +71,13 @@
 - [ ] Test theme consistency across all screens
 
 ## 9. Redesign Logo
-- [ ] Design new logo concept for Hindustani classical music app
-- [ ] Update `ic_launcher_foreground.xml` with new design
-- [ ] Incorporate musical elements (tanpura, swara symbols, etc.)
-- [ ] Update `ic_launcher_colors.xml` if needed
-- [ ] Follow Material Design adaptive icon guidelines
-- [ ] Create visually distinctive icon for app stores
-- [ ] Test logo visibility on different backgrounds and device launchers
+- [x] Design new logo concept for Hindustani classical music app
+- [x] Update `ic_launcher_foreground.xml` with new design
+- [x] Incorporate musical elements (tanpura, swara symbols, etc.)
+- [x] Update `ic_launcher_colors.xml` if needed
+- [x] Follow Material Design adaptive icon guidelines
+- [x] Create visually distinctive icon for app stores
+- [x] Test logo visibility on different backgrounds and device launchers
 
 ## 10. Rename App
 - [x] Choose new app name (shorter, memorable, culturally relevant) → **Shruti**
