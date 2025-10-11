@@ -97,3 +97,6 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Claude Code
+.claude/settings.local.json
