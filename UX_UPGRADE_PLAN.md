@@ -30,7 +30,7 @@
 - [x] Rearrange components in correct order:
   - [x] Header (Sa label + Settings icon)
   - [x] Piano Keyboard (new)
-  - [x] Note Display (large swara)
+  - [x] Note Display (large swar)
   - [x] Pitch Bar (replaces needle)
   - [x] Tanpura Card
   - [x] Recording Button
@@ -51,15 +51,20 @@
 - [x] Update `TanpuraPlayer` to support seamless switching between string 1 notes (already implemented)
 - [x] Test smooth transitions when changing string 1 during playback
 
-## 7. Add Help Screen
-- [ ] Create `HelpScreen.kt` composable
-- [ ] Add "help" navigation route in `MainActivity.kt`
-- [ ] Add navigation link to Help screen (from Settings or main menu)
-- [ ] Document swara notation system (S, R, G, M, P, D, N)
-- [ ] Explain octave notation (`.S` mandra, `S` madhya, `S'` taar)
-- [ ] Describe tuning systems (12-note Just Intonation vs 22-shruti)
-- [ ] Include app usage guide and feature explanations
-- [ ] Add tolerance level guidance for different skill levels
+## 7. Add Contextual Help via Tooltips
+- [x] Create `HelpTooltip.kt` reusable component with info icon
+- [x] Add tooltips to MainScreen.kt:
+  - [x] Sa label: Explain tonic concept
+  - [x] Piano keyboard: Selection instructions
+  - [x] Note display: Octave notation (`.S` mandra, `S` madhya, `S'` taar)
+  - [x] Pitch bar: Cents deviation + emoji meanings (🟢 ➡️ ⬅️)
+  - [x] Tanpura card: Traditional drone instrument explanation
+  - [x] Confidence indicator: Detection quality explanation
+- [x] Add tooltips to SettingsScreen.kt:
+  - [x] Tuning system: 12-note vs 22-shruti explanation
+  - [x] Tanpura volume: Purpose and usage guidance
+- [x] Tooltips show on tap/long-press (mobile-friendly)
+- [x] Concise, actionable help text (1-2 sentences)
 
 ## 8. Redesign UI Theme
 - [x] Design new color scheme reflecting Hindustani classical music aesthetics
@@ -73,7 +78,7 @@
 ## 9. Redesign Logo
 - [x] Design new logo concept for Hindustani classical music app
 - [x] Update `ic_launcher_foreground.xml` with new design
-- [x] Incorporate musical elements (tanpura, swara symbols, etc.)
+- [x] Incorporate musical elements (tanpura, swar symbols, etc.)
 - [x] Update `ic_launcher_colors.xml` if needed
 - [x] Follow Material Design adaptive icon guidelines
 - [x] Create visually distinctive icon for app stores

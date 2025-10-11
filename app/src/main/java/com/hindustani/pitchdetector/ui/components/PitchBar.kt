@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hindustani.pitchdetector.ui.components.HelpTooltip
 import com.hindustani.pitchdetector.ui.theme.PitchFlat
 import com.hindustani.pitchdetector.ui.theme.PitchPerfect
 import com.hindustani.pitchdetector.ui.theme.PitchSharp
@@ -62,12 +63,24 @@ fun PitchBar(
             else -> MaterialTheme.colorScheme.onSurfaceVariant
         }
 
-        Text(
-            text = "${centsDeviation.roundToInt()} cents",
-            style = MaterialTheme.typography.titleLarge,
-            color = indicatorColor,
-            fontWeight = FontWeight.SemiBold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "${centsDeviation.roundToInt()} cents",
+                style = MaterialTheme.typography.titleLarge,
+                color = indicatorColor,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            HelpTooltip(
+                text = "Deviation from the perfect pitch:\n\n" +
+                       "🟢 = perfect (witin tolerance)\n" +
+                       "➡️ = need to go a bit higher\n" +
+                       "⬅️ = need to go a bit lower"
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 

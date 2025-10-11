@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
+import com.hindustani.pitchdetector.ui.components.HelpTooltip
 import com.hindustani.pitchdetector.ui.components.NoteDisplay
 import com.hindustani.pitchdetector.ui.components.PitchBar
 import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
@@ -51,12 +52,18 @@ fun MainScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Sa: ${pitchState.saNote}",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(8.dp)
-            )
+            ) {
+                Text(
+                    text = "Sa: ${pitchState.saNote}",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                HelpTooltip(text = "Select your Sa (tonic/base note) on the keyboard.")
+            }
 
             IconButton(onClick = onNavigateToSettings) {
                 Icon(Icons.Default.Settings, contentDescription = "Settings")
@@ -65,7 +72,6 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Piano keyboard Sa selector
         PianoKeyboardSelector(
             selectedSa = pitchState.saNote,
             onSaSelected = { note -> viewModel.updateSa(note) }
@@ -86,9 +92,21 @@ fun MainScreen(
             "—"
         }
 
-        NoteDisplay(
-            swara = displaySwara
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            NoteDisplay(
+                swara = displaySwara
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            HelpTooltip(
+                text = "Detected swar/shruti (in listening mode):\n" +
+                       "• Lower octave - .S, .N, .n, .D ...\n" +
+                       "• Middle octave - S, r, R, g, G ...\n" +
+                       "• Higher octave - S', r', R', g' ..."
+                   )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -103,7 +121,6 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tanpura controls
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,28 +153,41 @@ fun MainScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .clickable {
-                                showTanpuraDropdown = true
-                            }
-                            .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "String 1: ${settings.tanpuraString1}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (isTanpuraPlaying)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Select string 1 note",
-                            tint = if (isTanpuraPlaying)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                        Row(
+                            modifier = Modifier
+                                .clickable {
+                                    showTanpuraDropdown = true
+                                }
+                                .padding(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "String 1: ${settings.tanpuraString1}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isTanpuraPlaying)
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Select string 1 note",
+                                tint = if (isTanpuraPlaying)
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        HelpTooltip(
+                            text = "String 1 tuning:\n\n" +
+                                   "• P: Yaman, Bhoop, Bhairav etc. (most common)\n" +
+                                   "• m: Malkauns, Lalit, Bageshree, etc.\n" +
+                                   "• N: Marva, Pooriya, Sohni, etc.\n" +
+                                   "• M: Very rare (to be removed soon)\n" +
+                                   "• S: Very rare (to be removed soon)"
                         )
                     }
 
@@ -215,12 +245,22 @@ fun MainScreen(
 
         // Confidence indicator (subtle) - always reserve space to prevent button movement
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier.alpha(if (isRecording) 1f else 0f)
-        )
+        ) {
+            Text(
+                text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            HelpTooltip(
+                text = "Confidence level based on audio signal quality:\n\n" +
+                       "Higher confidence means more reliable pitch detection. A quiet environment and wired headphones with a decent mic will improve confidence level."
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
     }
