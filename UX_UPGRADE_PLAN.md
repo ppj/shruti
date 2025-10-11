@@ -89,3 +89,15 @@
 - [x] Update CLAUDE.md with new app name
 - [x] Update TESTING.md with new app name
 - [x] Build and test to verify all references updated correctly
+
+## 11. Enhance Tanpura Card with Visual Icon
+- [x] Find or create tanpura icon/image asset
+- [x] Add tanpura icon to drawable resources
+- [x] Remove "Tanpura" text label from card
+- [x] Redesign card layout with three columns:
+  - [x] Left: String 1 selector dropdown
+  - [x] Center: Small tanpura image/icon
+  - [x] Right: On/off toggle switch (keep current position)
+- [x] Ensure proper spacing and alignment
+- [x] Test visual balance and accessibility
+- [x] Verify icon is visible in both light and dark themes

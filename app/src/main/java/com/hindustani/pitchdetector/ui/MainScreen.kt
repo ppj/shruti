@@ -1,5 +1,6 @@
 package com.hindustani.pitchdetector.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -10,7 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
 import com.hindustani.pitchdetector.ui.components.NoteDisplay
 import com.hindustani.pitchdetector.ui.components.PitchBar
@@ -118,74 +121,72 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Tanpura label and string 1 selector
-                Column {
-                    Text(
-                        text = "Tanpura",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isTanpuraPlaying)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                // Left: Tanpura icon
+                Image(
+                    painter = painterResource(id = R.drawable.ic_tanpura),
+                    contentDescription = "Tanpura",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(end = 8.dp)
+                )
 
-                    // String 1 selector
-                    Box {
-                        Row(
-                            modifier = Modifier
-                                .clickable {
-                                    showTanpuraDropdown = true
-                                }
-                                .padding(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "String 1: ${settings.tanpuraString1}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (isTanpuraPlaying)
-                                    MaterialTheme.colorScheme.onPrimaryContainer
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Select string 1 note",
-                                tint = if (isTanpuraPlaying)
-                                    MaterialTheme.colorScheme.onPrimaryContainer
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = showTanpuraDropdown,
-                            onDismissRequest = { showTanpuraDropdown = false }
-                        ) {
-                            tanpuraAvailableNotes.forEach { note ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = note,
-                                            style = if (note == settings.tanpuraString1)
-                                                MaterialTheme.typography.bodyLarge.copy(
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                            else
-                                                MaterialTheme.typography.bodyLarge
-                                        )
-                                    },
-                                    onClick = {
-                                        viewModel.updateTanpuraString1(note)
-                                        showTanpuraDropdown = false
-                                    }
-                                )
+                // Middle: String 1 selector
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                showTanpuraDropdown = true
                             }
+                            .padding(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "String 1: ${settings.tanpuraString1}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isTanpuraPlaying)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Select string 1 note",
+                            tint = if (isTanpuraPlaying)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showTanpuraDropdown,
+                        onDismissRequest = { showTanpuraDropdown = false }
+                    ) {
+                        tanpuraAvailableNotes.forEach { note ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = note,
+                                        style = if (note == settings.tanpuraString1)
+                                            MaterialTheme.typography.bodyLarge.copy(
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        else
+                                            MaterialTheme.typography.bodyLarge
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.updateTanpuraString1(note)
+                                    showTanpuraDropdown = false
+                                }
+                            )
                         }
                     }
                 }
 
-                // Toggle button
+                // Right: Toggle switch
                 Switch(
                     checked = isTanpuraPlaying,
                     onCheckedChange = { viewModel.toggleTanpura() }
