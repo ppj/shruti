@@ -40,7 +40,6 @@ fun PitchBar(
     isSharp: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // Animate the indicator position for smooth movement
     val targetPosition = (centsDeviation / 50.0).coerceIn(-1.0, 1.0).toFloat()
     val animatedPosition by animateFloatAsState(
         targetValue = targetPosition,
@@ -55,11 +54,10 @@ fun PitchBar(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        // Cents deviation text
         val indicatorColor = when {
-            isPerfect -> PitchPerfect  // Warm green for perfect pitch
-            isFlat -> PitchFlat        // Cool blue for flat/low pitch
-            isSharp -> PitchSharp      // Warm red for sharp/high pitch
+            isPerfect -> PitchPerfect
+            isFlat -> PitchFlat
+            isSharp -> PitchSharp
             else -> MaterialTheme.colorScheme.onSurfaceVariant
         }
 
@@ -76,7 +74,7 @@ fun PitchBar(
             Spacer(modifier = Modifier.width(8.dp))
             HelpTooltip(
                 text = "Deviation from the perfect pitch:\n\n" +
-                       "🟢 = perfect (witin tolerance)\n" +
+                       "🟢 = perfect (within tolerance)\n" +
                        "➡️ = need to go a bit higher\n" +
                        "⬅️ = need to go a bit lower"
             )
@@ -84,7 +82,6 @@ fun PitchBar(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Horizontal pitch bar
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,13 +93,8 @@ fun PitchBar(
             val centerX = barWidth / 2
             val centerY = size.height / 2
 
-            // Draw background gradient bar
             val gradientBrush = Brush.horizontalGradient(
-                colors = listOf(
-                    PitchFlat,     // Cool blue for flat (left)
-                    PitchPerfect,  // Warm green for perfect (center)
-                    PitchSharp     // Warm red for sharp (right)
-                ),
+                colors = listOf(PitchFlat, PitchPerfect, PitchSharp),
                 startX = 0f,
                 endX = barWidth
             )
@@ -115,7 +107,6 @@ fun PitchBar(
                 alpha = 0.3f
             )
 
-            // Draw tolerance zone (green band in center)
             val toleranceWidth = (tolerance / 50.0 * barWidth / 2).toFloat()
             drawRoundRect(
                 color = PitchPerfect,
@@ -125,7 +116,6 @@ fun PitchBar(
                 alpha = 0.4f
             )
 
-            // Draw center line (dynamic color based on theme)
             drawLine(
                 color = Color.Black.copy(alpha = 0.6f),
                 start = Offset(centerX, centerY - barHeight / 2 - 10.dp.toPx()),
@@ -134,7 +124,6 @@ fun PitchBar(
                 cap = StrokeCap.Round
             )
 
-            // Draw tick marks for -25¢ and +25¢
             val tickOffset = barWidth / 4
             listOf(centerX - tickOffset, centerX + tickOffset).forEach { x ->
                 drawLine(
@@ -146,17 +135,14 @@ fun PitchBar(
                 )
             }
 
-            // Draw animated indicator dot
             val indicatorX = centerX + animatedPosition * barWidth / 2
 
-            // Outer glow
             drawCircle(
                 color = indicatorColor.copy(alpha = 0.3f),
                 radius = 20.dp.toPx(),
                 center = Offset(indicatorX, centerY)
             )
 
-            // Main indicator circle with border
             drawCircle(
                 color = Color.White,
                 radius = 14.dp.toPx(),
@@ -169,7 +155,6 @@ fun PitchBar(
                 center = Offset(indicatorX, centerY)
             )
 
-            // Inner highlight
             drawCircle(
                 color = Color.White.copy(alpha = 0.4f),
                 radius = 5.dp.toPx(),
@@ -179,7 +164,6 @@ fun PitchBar(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Emoji status indicator
         val (emoji, statusText) = when {
             isPerfect -> "🟢" to "Perfect!"
             isFlat -> "➡️" to "Sharpen"

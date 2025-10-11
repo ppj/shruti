@@ -31,30 +31,22 @@ fun PianoKeyboardSelector(
     onSaSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // All 15 notes in order: G#2, A2, A#2, B2, C3, C#3, D3, D#3, E3, F3, F#3, G3, G#3, A3, A#3
-    // White keys: A2, B2, C3, D3, E3, F3, G3, A3 (8 keys)
-    // Black keys: G#2, A#2, C#3, D#3, F#3, G#3, A#3 (7 keys)
-
-    // White keys including dummy keys on edges
     val whiteKeys = listOf("A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3")
 
     // Black keys centered between neighboring white keys
     // Grouping pattern comes from gaps where no black keys exist (B-C and E-F)
 
     val blackKeysWithPositions = listOf(
-        1.0f to "A#2",     // Between A2 and B2
-        // NO black key between B2 and C3 - this creates the gap (2-3 grouping)
-        3.0f to "C#3",     // Between C3 and D3
-        4.0f to "D#3",     // Between D3 and E3
-        // NO black key between E3 and F3 - this creates the gap (2-3 grouping)
-        6.0f to "F#3",     // Between F3 and G3
-        7.0f to "G#3",     // Between G3 and A3
+        1.0f to "A#2",
+        3.0f to "C#3",
+        4.0f to "D#3",
+        6.0f to "F#3",
+        7.0f to "G#3"
     )
 
-    // Special black keys before first and after last white key
     val edgeBlackKeys = listOf(
-        0.0f to "G#2",     // Between dummy and A2
-        8.0f to "A#3"      // Between A3 and dummy
+        0.0f to "G#2",
+        8.0f to "A#3"
     )
 
     Box(
@@ -62,15 +54,12 @@ fun PianoKeyboardSelector(
             .fillMaxWidth()
             .height(90.dp)
     ) {
-        // White keys layer with dummy keys on edges
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Dummy left key (half width)
             DummyWhiteKey(modifier = Modifier.weight(0.5f))
 
-            // Real white keys
             whiteKeys.forEach { note ->
                 WhiteKey(
                     note = note,
@@ -80,18 +69,15 @@ fun PianoKeyboardSelector(
                 )
             }
 
-            // Dummy right key (half width)
             DummyWhiteKey(modifier = Modifier.weight(0.5f))
         }
 
-        // Black keys layer - positioned absolutely over white keys
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val totalKeys = 9f  // 8 white keys + 1 for dummy halves (0.5 + 8*1 + 0.5)
+            val totalKeys = 9f
             val whiteKeyWidth = maxWidth / totalKeys
-            val blackKeyWidth = whiteKeyWidth * 2f / 3f  // 2/3 of white key width
+            val blackKeyWidth = whiteKeyWidth * 2f / 3f
             val blackKeyHalfWidth = blackKeyWidth / 2
 
-            // Regular black keys between white keys
             blackKeysWithPositions.forEach { (position, note) ->
                 Box(
                     modifier = Modifier
@@ -107,7 +93,6 @@ fun PianoKeyboardSelector(
                 }
             }
 
-            // Edge black keys
             edgeBlackKeys.forEach { (position, note) ->
                 Box(
                     modifier = Modifier
@@ -163,10 +148,7 @@ private fun WhiteKey(
             text = note,
             fontSize = 14.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-            color = if (isSelected)
-                Color.Black
-            else
-                Color.Black,
+            color = Color.Black,
             maxLines = 1,
             softWrap = false,
             modifier = Modifier
