@@ -21,6 +21,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hindustani.pitchdetector.ui.theme.PitchFlat
+import com.hindustani.pitchdetector.ui.theme.PitchPerfect
+import com.hindustani.pitchdetector.ui.theme.PitchSharp
 import kotlin.math.roundToInt
 
 /**
@@ -53,10 +56,10 @@ fun PitchBar(
     ) {
         // Cents deviation text
         val indicatorColor = when {
-            isPerfect -> Color(0xFF4CAF50)  // Green
-            isFlat -> Color(0xFF2196F3)     // Blue
-            isSharp -> Color(0xFFF44336)    // Red
-            else -> Color.Gray
+            isPerfect -> PitchPerfect  // Warm green for perfect pitch
+            isFlat -> PitchFlat        // Cool blue for flat/low pitch
+            isSharp -> PitchSharp      // Warm red for sharp/high pitch
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
         }
 
         Text(
@@ -83,9 +86,9 @@ fun PitchBar(
             // Draw background gradient bar
             val gradientBrush = Brush.horizontalGradient(
                 colors = listOf(
-                    Color(0xFF2196F3),  // Blue (flat)
-                    Color(0xFF4CAF50),  // Green (center)
-                    Color(0xFFF44336)   // Red (sharp)
+                    PitchFlat,     // Cool blue for flat (left)
+                    PitchPerfect,  // Warm green for perfect (center)
+                    PitchSharp     // Warm red for sharp (right)
                 ),
                 startX = 0f,
                 endX = barWidth
@@ -102,16 +105,16 @@ fun PitchBar(
             // Draw tolerance zone (green band in center)
             val toleranceWidth = (tolerance / 50.0 * barWidth / 2).toFloat()
             drawRoundRect(
-                color = Color(0xFF4CAF50),
+                color = PitchPerfect,
                 topLeft = Offset(centerX - toleranceWidth, centerY - barHeight / 2),
                 size = Size(toleranceWidth * 2, barHeight),
                 cornerRadius = CornerRadius(barHeight / 2, barHeight / 2),
                 alpha = 0.4f
             )
 
-            // Draw center line
+            // Draw center line (dynamic color based on theme)
             drawLine(
-                color = Color.Black,
+                color = Color.Black.copy(alpha = 0.6f),
                 start = Offset(centerX, centerY - barHeight / 2 - 10.dp.toPx()),
                 end = Offset(centerX, centerY + barHeight / 2 + 10.dp.toPx()),
                 strokeWidth = 2.dp.toPx(),
@@ -122,7 +125,7 @@ fun PitchBar(
             val tickOffset = barWidth / 4
             listOf(centerX - tickOffset, centerX + tickOffset).forEach { x ->
                 drawLine(
-                    color = Color.Gray,
+                    color = Color.Gray.copy(alpha = 0.6f),
                     start = Offset(x, centerY - barHeight / 2 - 5.dp.toPx()),
                     end = Offset(x, centerY + barHeight / 2 + 5.dp.toPx()),
                     strokeWidth = 1.5.dp.toPx(),
@@ -177,7 +180,7 @@ fun PitchBar(
         ) {
             Text(
                 text = emoji,
-                fontSize = 40.sp
+                fontSize = 24.sp
             )
             if (statusText != "—") {
                 Spacer(modifier = Modifier.width(8.dp))

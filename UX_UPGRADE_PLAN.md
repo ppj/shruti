@@ -62,13 +62,13 @@
 - [ ] Add tolerance level guidance for different skill levels
 
 ## 8. Redesign UI Theme
-- [ ] Design new color scheme reflecting Hindustani classical music aesthetics
-- [ ] Update `Theme.kt` with new color palette
-- [ ] Consider adding dark theme support
-- [ ] Implement vibrant, culturally-appropriate colors
-- [ ] Add gradient accents or warm tones suitable for classical music
-- [ ] Update all color references throughout the app
-- [ ] Test theme consistency across all screens
+- [x] Design new color scheme reflecting Hindustani classical music aesthetics
+- [x] Update `Theme.kt` with new color palette
+- [x] Consider adding dark theme support
+- [x] Implement vibrant, culturally-appropriate colors
+- [x] Add gradient accents or warm tones suitable for classical music
+- [x] Update all color references throughout the app
+- [x] Test theme consistency across all screens
 
 ## 9. Redesign Logo
 - [x] Design new logo concept for Hindustani classical music app

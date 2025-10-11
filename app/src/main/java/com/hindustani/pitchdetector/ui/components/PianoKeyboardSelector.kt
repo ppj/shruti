@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hindustani.pitchdetector.ui.theme.WarmGold
 
 /**
  * Piano keyboard selector for Sa (tonic) note selection
@@ -143,14 +144,14 @@ private fun WhiteKey(
             .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
             .background(
                 if (isSelected)
-                    MaterialTheme.colorScheme.primaryContainer
+                    WarmGold
                 else
                     Color.White
             )
             .border(
                 width = 0.5.dp,
                 color = if (isSelected)
-                    MaterialTheme.colorScheme.primary
+                    WarmGold.copy(alpha = 0.8f)
                 else
                     Color(0xFFCCCCCC),
                 shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
@@ -163,7 +164,7 @@ private fun WhiteKey(
             fontSize = 14.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
             color = if (isSelected)
-                MaterialTheme.colorScheme.onPrimaryContainer
+                Color.Black
             else
                 Color.Black,
             maxLines = 1,
@@ -215,7 +216,7 @@ private fun BlackKey(
             .clip(RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp))
             .background(
                 if (isSelected)
-                    MaterialTheme.colorScheme.primary
+                    WarmGold
                 else
                     Color(0xFF2C2C2C)
             )
@@ -231,7 +232,7 @@ private fun BlackKey(
                 fontSize = 12.sp,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                 color = if (isSelected)
-                    MaterialTheme.colorScheme.onPrimary
+                    Color.Black
                 else
                     Color.White,
                 maxLines = 1,

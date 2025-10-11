@@ -202,11 +202,11 @@ fun MainScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (isRecording) Color(0xFFF44336) else Color(0xFF4CAF50)
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(
-                text = if (isRecording) "Stop" else "Start",
+                text = if (isRecording) "Stop" else "Listen",
                 style = MaterialTheme.typography.titleLarge
             )
         }
