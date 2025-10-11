@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -212,15 +213,14 @@ fun MainScreen(
             )
         }
 
-        // Confidence indicator (subtle)
-        if (isRecording) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
-        }
+        // Confidence indicator (subtle) - always reserve space to prevent button movement
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray,
+            modifier = Modifier.alpha(if (isRecording) 1f else 0f)
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
     }
