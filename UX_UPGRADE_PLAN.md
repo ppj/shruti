@@ -42,7 +42,7 @@
 - [x] Test pitch bar smoothness and accuracy
 - [ ] Test keyboard interaction on various screen sizes
 - [ ] Test emoji rendering on different Android versions
-- [ ] Run existing UI tests and update as needed
+- [x] Run existing UI tests and update as needed
 
 ## 6. Dynamic Tanpura String 1 Selection
 - [x] Remove `enabled = !isTanpuraPlaying` constraint in `MainScreen.kt:137`
