@@ -80,10 +80,12 @@
 - [ ] Test logo visibility on different backgrounds and device launchers
 
 ## 10. Rename App
-- [ ] Choose new app name (shorter, memorable, culturally relevant)
-- [ ] Update `strings.xml` app_name resource
-- [ ] Update `AndroidManifest.xml` theme references if needed
-- [ ] Update README.md with new app name
-- [ ] Update CLAUDE.md with new app name
-- [ ] Update any other documentation references
-- [ ] Search codebase for hardcoded references to old name
+- [x] Choose new app name (shorter, memorable, culturally relevant) → **Shruti**
+- [x] Update `strings.xml` app_name resource
+- [x] Update `AndroidManifest.xml` theme references
+- [x] Update `Theme.kt` theme name to `ShrutiTheme`
+- [x] Update `MainActivity.kt` theme import and usage
+- [x] Update README.md with new app name
+- [x] Update CLAUDE.md with new app name
+- [x] Update TESTING.md with new app name
+- [x] Build and test to verify all references updated correctly

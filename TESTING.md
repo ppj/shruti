@@ -1,6 +1,6 @@
 # Testing Documentation
 
-This document provides an overview of the test suite for the Hindustani Pitch Detector app.
+This document provides an overview of the test suite for the Shruti app.
 
 ## Test Coverage Summary
 

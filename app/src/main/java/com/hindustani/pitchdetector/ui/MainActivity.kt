@@ -17,7 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.hindustani.pitchdetector.ui.theme.HindustaniPitchDetectorTheme
+import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 
 class MainActivity : ComponentActivity() {
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         ) == PackageManager.PERMISSION_GRANTED
 
         setContent {
-            HindustaniPitchDetectorTheme {
+            ShrutiTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

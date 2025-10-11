@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Kansen** is a real-time pitch detection Android app for Hindustani classical music students. It uses the PYIN (Probabilistic YIN) algorithm to detect vocal pitch and displays notes in traditional Hindustani swaras (S, R, G, P, etc.) with visual feedback on accuracy.
+**Shruti** is a real-time pitch detection Android app for Hindustani classical music students. It uses the PYIN (Probabilistic YIN) algorithm to detect vocal pitch and displays notes in traditional Hindustani swaras (S, R, G, P, etc.) with visual feedback on accuracy.
 
 **Tech Stack:**
 - Language: Kotlin

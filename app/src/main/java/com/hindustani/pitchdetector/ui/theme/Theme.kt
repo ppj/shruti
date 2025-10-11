@@ -19,7 +19,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun HindustaniPitchDetectorTheme(
+fun ShrutiTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
