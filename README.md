@@ -1,6 +1,6 @@
-# Hindustani Pitch Detector
+# Shruti
 
-A real-time pitch detection Android app for Hindustani classical music students. This app helps musicians practice vocal accuracy by providing instant visual feedback on pitch, note accuracy, and deviation in cents.
+A real-time pitch detection Android app for Hindustani classical music students. Shruti helps musicians practice vocal accuracy by providing instant visual feedback on pitch, note accuracy, and deviation in cents.
 
 ## Features
 

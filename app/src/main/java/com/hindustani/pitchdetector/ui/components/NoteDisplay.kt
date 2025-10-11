@@ -26,21 +26,12 @@ fun NoteDisplay(
     swara: String,
     modifier: Modifier = Modifier
 ) {
-    // Large circular note display
-    Box(
-        contentAlignment = Alignment.Center,
+    // Compact note display - just the swara text
+    Text(
+        text = swara,
+        style = MaterialTheme.typography.displayLarge,
+        fontSize = 64.sp,
+        color = MaterialTheme.colorScheme.primary,
         modifier = modifier
-            .size(150.dp)
-            .background(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                shape = CircleShape
-            )
-    ) {
-        Text(
-            text = swara,
-            style = MaterialTheme.typography.displayLarge,
-            fontSize = 72.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
+    )
 }

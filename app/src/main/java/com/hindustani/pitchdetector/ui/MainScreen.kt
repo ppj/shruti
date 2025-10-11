@@ -1,5 +1,6 @@
 package com.hindustani.pitchdetector.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -9,12 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
-import com.hindustani.pitchdetector.music.SaParser
+import com.hindustani.pitchdetector.ui.components.HelpTooltip
 import com.hindustani.pitchdetector.ui.components.NoteDisplay
-import com.hindustani.pitchdetector.ui.components.PitchIndicator
+import com.hindustani.pitchdetector.ui.components.PitchBar
+import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import kotlin.math.roundToInt
 
@@ -31,10 +36,6 @@ fun MainScreen(
     val isTanpuraPlaying by viewModel.isTanpuraPlaying.collectAsState()
     val settings by viewModel.settings.collectAsState()
 
-    // Dropdown state for Sa selector
-    var showSaDropdown by remember { mutableStateOf(false) }
-    val saOptions = remember { SaParser.getSaOptionsInRange() }
-
     // Dropdown state for tanpura string 1 selector
     var showTanpuraDropdown by remember { mutableStateOf(false) }
     val tanpuraAvailableNotes = remember { viewModel.getTanpuraAvailableNotes() }
@@ -45,72 +46,23 @@ fun MainScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header with Sa dropdown selector
+        // Header with Settings button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Sa dropdown selector
-            Box {
-                Row(
-                    modifier = Modifier
-                        .clickable {
-                            // Stop recording when opening dropdown
-                            if (isRecording) {
-                                viewModel.toggleRecording()
-                            }
-                            showSaDropdown = true
-                        }
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Sa: ${pitchState.saNote}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Select Sa",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showSaDropdown,
-                    onDismissRequest = { showSaDropdown = false }
-                ) {
-                    saOptions.forEach { (note, frequency) ->
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = note,
-                                        style = if (note == pitchState.saNote)
-                                            MaterialTheme.typography.bodyLarge.copy(
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                        else
-                                            MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        text = "${frequency.roundToInt()} Hz",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color.Gray
-                                    )
-                                }
-                            },
-                            onClick = {
-                                viewModel.updateSa(note)
-                                showSaDropdown = false
-                            }
-                        )
-                    }
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Sa: ${pitchState.saNote}",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                HelpTooltip(text = "Select your Sa (tonic/base note) on the keyboard.")
             }
 
             IconButton(onClick = onNavigateToSettings) {
@@ -118,7 +70,14 @@ fun MainScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+
+        PianoKeyboardSelector(
+            selectedSa = pitchState.saNote,
+            onSaSelected = { note -> viewModel.updateSa(note) }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Current note display
         val currentNote = pitchState.currentNote
@@ -133,14 +92,26 @@ fun MainScreen(
             "—"
         }
 
-        NoteDisplay(
-            swara = displaySwara
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            NoteDisplay(
+                swara = displaySwara
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            HelpTooltip(
+                text = "Detected swar/shruti (in listening mode):\n" +
+                       "• Lower octave - .S, .N, .n, .D ...\n" +
+                       "• Middle octave - S, r, R, g, G ...\n" +
+                       "• Higher octave - S', r', R', g' ..."
+                   )
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Pitch accuracy indicator
-        PitchIndicator(
+        // Pitch accuracy bar
+        PitchBar(
             centsDeviation = pitchState.currentNote?.centsDeviation ?: 0.0,
             tolerance = pitchState.toleranceCents,
             isPerfect = pitchState.currentNote?.isPerfect ?: false,
@@ -148,9 +119,8 @@ fun MainScreen(
             isSharp = pitchState.currentNote?.isSharp ?: false
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Tanpura controls
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,23 +139,25 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Tanpura label and string 1 selector
-                Column {
-                    Text(
-                        text = "Tanpura",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isTanpuraPlaying)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                // Left: Tanpura icon
+                Image(
+                    painter = painterResource(id = R.drawable.ic_tanpura),
+                    contentDescription = "Tanpura",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(end = 8.dp)
+                )
 
-                    // String 1 selector
-                    Box {
+                // Middle: String 1 selector
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Row(
                             modifier = Modifier
-                                .clickable(enabled = !isRecording) {
+                                .clickable {
                                     showTanpuraDropdown = true
                                 }
                                 .padding(4.dp),
@@ -208,39 +180,47 @@ fun MainScreen(
                                     MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        HelpTooltip(
+                            text = "String 1 tuning:\n\n" +
+                                   "• P: Yaman, Bhoop, Bhairav etc. (most common)\n" +
+                                   "• m: Malkauns, Lalit, Bageshree, etc.\n" +
+                                   "• N: Marva, Pooriya, Sohni, etc.\n" +
+                                   "• M: Very rare (to be removed soon)\n" +
+                                   "• S: Very rare (to be removed soon)"
+                        )
+                    }
 
-                        DropdownMenu(
-                            expanded = showTanpuraDropdown,
-                            onDismissRequest = { showTanpuraDropdown = false }
-                        ) {
-                            tanpuraAvailableNotes.forEach { note ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = note,
-                                            style = if (note == settings.tanpuraString1)
-                                                MaterialTheme.typography.bodyLarge.copy(
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                            else
-                                                MaterialTheme.typography.bodyLarge
-                                        )
-                                    },
-                                    onClick = {
-                                        viewModel.updateTanpuraString1(note)
-                                        showTanpuraDropdown = false
-                                    }
-                                )
-                            }
+                    DropdownMenu(
+                        expanded = showTanpuraDropdown,
+                        onDismissRequest = { showTanpuraDropdown = false }
+                    ) {
+                        tanpuraAvailableNotes.forEach { note ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = note,
+                                        style = if (note == settings.tanpuraString1)
+                                            MaterialTheme.typography.bodyLarge.copy(
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        else
+                                            MaterialTheme.typography.bodyLarge
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.updateTanpuraString1(note)
+                                    showTanpuraDropdown = false
+                                }
+                            )
                         }
                     }
                 }
 
-                // Toggle button
+                // Right: Toggle switch
                 Switch(
                     checked = isTanpuraPlaying,
-                    onCheckedChange = { viewModel.toggleTanpura() },
-                    enabled = !isRecording
+                    onCheckedChange = { viewModel.toggleTanpura() }
                 )
             }
         }
@@ -254,22 +234,31 @@ fun MainScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (isRecording) Color(0xFFF44336) else Color(0xFF4CAF50)
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(
-                text = if (isRecording) "Stop" else "Start",
+                text = if (isRecording) "Stop" else "Listen",
                 style = MaterialTheme.typography.titleLarge
             )
         }
 
-        // Confidence indicator (subtle)
-        if (isRecording) {
-            Spacer(modifier = Modifier.height(8.dp))
+        // Confidence indicator (subtle) - always reserve space to prevent button movement
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.alpha(if (isRecording) 1f else 0f)
+        ) {
             Text(
                 text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            HelpTooltip(
+                text = "Confidence level based on audio signal quality:\n\n" +
+                       "Higher confidence means more reliable pitch detection. A quiet environment and wired headphones with a decent mic will improve confidence level."
             )
         }
 

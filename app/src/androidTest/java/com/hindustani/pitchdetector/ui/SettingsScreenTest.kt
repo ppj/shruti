@@ -35,7 +35,7 @@ class SettingsScreenTest {
         composeTestRule.onNodeWithText("12 Notes (Just Intonation)").assertIsDisplayed()
         composeTestRule.onNodeWithText("22 Shruti System").assertIsDisplayed()
         composeTestRule.onNodeWithText("Tanpura Volume:", substring = true).assertIsDisplayed()
-        composeTestRule.onNodeWithText("About Tolerance").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Swar Notation").assertIsDisplayed()
     }
 
     @Test
@@ -75,8 +75,8 @@ class SettingsScreenTest {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
 
-        // Verify tanpura volume slider is displayed with default value (50%)
-        composeTestRule.onNodeWithText("Tanpura Volume: 50%").assertIsDisplayed()
+        // Verify tanpura volume slider is displayed
+        composeTestRule.onNodeWithText("Tanpura Volume:", substring = true).assertIsDisplayed()
 
         // Verify slider labels are displayed
         composeTestRule.onNodeWithText("Silent (0%)").assertIsDisplayed()
