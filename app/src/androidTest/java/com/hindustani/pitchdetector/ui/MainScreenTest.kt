@@ -34,8 +34,8 @@ class MainScreenTest {
 
         composeTestRule.onNodeWithText("Sa:", substring = true).assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Settings").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Start").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Tanpura").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Listen").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Tanpura").assertIsDisplayed()
     }
 
     @Test

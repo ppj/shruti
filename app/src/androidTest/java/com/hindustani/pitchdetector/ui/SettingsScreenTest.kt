@@ -35,7 +35,7 @@ class SettingsScreenTest {
         composeTestRule.onNodeWithText("12 Notes (Just Intonation)").assertIsDisplayed()
         composeTestRule.onNodeWithText("22 Shruti System").assertIsDisplayed()
         composeTestRule.onNodeWithText("Tanpura Volume:", substring = true).assertIsDisplayed()
-        composeTestRule.onNodeWithText("About Tolerance").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Swar Notation").assertIsDisplayed()
     }
 
     @Test
