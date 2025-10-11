@@ -45,11 +45,11 @@
 - [ ] Run existing UI tests and update as needed
 
 ## 6. Dynamic Tanpura String 1 Selection
-- [ ] Remove `enabled = !isTanpuraPlaying` constraint in `MainScreen.kt:137`
-- [ ] Allow changing tanpura string 1 while tanpura is playing
-- [ ] Allow changing tanpura string 1 while listening/recording is active
-- [ ] Update `TanpuraPlayer` to support seamless switching between string 1 notes
-- [ ] Test smooth transitions when changing string 1 during playback
+- [x] Remove `enabled = !isTanpuraPlaying` constraint in `MainScreen.kt:137`
+- [x] Allow changing tanpura string 1 while tanpura is playing
+- [x] Allow changing tanpura string 1 while listening/recording is active
+- [x] Update `TanpuraPlayer` to support seamless switching between string 1 notes (already implemented)
+- [x] Test smooth transitions when changing string 1 during playback
 
 ## 7. Add Help Screen
 - [ ] Create `HelpScreen.kt` composable

@@ -134,7 +134,7 @@ fun MainScreen(
                     Box {
                         Row(
                             modifier = Modifier
-                                .clickable(enabled = !isTanpuraPlaying) {
+                                .clickable {
                                     showTanpuraDropdown = true
                                 }
                                 .padding(4.dp),
