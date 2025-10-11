@@ -230,7 +230,7 @@ app/src/main/java/com/hindustani/pitchdetector/
 │   ├── MainScreen.kt                # Primary pitch detection UI
 │   ├── SettingsScreen.kt            # Settings interface
 │   ├── components/
-│   │   ├── PitchIndicator.kt        # Needle-style pitch meter
+│   │   ├── PitchBar.kt              # Horizontal pitch bar
 │   │   └── NoteDisplay.kt           # Note display component
 │   └── theme/
 │       ├── Theme.kt                 # Material 3 theme

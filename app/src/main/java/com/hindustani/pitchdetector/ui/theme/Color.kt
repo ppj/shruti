@@ -16,7 +16,6 @@ val DarkGold = Color(0xFF8b7355)
 // Tertiary colors - Terracotta and warm tones from tanpura
 val Terracotta = Color(0xFFa0522d)
 val WarmOrange = Color(0xFFd4935d)
-val DeepTerracotta = Color(0xFF8b4513)
 
 // Background and surface colors
 val WarmWhite = Color(0xFFfaf8f5)
@@ -31,6 +30,5 @@ val PitchPerfect = Color(0xFF7cb342)   // Warm green for perfect pitch
 val PitchSharp = Color(0xFFe57373)     // Warm red for sharp/high pitch
 
 // Additional UI colors
-val CoolSilver = Color(0xFFe8e8e8)
 val TextDark = Color(0xFF1C1B1F)
 val TextLight = Color(0xFFe8e8e8)

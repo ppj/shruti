@@ -46,7 +46,6 @@ fun MainScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header with Settings button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -79,10 +78,8 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Current note display
         val currentNote = pitchState.currentNote
         val displaySwara = if (currentNote != null) {
-            // Format swara with octave notation
             when (currentNote.octave) {
                 HindustaniNoteConverter.Octave.MANDRA -> ".${currentNote.swara}"
                 HindustaniNoteConverter.Octave.MADHYA -> currentNote.swara
@@ -110,7 +107,6 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Pitch accuracy bar
         PitchBar(
             centsDeviation = pitchState.currentNote?.centsDeviation ?: 0.0,
             tolerance = pitchState.toleranceCents,
@@ -139,16 +135,14 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left: Tanpura icon
                 Image(
                     painter = painterResource(id = R.drawable.ic_tanpura),
                     contentDescription = "Tanpura",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(60.dp)
                         .padding(end = 8.dp)
                 )
 
-                // Middle: String 1 selector
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
@@ -217,7 +211,6 @@ fun MainScreen(
                     }
                 }
 
-                // Right: Toggle switch
                 Switch(
                     checked = isTanpuraPlaying,
                     onCheckedChange = { viewModel.toggleTanpura() }
@@ -227,7 +220,6 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Recording controls
         Button(
             onClick = { viewModel.toggleRecording() },
             modifier = Modifier

@@ -87,7 +87,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `MainActivity` - Single activity with Navigation Compose
 - `MainScreen` - Primary pitch detection interface
 - `SettingsScreen` - Configuration interface
-- `PitchIndicator` - Needle-style pitch meter (Canvas-based)
+- `PitchBar` - Horizontal pitch bar with emoji feedback (Canvas-based)
 - `NoteDisplay` - Large swara display with cents deviation
 
 ### Key Design Patterns
@@ -172,7 +172,7 @@ The app uses pure frequency ratios (not equal temperament):
 - Stateless composables when possible
 - Hoist state to ViewModels
 - Use `remember` for computation caching
-- Hardware acceleration for Canvas (PitchIndicator)
+- Hardware acceleration for Canvas (PitchBar)
 
 ## Common Development Tasks
 
@@ -216,7 +216,7 @@ app/src/main/java/com/hindustani/pitchdetector/
 │   ├── MainScreen.kt              # Pitch detection UI
 │   ├── SettingsScreen.kt          # Settings UI
 │   ├── components/
-│   │   ├── PitchIndicator.kt      # Needle meter (Canvas)
+│   │   ├── PitchBar.kt            # Horizontal pitch bar (Canvas)
 │   │   └── NoteDisplay.kt         # Note display component
 │   └── theme/
 ├── viewmodel/
@@ -272,7 +272,7 @@ app/src/main/java/com/hindustani/pitchdetector/
 
 **UI Performance:**
 - Throttled state updates to prevent frame drops
-- Hardware-accelerated Canvas for PitchIndicator
+- Hardware-accelerated Canvas for PitchBar
 - Efficient Compose recomposition with proper state hoisting
 
 **Battery Efficiency:**
@@ -369,4 +369,4 @@ Important Notes
 - No need for --yolo flag for read-only analysis
 - Gemini's context window can handle entire codebases that would overflow Claude's context
 - When checking implementations, be specific about what you're looking for to get accurate results
-
+- use the Java Runtime from Android Studio

@@ -44,7 +44,6 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Tolerance Slider with help
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -88,7 +87,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Tuning System with help
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -139,7 +137,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Tanpura Volume Slider with tips
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -181,7 +178,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Swar notation reference
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -196,12 +192,12 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "• Capital letters indicate shuddha variants (except Ma)\n" +
-                               "• Small letters indicate komal variants (except Ma)\n" +
-                               "• m indicates shuddha Ma\n" +
-                               "• M indicates teevra Ma\n" +
-                               "• . before the note indicates mandra saptak (lower octave)\n" +
-                               "• ' after the note indicates taar saptak (higher octave)",
+                        text = "• Capital letters = shuddha variants (except Ma)\n" +
+                               "• Small letters = komal variants (except Ma)\n" +
+                               "• m = shuddha Ma\n" +
+                               "• M = teevra Ma\n" +
+                               "• a . before the note = mandra saptak (lower octave)\n" +
+                               "• a ' after the note = taar saptak (higher octave)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
