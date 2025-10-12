@@ -295,78 +295,52 @@ app/src/main/java/com/hindustani/pitchdetector/
 - `AUDIO_TESTING.md` - Audio testing troubleshooting guide
 - `GEMINI.md` - Additional project context
 
-# Using Gemini CLI for Large Codebase Analysis
+## Core Philosophy: Gemini CLI Orchestration
 
-When analyzing large codebases or multiple files that might exceed context limits, use the Gemini CLI with its massive
-context window. Use `gemini -p` to leverage Google Gemini's large context capacity.
+**CRITICAL: Claude Code should use the Gemini CLI to do as much of the thinking and processing as possible. Claude Code should only act as the orchestrator, using as little tokens itself as possible.**
 
-## File and Directory Inclusion Syntax
+### When to Use Gemini CLI
 
-Use the `@` syntax to include files and directories in your Gemini prompts. The paths should be relative to WHERE you run the
-  gemini command:
+The `gemini` CLI tool is installed and available. Claude Code should invoke Gemini for:
 
-### Examples:
+1. **Code Analysis and Understanding** - Understanding how existing code works
+2. **Planning Complex Implementations** - Breaking down features and architectural decisions
+3. **Researching the Codebase** - Reading and comprehending code structure
+4. **Plan Mode** - Use Gemini CLI extensively during planning phase
 
-**Single file analysis:**
-gemini -p "@src/main.py Explain this file's purpose and structure"
+### When to Use Built-in Tools
 
-Multiple files:
-gemini -p "@package.json @src/index.js Analyze the dependencies used in the code"
+Claude Code should use its own tools for:
 
-Entire directory:
-gemini -p "@src/ Summarize the architecture of this codebase"
+1. **Grep** - Searching for specific patterns/text in files
+2. **Edit** - Making file modifications
+3. **Write** - Creating new files
+4. **Bash** - Running build commands, tests, git operations
 
-Multiple directories:
-gemini -p "@src/ @tests/ Analyze test coverage for the source code"
+### Usage Pattern
 
-Current directory and subdirectories:
-gemini -p "@./ Give me an overview of this entire project"
+Invoke Gemini like this:
+```bash
+gemini --prompt "<prompt>"
+```
+where `<prompt>` should be replaced by the actual prompt to Gemini.
 
-# Or use --all_files flag:
-gemini --all_files -p "Analyze the project structure and dependencies"
+### Example Workflow
 
-Implementation Verification Examples
+**Planning a new feature:**
+1. Use Gemini CLI to analyze relevant existing code
+2. Use Gemini CLI to plan the implementation approach
+3. Use Grep to find specific locations to modify
+4. Use Edit to make the changes
+5. Use Bash to run tests and verify
 
-Check if a feature is implemented:
-gemini -p "@src/ @lib/ Has dark mode been implemented in this codebase? Show me the relevant files and functions"
+**Understanding existing code:**
+1. Use Gemini CLI to read and explain code structure
+2. Use Gemini CLI to trace execution flow
+3. Use built-in tools only for direct operations
 
-Verify authentication implementation:
-gemini -p "@src/ @middleware/ Is JWT authentication implemented? List all auth-related endpoints and middleware"
-
-Check for specific patterns:
-gemini -p "@src/ Are there any React hooks that handle WebSocket connections? List them with file paths"
-
-Verify error handling:
-gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoints? Show examples of try-catch blocks"
-
-Check for rate limiting:
-gemini -p "@backend/ @middleware/ Is rate limiting implemented for the API? Show the implementation details"
-
-Verify caching strategy:
-gemini -p "@src/ @lib/ @services/ Is Redis caching implemented? List all cache-related functions and their usage"
-
-Check for specific security measures:
-gemini -p "@src/ @api/ Are SQL injection protections implemented? Show how user inputs are sanitized"
-
-Verify test coverage for features:
-gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases"
-
-When to Use Gemini CLI
-
-Use gemini -p when:
-- Analyzing entire codebases or large directories
-- Comparing multiple large files
-- Need to understand project-wide patterns or architecture
-- Current context window is insufficient for the task
-- Working with files totaling more than 100KB
-- Verifying if specific features, patterns, or security measures are implemented
-- Checking for the presence of certain coding patterns across the entire codebase
-
-Important Notes
-
-- Paths in @ syntax are relative to your current working directory when invoking gemini
-- The CLI will include file contents directly in the context
-- No need for --yolo flag for read-only analysis
-- Gemini's context window can handle entire codebases that would overflow Claude's context
-- When checking implementations, be specific about what you're looking for to get accurate results
-- use the Java Runtime from Android Studio
+This approach ensures:
+- Minimal token usage by Claude Code
+- Efficient processing through Gemini CLI
+- Claude Code focuses on orchestration rather than heavy computation
+- Gemini handles all analytical heavy lifting, especially in plan mode
