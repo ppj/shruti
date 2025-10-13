@@ -148,7 +148,8 @@ fun NotStartedView(onStartTest: () -> Unit) {
                            "2. Press 'Start Test' and sing 'aaaaah'\n\n" +
                            "3. Glide to your lowest comfortable note first, hold it for a couple of seconds\n\n" +
                            "4. Then glide to your highest comfortable note (avoid falsetto), hold it for a couple of seconds\n\n" +
-                           "5. We'll analyze your voice and recommend the ideal Sa for you",
+                           "5. Keep singing until you see 'Ready to analyze'\n\n" +
+                           "6. We'll analyze your voice and recommend the ideal Sa for you",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -207,8 +208,9 @@ fun RecordingView(
             ) {
                 Text(
                     text = "1. Start singing 'aaaaah'\n" +
-                           "2. Glide to your lowest comfortable note & hold for a second\n" +
-                           "3. Glide to your highest comfortable note (avoid falsetto), hold it for a second",
+                           "2. Glide to your lowest comfortable note & hold\n" +
+                           "3. Glide to your highest comfortable note (avoid falsetto) & hold\n" +
+                           "4. Keep singing until the indicator shows 'Ready'",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -230,11 +232,42 @@ fun RecordingView(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Samples collected: $samplesCount",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+                // Visual indicator for sample collection progress
+                val isReady = samplesCount >= 20
+                val progress = if (samplesCount < 20) samplesCount / 20f else 1f
+
+                if (isReady) {
+                    // Show ready indicator
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "✓ Ready to analyze",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                } else {
+                    // Show progress
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LinearProgressIndicator(
+                            progress = progress,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Collecting samples...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
             }
         }
 
@@ -258,7 +291,7 @@ fun RecordingView(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Sing for at least 10 seconds",
+            text = "Wait for the 'Ready' indicator before stopping",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

@@ -92,8 +92,8 @@ class FindSaScreenTest {
         // Should show "Listening..." text
         composeTestRule.onNodeWithText("Listening...").assertIsDisplayed()
 
-        // Should show samples count
-        composeTestRule.onNodeWithText("Samples collected:", substring = true).assertIsDisplayed()
+        // Should show progress indicator
+        composeTestRule.onNodeWithText("Collecting samples...", substring = true).assertIsDisplayed()
     }
 
     @Test
@@ -115,8 +115,8 @@ class FindSaScreenTest {
         composeTestRule.onNodeWithText("Start singing 'aaaaah'", substring = true)
             .assertIsDisplayed()
 
-        // Should show minimum duration guidance
-        composeTestRule.onNodeWithText("Sing for at least 10 seconds", substring = true)
+        // Should show ready indicator guidance
+        composeTestRule.onNodeWithText("Wait for the 'Ready' indicator before stopping", substring = true)
             .assertIsDisplayed()
     }
 
