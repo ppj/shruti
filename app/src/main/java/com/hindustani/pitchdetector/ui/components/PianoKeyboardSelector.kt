@@ -208,6 +208,7 @@ private fun BlackKey(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 6.dp)
+                .graphicsLayer(clip = false) // Don't clip rotated text
         ) {
             Text(
                 text = note,

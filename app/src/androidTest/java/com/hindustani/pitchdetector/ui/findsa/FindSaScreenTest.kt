@@ -112,7 +112,7 @@ class FindSaScreenTest {
         composeTestRule.waitForIdle()
 
         // Should show guidance text
-        composeTestRule.onNodeWithText("Sing 'aaaaah' and glide from low to high", substring = true)
+        composeTestRule.onNodeWithText("Start singing 'aaaaah'", substring = true)
             .assertIsDisplayed()
 
         // Should show minimum duration guidance

@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import kotlin.math.roundToInt
 
@@ -294,49 +295,35 @@ fun ResultsView(
     var isPlaying by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Your Recommended Sa",
+            text = "Your recommended Sa: ${state.originalSa.name}",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Large Sa display
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = state.recommendedSa.name,
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "${state.recommendedSa.frequency.roundToInt()} Hz",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
+        // Frequency display
+        Text(
+            text = "${state.recommendedSa.frequency.roundToInt()} Hz",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Piano keyboard selector to show recommended Sa
+        // Use fillMaxWidth directly without extra padding for better display
+        PianoKeyboardSelector(
+            selectedSa = state.recommendedSa.name,
+            onSaSelected = { /* Read-only in results view */ },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Detected range info
         Card(
@@ -381,7 +368,13 @@ fun ResultsView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedButton(
-                onClick = { onAdjust(-1) },
+                onClick = {
+                    onAdjust(-1)
+                    // If tanpura is playing, update it to the new Sa
+                    if (isPlaying) {
+                        onListen()
+                    }
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("-1")
@@ -407,7 +400,13 @@ fun ResultsView(
             Spacer(modifier = Modifier.width(8.dp))
 
             OutlinedButton(
-                onClick = { onAdjust(1) },
+                onClick = {
+                    onAdjust(1)
+                    // If tanpura is playing, update it to the new Sa
+                    if (isPlaying) {
+                        onListen()
+                    }
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("+1")
