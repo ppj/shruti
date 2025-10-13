@@ -1,5 +1,6 @@
 package com.hindustani.pitchdetector.ui.findsa
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -25,12 +26,20 @@ fun FindSaScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Handle system back button (phone back button)
+    BackHandler {
+        viewModel.stopPlaying()
+        viewModel.resetTest()
+        onNavigateBack()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Find Your Sa") },
                 navigationIcon = {
                     IconButton(onClick = {
+                        viewModel.stopPlaying()
                         viewModel.resetTest()
                         onNavigateBack()
                     }) {
