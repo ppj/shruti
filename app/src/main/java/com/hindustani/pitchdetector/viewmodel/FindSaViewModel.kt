@@ -175,6 +175,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         val highestNote = snapToNearestNote(highestFreq)
 
         return FindSaState.Finished(
+            originalSa = recommendedSa,
             recommendedSa = recommendedSa,
             lowestNote = lowestNote,
             highestNote = highestNote
@@ -218,7 +219,10 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             val adjustedNote = snapToNearestNote(adjustedFreq)
 
             _uiState.update { it.copy(
-                currentState = currentState.copy(recommendedSa = adjustedNote)
+                currentState = currentState.copy(
+                    recommendedSa = adjustedNote
+                    // originalSa remains unchanged
+                )
             )}
         }
     }

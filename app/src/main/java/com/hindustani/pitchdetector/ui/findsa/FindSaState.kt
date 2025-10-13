@@ -29,11 +29,13 @@ sealed class FindSaState {
 
     /**
      * Test complete with recommendation
-     * @param recommendedSa The calculated ideal Sa note for the user
+     * @param originalSa The originally calculated ideal Sa note (never changes)
+     * @param recommendedSa The current Sa recommendation (can be adjusted by user)
      * @param lowestNote The lowest comfortable note detected
      * @param highestNote The highest comfortable note detected
      */
     data class Finished(
+        val originalSa: Note,
         val recommendedSa: Note,
         val lowestNote: Note,
         val highestNote: Note
