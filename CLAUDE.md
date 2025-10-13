@@ -344,3 +344,4 @@ This approach ensures:
 - Efficient processing through Gemini CLI
 - Claude Code focuses on orchestration rather than heavy computation
 - Gemini handles all analytical heavy lifting, especially in plan mode
+- use the Java runtime from Android Studio to build and test the changes always.

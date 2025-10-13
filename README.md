@@ -91,7 +91,7 @@ A real-time pitch detection Android app for Hindustani classical music students.
 
 1. **Clone/Open the project**
    ```bash
-   cd /path/to/kansen
+   cd /path/to/shruti
    ```
 
 2. **Sync Gradle**
