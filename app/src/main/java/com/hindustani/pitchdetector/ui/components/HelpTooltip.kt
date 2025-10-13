@@ -16,7 +16,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HelpTooltip(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -38,7 +40,19 @@ fun HelpTooltip(
                 TextButton(onClick = { showDialog = false }) {
                     Text("Got it")
                 }
-            }
+            },
+            dismissButton = if (actionLabel != null && onActionClick != null) {
+                {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                            onActionClick()
+                        }
+                    ) {
+                        Text(actionLabel)
+                    }
+                }
+            } else null
         )
     }
 }

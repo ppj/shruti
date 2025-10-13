@@ -17,12 +17,15 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.hindustani.pitchdetector.ui.findsa.FindSaScreen
 import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
+import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: PitchViewModel by viewModels()
+    private val findSaViewModel: FindSaViewModel by viewModels()
     private var hasPermission by mutableStateOf(false)
 
     private val permissionLauncher = registerForActivityResult(
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (hasPermission) {
-                        AppNavigation(viewModel)
+                        AppNavigation(viewModel, findSaViewModel)
                     } else {
                         PermissionScreen(
                             onRequestPermission = {
@@ -62,7 +65,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(viewModel: PitchViewModel) {
+fun AppNavigation(viewModel: PitchViewModel, findSaViewModel: FindSaViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "main") {
@@ -71,6 +74,9 @@ fun AppNavigation(viewModel: PitchViewModel) {
                 viewModel = viewModel,
                 onNavigateToSettings = {
                     navController.navigate("settings")
+                },
+                onNavigateToFindSa = {
+                    navController.navigate("findSa")
                 }
             )
         }
@@ -79,6 +85,18 @@ fun AppNavigation(viewModel: PitchViewModel) {
                 viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+        composable("findSa") {
+            FindSaScreen(
+                viewModel = findSaViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onSaSelected = { saNote ->
+                    // Update the Sa in PitchViewModel and persist it
+                    viewModel.updateSa(saNote)
                 }
             )
         }

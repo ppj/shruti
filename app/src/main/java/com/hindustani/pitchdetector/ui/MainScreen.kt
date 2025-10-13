@@ -29,7 +29,8 @@ import kotlin.math.roundToInt
 @Composable
 fun MainScreen(
     viewModel: PitchViewModel,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToFindSa: () -> Unit
 ) {
     val pitchState by viewModel.pitchState.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
@@ -61,7 +62,11 @@ fun MainScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                HelpTooltip(text = "Select your Sa (tonic/base note) on the keyboard.")
+                HelpTooltip(
+                    text = "Select your Sa (tonic/base note) on the keyboard.\n\nNot sure which Sa is right for you? Let us help you discover your ideal starting pitch!",
+                    actionLabel = "Find My Sa",
+                    onActionClick = onNavigateToFindSa
+                )
             }
 
             IconButton(onClick = onNavigateToSettings) {
