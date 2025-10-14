@@ -14,6 +14,10 @@ import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import kotlin.math.roundToInt
 
+// Constants for sample requirements
+private const val MIN_SPEECH_SAMPLES = 10
+private const val MIN_SINGING_SAMPLES = 20
+
 /**
  * Main screen for the Find Your Sa feature
  */
@@ -188,11 +192,6 @@ fun SpeechRecordingView(
     samplesCount: Int,
     onNext: () -> Unit
 ) {
-    // Define minimum samples at function scope
-    val minSamples = 10
-    val isReady = samplesCount >= minSamples
-    val progress = if (samplesCount < minSamples) samplesCount.toFloat() / minSamples else 1f
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -227,54 +226,14 @@ fun SpeechRecordingView(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                if (currentPitch > 0) {
-                    Text(
-                        text = "${currentPitch.roundToInt()} Hz",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
+                PitchDisplay(currentPitch)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Visual indicator for sample collection progress
-
-                if (isReady) {
-                    // Show ready indicator
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "✓ Ready",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                } else {
-                    // Show progress
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        LinearProgressIndicator(
-                            progress = progress,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Collecting samples...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-                }
+                SampleCollectionProgress(
+                    samplesCount = samplesCount,
+                    requiredSamples = MIN_SPEECH_SAMPLES
+                )
             }
         }
 
@@ -285,7 +244,7 @@ fun SpeechRecordingView(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            enabled = samplesCount >= minSamples
+            enabled = samplesCount >= MIN_SPEECH_SAMPLES
         ) {
             Text(
                 text = "Next: Vocal Range",
@@ -349,56 +308,15 @@ fun RecordingView(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (currentPitch > 0) {
-                    Text(
-                        text = "${currentPitch.roundToInt()} Hz",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
+                PitchDisplay(currentPitch)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Visual indicator for sample collection progress
-                val isReady = samplesCount >= 20
-                val progress = if (samplesCount < 20) samplesCount / 20f else 1f
-
-                if (isReady) {
-                    // Show ready indicator
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "✓ Ready to analyze",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                } else {
-                    // Show progress
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        LinearProgressIndicator(
-                            progress = progress,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Collecting samples...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-                }
+                SampleCollectionProgress(
+                    samplesCount = samplesCount,
+                    requiredSamples = MIN_SINGING_SAMPLES,
+                    readyText = "✓ Ready to analyze"
+                )
             }
         }
 
@@ -488,11 +406,9 @@ fun ResultsView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Piano keyboard selector to show recommended Sa
-        // Use fillMaxWidth directly without extra padding for better display
         PianoKeyboardSelector(
             selectedSa = state.recommendedSa.name,
-            onSaSelected = { /* Read-only in results view */ },
+            onSaSelected = {},
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -618,6 +534,70 @@ fun ResultsView(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Try Again")
+        }
+    }
+}
+
+/**
+ * Reusable composable for displaying current pitch or loading indicator
+ */
+@Composable
+private fun PitchDisplay(currentPitch: Float) {
+    if (currentPitch > 0) {
+        Text(
+            text = "${currentPitch.roundToInt()} Hz",
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+    } else {
+        CircularProgressIndicator(modifier = Modifier.size(64.dp))
+    }
+}
+
+/**
+ * Reusable composable for showing sample collection progress
+ */
+@Composable
+private fun SampleCollectionProgress(
+    samplesCount: Int,
+    requiredSamples: Int,
+    readyText: String = "✓ Ready"
+) {
+    val isReady = samplesCount >= requiredSamples
+    val progress = if (samplesCount < requiredSamples) {
+        samplesCount.toFloat() / requiredSamples
+    } else {
+        1f
+    }
+
+    if (isReady) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = readyText,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    } else {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Collecting samples...",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hindustani.pitchdetector.audio.AudioCaptureManager
 import com.hindustani.pitchdetector.audio.PYINDetector
+import com.hindustani.pitchdetector.constants.VocalRangeConstants
 import com.hindustani.pitchdetector.data.PitchState
 import com.hindustani.pitchdetector.data.UserSettings
 import com.hindustani.pitchdetector.data.UserSettingsRepository
@@ -66,10 +67,8 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            userSettingsRepository.userSettings.collect {
-                userSettings ->
+            userSettingsRepository.userSettings.collect { userSettings ->
                 _settings.value = userSettings
-                // Also update pitch state to reflect settings changes
                 _pitchState.update {
                     it.copy(
                         saNote = userSettings.saNote,
@@ -129,9 +128,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         if (pitchResult.frequency != null && pitchResult.confidence > 0.5f) {
             val frequency = pitchResult.frequency.toDouble()
 
-            // Only process frequencies in reasonable vocal range (65 Hz - 1050 Hz, C2-C6)
-            // This range accommodates the full Sa range (G#2-B3) plus headroom for vocal extremes
-            if (frequency in 65.0..1050.0) {
+            if (frequency in VocalRangeConstants.MIN_VOCAL_FREQ..VocalRangeConstants.MAX_VOCAL_FREQ) {
                 val converter = HindustaniNoteConverter(
                     saFrequency = _settings.value.saFrequency,
                     toleranceCents = _settings.value.toleranceCents,

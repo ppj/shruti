@@ -55,18 +55,14 @@ class FindSaAlgorithmTest {
     @Test
     fun `remove outliers from bottom and top 10 percent`() {
         val pitches = mutableListOf<Float>()
-        // Add 10 low outliers
         repeat(10) { pitches.add(50f + it) }
-        // Add 80 main range values
         repeat(80) { pitches.add(100f + it) }
-        // Add 10 high outliers
         repeat(10) { pitches.add(500f + it) }
 
         val sorted = pitches.sorted()
         val outlierCount = (sorted.size * 0.1).toInt()
         val filtered = sorted.subList(outlierCount, sorted.size - outlierCount)
 
-        // Should remove 10 from each end
         assertThat(filtered.size).isEqualTo(80)
         assertThat(filtered.first()).isGreaterThan(50f)
         assertThat(filtered.last()).isLessThan(500f)
@@ -75,9 +71,6 @@ class FindSaAlgorithmTest {
     @Test
     fun `small dataset under 20 samples skips outlier removal`() {
         val pitches = List(15) { 100f + (it * 2f) }
-
-        // With < 20 samples, outlier removal would remove too much data
-        // Algorithm should handle this gracefully
         val sorted = pitches.sorted()
 
         assertThat(sorted.size).isEqualTo(15)
@@ -193,7 +186,6 @@ class FindSaAlgorithmTest {
         val insufficientSamples = List(10) { 100.0 + it }
 
         assertThat(insufficientSamples.size).isLessThan(20)
-        // In the actual implementation, this would throw an exception
     }
 
     // Test speaking pitch algorithm
@@ -241,18 +233,14 @@ class FindSaAlgorithmTest {
     @Test
     fun `remove outliers from speech samples at 5 percent`() {
         val pitches = mutableListOf<Float>()
-        // Add 5 low outliers
         repeat(5) { pitches.add(50f + it) }
-        // Add 90 main range values
         repeat(90) { pitches.add(100f + it) }
-        // Add 5 high outliers
         repeat(5) { pitches.add(500f + it) }
 
         val sorted = pitches.sorted()
         val outlierCount = (sorted.size * 0.05).toInt()
         val filtered = sorted.subList(outlierCount, sorted.size - outlierCount)
 
-        // Should remove 5 from each end
         assertThat(filtered.size).isEqualTo(90)
         assertThat(filtered.first()).isGreaterThan(50f)
         assertThat(filtered.last()).isLessThan(500f)
@@ -261,9 +249,6 @@ class FindSaAlgorithmTest {
     @Test
     fun `small speech dataset under 20 samples skips outlier removal`() {
         val pitches = List(15) { 120f + (it * 2f) }
-
-        // With < 20 samples, outlier removal would remove too much data
-        // Algorithm should use all data
         val sorted = pitches.sorted()
 
         assertThat(sorted.size).isEqualTo(15)
@@ -275,28 +260,24 @@ class FindSaAlgorithmTest {
 
     @Test
     fun `combine recommendations when they agree within 3_5 semitones uses weighted average`() {
-        val saFromSpeaking = 200.0 // Hz
-        val saFromSinging = 210.0  // Hz (close, < 3.5 semitones apart)
+        val saFromSpeaking = 200.0
+        val saFromSinging = 210.0
 
-        // Calculate distance in semitones
         val semitoneDiff = kotlin.math.abs(kotlin.math.log2(saFromSpeaking / saFromSinging) * 12.0)
         assertThat(semitoneDiff).isLessThan(3.5)
 
-        // Should use weighted average: 70% singing + 30% speaking
         val combined = (saFromSinging * 0.7) + (saFromSpeaking * 0.3)
         assertThat(combined).isWithin(1.0).of(207.0)
     }
 
     @Test
     fun `combine recommendations when they differ by more than 3_5 semitones uses singing only`() {
-        val saFromSpeaking = 140.0 // Hz
-        val saFromSinging = 200.0  // Hz (far apart, > 3.5 semitones)
+        val saFromSpeaking = 140.0
+        val saFromSinging = 200.0
 
-        // Calculate distance in semitones
         val semitoneDiff = kotlin.math.abs(kotlin.math.log2(saFromSpeaking / saFromSinging) * 12.0)
         assertThat(semitoneDiff).isGreaterThan(3.5)
 
-        // Should use singing only
         val combined = saFromSinging
         assertThat(combined).isEqualTo(200.0)
     }
@@ -308,7 +289,6 @@ class FindSaAlgorithmTest {
 
         val weighted = (singing * 0.7) + (speaking * 0.3)
 
-        // 200 * 0.7 + 180 * 0.3 = 140 + 54 = 194
         assertThat(weighted).isWithin(0.1).of(194.0)
     }
 
@@ -317,10 +297,8 @@ class FindSaAlgorithmTest {
         val freq1 = 200.0
         val freq2 = 210.0
 
-        // Distance in semitones = 12 * log2(freq1 / freq2)
         val semitones = kotlin.math.abs(kotlin.math.log2(freq1 / freq2) * 12.0)
 
-        // ~0.8 semitones apart
         assertThat(semitones).isWithin(0.1).of(0.8)
     }
 
@@ -352,6 +330,5 @@ class FindSaAlgorithmTest {
         val insufficientSpeechSamples = List(8) { 120.0 + it }
 
         assertThat(insufficientSpeechSamples.size).isLessThan(10)
-        // In the actual implementation, this would skip speaking pitch and use singing only
     }
 }

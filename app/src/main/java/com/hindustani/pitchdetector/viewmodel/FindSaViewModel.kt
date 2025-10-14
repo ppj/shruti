@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.hindustani.pitchdetector.audio.AudioCaptureManager
 import com.hindustani.pitchdetector.audio.PYINDetector
 import com.hindustani.pitchdetector.audio.TanpuraPlayer
+import com.hindustani.pitchdetector.constants.VocalRangeConstants
 import com.hindustani.pitchdetector.ui.findsa.FindSaState
 import com.hindustani.pitchdetector.ui.findsa.FindSaUiState
 import com.hindustani.pitchdetector.ui.findsa.Note
@@ -38,9 +39,32 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     private val collectedSingingPitches = mutableListOf<Float>()
     private var recordingJob: Job? = null
 
-    // Minimum confidence thresholds for accepting pitch samples
-    private val speechConfidenceThreshold = 0.7f  // Lower for natural speech
-    private val singingConfidenceThreshold = 0.8f  // Stricter for singing
+    companion object {
+        // Confidence thresholds for accepting pitch samples
+        private const val SPEECH_CONFIDENCE_THRESHOLD = 0.7f
+        private const val SINGING_CONFIDENCE_THRESHOLD = 0.8f
+
+        // Sample requirements
+        private const val MIN_SPEECH_SAMPLES = 10
+        private const val MIN_SINGING_SAMPLES = 20
+        private const val MIN_SAMPLES_FOR_OUTLIER_REMOVAL = 20
+
+        // Outlier removal percentages
+        private const val SPEECH_OUTLIER_PERCENTAGE = 0.05  // 5%
+        private const val SINGING_OUTLIER_PERCENTAGE = 0.1  // 10%
+
+        // Musical interval calculations (in semitones)
+        private const val SA_FROM_SPEAKING_SEMITONES = 5  // Perfect fourth above speaking pitch
+        private const val SA_FROM_SINGING_SEMITONES = 7   // Perfect fifth above lowest note
+
+        // Combination algorithm parameters
+        private const val SEMITONE_AGREEMENT_THRESHOLD = 3.5
+        private const val SINGING_WEIGHT = 0.7
+        private const val SPEAKING_WEIGHT = 0.3
+
+        // Playback settings
+        private const val PREVIEW_VOLUME = 0.5f
+    }
 
     // Standard Sa notes with their frequencies
     // These are the typical Sa recommendations for different voice types
@@ -146,12 +170,10 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun processSpeechData(audioData: FloatArray) {
         val pitchResult = pitchDetector.detectPitch(audioData)
 
-        if (pitchResult.frequency != null && pitchResult.confidence > speechConfidenceThreshold) {
+        if (pitchResult.frequency != null && pitchResult.confidence > SPEECH_CONFIDENCE_THRESHOLD) {
             val frequency = pitchResult.frequency
 
-            // Only accept frequencies in reasonable vocal range (65-1050 Hz, C2-C6)
-            // This range accommodates the full Sa range (G#2-B3) plus headroom for vocal extremes
-            if (frequency in 65f..1050f) {
+            if (frequency in VocalRangeConstants.MIN_VOCAL_FREQ..VocalRangeConstants.MAX_VOCAL_FREQ) {
                 collectedSpeechPitches.add(frequency)
 
                 withContext(Dispatchers.Main) {
@@ -170,12 +192,10 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun processSingingData(audioData: FloatArray) {
         val pitchResult = pitchDetector.detectPitch(audioData)
 
-        if (pitchResult.frequency != null && pitchResult.confidence > singingConfidenceThreshold) {
+        if (pitchResult.frequency != null && pitchResult.confidence > SINGING_CONFIDENCE_THRESHOLD) {
             val frequency = pitchResult.frequency
 
-            // Only accept frequencies in reasonable vocal range (65-1050 Hz, C2-C6)
-            // This range accommodates the full Sa range (G#2-B3) plus headroom for vocal extremes
-            if (frequency in 65f..1050f) {
+            if (frequency in VocalRangeConstants.MIN_VOCAL_FREQ..VocalRangeConstants.MAX_VOCAL_FREQ) {
                 collectedSingingPitches.add(frequency)
 
                 withContext(Dispatchers.Main) {
@@ -197,14 +217,14 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             throw IllegalStateException("No valid pitches recorded. Please try again.")
         }
 
-        if (singingPitches.size < 20) {
+        if (singingPitches.size < MIN_SINGING_SAMPLES) {
             throw IllegalStateException("Insufficient data (${singingPitches.size} samples). Please hold notes longer.")
         }
 
         // Process singing pitches
         val sortedSingingPitches = singingPitches.sorted()
-        val outlierCutoff = (sortedSingingPitches.size * 0.1).toInt()
-        val filteredSingingPitches = if (sortedSingingPitches.size > 20) {
+        val outlierCutoff = (sortedSingingPitches.size * SINGING_OUTLIER_PERCENTAGE).toInt()
+        val filteredSingingPitches = if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
             sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
         } else {
             sortedSingingPitches
@@ -214,11 +234,9 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         val lowestFreq = filteredSingingPitches.first().toDouble()
         val highestFreq = filteredSingingPitches.last().toDouble()
 
-        // Calculate Sa from singing: 7 semitones above the lowest comfortable note
-        val saFromSinging = lowestFreq * 2.0.pow(7.0 / 12.0)
+        val saFromSinging = lowestFreq * 2.0.pow(SA_FROM_SINGING_SEMITONES.toDouble() / 12.0)
 
-        // Process speech pitches if available
-        val saFromSpeaking = if (speechPitches.size >= 10) {  // Minimum 10 samples for speech
+        val saFromSpeaking = if (speechPitches.size >= MIN_SPEECH_SAMPLES) {
             calculateSaFromSpeaking(speechPitches)
         } else {
             null
@@ -239,10 +257,10 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         val highestNote = frequencyToNote(highestFreq)
 
         // Calculate speaking pitch note if available
-        val speakingPitchNote = if (saFromSpeaking != null && speechPitches.size >= 10) {
+        val speakingPitchNote = if (saFromSpeaking != null && speechPitches.size >= MIN_SPEECH_SAMPLES) {
             val sortedSpeech = speechPitches.sorted()
-            val speechOutlierCutoff = (sortedSpeech.size * 0.05).toInt()
-            val filteredSpeech = if (sortedSpeech.size > 20) {
+            val speechOutlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
+            val filteredSpeech = if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
                 sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
             } else {
                 sortedSpeech
@@ -264,14 +282,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Calculate ideal Sa from speaking pitch
      * Speaking pitch is typically in the lower-middle of vocal range
-     * Place Sa a perfect fourth (5 semitones) above mean speaking pitch
      */
     private fun calculateSaFromSpeaking(speechPitches: List<Float>): Double {
         val sortedSpeech = speechPitches.sorted()
 
-        // Remove top and bottom 5% as outliers
-        val outlierCutoff = (sortedSpeech.size * 0.05).toInt()
-        val filteredSpeech = if (sortedSpeech.size > 20) {
+        val outlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
+        val filteredSpeech = if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
             sortedSpeech.subList(outlierCutoff, sortedSpeech.size - outlierCutoff)
         } else {
             sortedSpeech
@@ -279,8 +295,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
 
         val meanSpeakingFreq = filteredSpeech.average()
 
-        // Calculate Sa: 5 semitones above speaking pitch (perfect fourth)
-        return meanSpeakingFreq * 2.0.pow(5.0 / 12.0)
+        return meanSpeakingFreq * 2.0.pow(SA_FROM_SPEAKING_SEMITONES.toDouble() / 12.0)
     }
 
     /**
@@ -288,14 +303,11 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
      * Uses weighted average if they're close, otherwise defaults to singing
      */
     private fun combineRecommendations(saFromSpeaking: Double, saFromSinging: Double): Double {
-        // Calculate distance in semitones
         val semitoneDiff = abs(kotlin.math.log2(saFromSpeaking / saFromSinging) * 12.0)
 
-        return if (semitoneDiff < 3.5) {
-            // Recommendations are close - use weighted average (70% singing, 30% speaking)
-            (saFromSinging * 0.7) + (saFromSpeaking * 0.3)
+        return if (semitoneDiff < SEMITONE_AGREEMENT_THRESHOLD) {
+            (saFromSinging * SINGING_WEIGHT) + (saFromSpeaking * SPEAKING_WEIGHT)
         } else {
-            // Recommendations are far apart - trust singing more (it's more direct)
             saFromSinging
         }
     }
@@ -346,13 +358,6 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Convert a note name to its frequency
-     */
-    private fun noteToFrequency(noteName: String): Double {
-        return standardSaNotes[noteName] ?: throw IllegalArgumentException("Unknown note: $noteName")
-    }
-
-    /**
      * Adjust the recommended Sa by a number of semitones
      * @param semitones Number of semitones to adjust (positive = higher, negative = lower)
      */
@@ -364,10 +369,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             val adjustedNote = snapToNearestNote(adjustedFreq)
 
             _uiState.update { it.copy(
-                currentState = currentState.copy(
-                    recommendedSa = adjustedNote
-                    // originalSa remains unchanged
-                )
+                currentState = currentState.copy(recommendedSa = adjustedNote)
             )}
         }
     }
@@ -381,7 +383,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             tanpuraPlayer.start(
                 saFreq = currentState.recommendedSa.frequency,
                 string1 = "P",
-                vol = 0.5f
+                vol = PREVIEW_VOLUME
             )
         }
     }

@@ -33,9 +33,6 @@ fun PianoKeyboardSelector(
 ) {
     val whiteKeys = listOf("A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3")
 
-    // Black keys centered between neighboring white keys
-    // Grouping pattern comes from gaps where no black keys exist (B-C and E-F)
-
     val blackKeysWithPositions = listOf(
         1.0f to "A#2",
         3.0f to "C#3",
@@ -174,7 +171,7 @@ private fun DummyWhiteKey(
             .background(Color.White)
             .border(
                 width = 0.5.dp,
-                color = Color.Gray,  // Grey borders
+                color = Color.Gray,
                 shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
             )
     )
@@ -189,7 +186,7 @@ private fun BlackKey(
 ) {
     Box(
         modifier = Modifier
-            .width(width)  // Dynamic width: 2/3 of white key width
+            .width(width)
             .height(54.dp)
             .shadow(
                 elevation = if (isSelected) 1.dp else 3.dp,
@@ -208,7 +205,7 @@ private fun BlackKey(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 6.dp)
-                .graphicsLayer(clip = false) // Don't clip rotated text
+                .graphicsLayer(clip = false)
         ) {
             Text(
                 text = note,
