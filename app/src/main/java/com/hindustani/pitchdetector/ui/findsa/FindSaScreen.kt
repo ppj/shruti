@@ -286,6 +286,21 @@ fun NotStartedView(
             textAlign = TextAlign.Center
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Show selected test method
+        val methodText = when (testMode) {
+            TestMode.SPEAKING_ONLY -> "Speaking Voice Method"
+            TestMode.SINGING_ONLY -> "Singing Range Method"
+            TestMode.BOTH -> "Speaking + Singing Method"
+        }
+        Text(
+            text = methodText,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Card(
