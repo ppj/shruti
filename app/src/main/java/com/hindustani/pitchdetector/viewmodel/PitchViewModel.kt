@@ -129,8 +129,9 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         if (pitchResult.frequency != null && pitchResult.confidence > 0.5f) {
             val frequency = pitchResult.frequency.toDouble()
 
-            // Only process frequencies in reasonable vocal range (80 Hz - 1000 Hz)
-            if (frequency in 80.0..1000.0) {
+            // Only process frequencies in reasonable vocal range (65 Hz - 1050 Hz, C2-C6)
+            // This range accommodates the full Sa range (G#2-B3) plus headroom for vocal extremes
+            if (frequency in 65.0..1050.0) {
                 val converter = HindustaniNoteConverter(
                     saFrequency = _settings.value.saFrequency,
                     toleranceCents = _settings.value.toleranceCents,

@@ -123,8 +123,9 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         if (pitchResult.frequency != null && pitchResult.confidence > confidenceThreshold) {
             val frequency = pitchResult.frequency
 
-            // Only accept frequencies in reasonable vocal range (80-1000 Hz)
-            if (frequency in 80f..1000f) {
+            // Only accept frequencies in reasonable vocal range (65-1050 Hz, C2-C6)
+            // This range accommodates the full Sa range (G#2-B3) plus headroom for vocal extremes
+            if (frequency in 65f..1050f) {
                 collectedPitches.add(frequency)
 
                 withContext(Dispatchers.Main) {
@@ -169,10 +170,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Formula: freq_new = freq_old × 2^(semitones/12)
         val idealSaFreq = lowestFreq * 2.0.pow(7.0 / 12.0)
 
-        // Snap to nearest standard Sa note
+        // Snap recommended Sa to nearest standard Sa note
         val recommendedSa = snapToNearestNote(idealSaFreq)
-        val lowestNote = snapToNearestNote(lowestFreq)
-        val highestNote = snapToNearestNote(highestFreq)
+
+        // Convert lowest and highest to actual note names (not restricted to Sa scale)
+        val lowestNote = frequencyToNote(lowestFreq)
+        val highestNote = frequencyToNote(highestFreq)
 
         return FindSaState.Finished(
             originalSa = recommendedSa,
@@ -198,6 +201,33 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         return Note(name = closestNote.key, frequency = closestNote.value)
+    }
+
+    /**
+     * Convert any frequency to its nearest note name (not restricted to standard Sa notes)
+     */
+    private fun frequencyToNote(frequency: Double): Note {
+        // Calculate semitones from A4 (440 Hz)
+        val semitonesFromA4 = 12.0 * kotlin.math.log2(frequency / 440.0)
+
+        // Round to nearest semitone
+        val nearestSemitone = kotlin.math.round(semitonesFromA4).toInt()
+
+        // Calculate MIDI note number (A4 = 69)
+        val midiNote = 69 + nearestSemitone
+
+        // Extract octave and note within octave
+        val octave = (midiNote / 12) - 1
+        val noteIndex = midiNote % 12
+
+        // Map to note name (using sharps for consistency)
+        val noteNames = arrayOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+        val noteName = "${noteNames[noteIndex]}$octave"
+
+        // Calculate actual frequency for this note
+        val actualFrequency = 440.0 * 2.0.pow(nearestSemitone / 12.0)
+
+        return Note(name = noteName, frequency = actualFrequency)
     }
 
     /**
