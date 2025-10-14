@@ -81,12 +81,18 @@ fun FindSaScreen(
 
             // Render different UI based on current state
             when (val state = uiState.currentState) {
+                is FindSaState.SelectingMode -> ModeSelectionView(
+                    selectedMode = uiState.testMode,
+                    onModeSelected = { mode -> viewModel.setTestMode(mode) }
+                )
                 is FindSaState.NotStarted -> NotStartedView(
+                    testMode = uiState.testMode,
                     onStartTest = { viewModel.startTest() }
                 )
                 is FindSaState.RecordingSpeech -> SpeechRecordingView(
                     currentPitch = uiState.currentPitch,
                     samplesCount = uiState.collectedSamplesCount,
+                    testMode = uiState.testMode,
                     onNext = { viewModel.stopSpeechTest() }
                 )
                 is FindSaState.RecordingSinging -> RecordingView(
@@ -116,10 +122,141 @@ fun FindSaScreen(
 }
 
 /**
+ * Mode selection view - lets user choose test mode
+ */
+@Composable
+fun ModeSelectionView(
+    selectedMode: TestMode,
+    onModeSelected: (TestMode) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Choose Test Method",
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Speaking Only Mode
+        ModeCard(
+            title = "Speaking Voice",
+            duration = "~10 seconds",
+            description = "Quick test based on your natural speaking pitch. Best for finding a comfortable Sa for long practice sessions.",
+            isSelected = selectedMode == TestMode.SPEAKING_ONLY,
+            onClick = { onModeSelected(TestMode.SPEAKING_ONLY) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Singing Only Mode
+        ModeCard(
+            title = "Singing Range",
+            duration = "~20 seconds",
+            description = "Traditional method analyzing your full vocal range. Best for performance-oriented training.",
+            isSelected = selectedMode == TestMode.SINGING_ONLY,
+            onClick = { onModeSelected(TestMode.SINGING_ONLY) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Both Mode
+        ModeCard(
+            title = "Both (Recommended)",
+            duration = "~30 seconds",
+            description = "Combines both methods for the most accurate recommendation. Analyzes both speaking pitch and vocal range.",
+            isSelected = selectedMode == TestMode.BOTH,
+            onClick = { onModeSelected(TestMode.BOTH) },
+            isRecommended = true
+        )
+    }
+}
+
+/**
+ * Reusable mode selection card
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModeCard(
+    title: String,
+    duration: String,
+    description: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    isRecommended: Boolean = false
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surfaceVariant
+        ),
+        onClick = onClick
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = duration,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (isRecommended) {
+                Text(
+                    text = "Recommended",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isSelected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
  * Initial view with instructions
  */
 @Composable
-fun NotStartedView(onStartTest: () -> Unit) {
+fun NotStartedView(
+    testMode: TestMode,
+    onStartTest: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -152,15 +289,34 @@ fun NotStartedView(onStartTest: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                val instructions = when (testMode) {
+                    TestMode.SPEAKING_ONLY ->
+                        "1. Find a quiet place\n\n" +
+                        "2. Press 'Start Test' to begin\n\n" +
+                        "3. Count upwards slowly in your natural speaking voice\n\n" +
+                        "4. Continue for about 10 seconds until the indicator shows 'Ready'\n\n" +
+                        "5. We'll analyze your speaking pitch to recommend a comfortable Sa"
+
+                    TestMode.SINGING_ONLY ->
+                        "1. Find a quiet place\n\n" +
+                        "2. Press 'Start Test' to begin\n\n" +
+                        "3. Sing 'aaaaah' and glide to your lowest comfortable note, hold it\n\n" +
+                        "4. Then glide to your highest comfortable note (avoid falsetto), hold it\n\n" +
+                        "5. We'll analyze your vocal range to recommend the ideal Sa"
+
+                    TestMode.BOTH ->
+                        "1. Find a quiet place\n\n" +
+                        "2. Press 'Start Test' to begin\n\n" +
+                        "Phase 1: Speaking Voice\n" +
+                        "• Count upwards slowly in your natural speaking voice\n\n" +
+                        "Phase 2: Singing Range\n" +
+                        "• Sing 'aaaaah' and glide to your lowest comfortable note, hold it\n" +
+                        "• Then glide to your highest comfortable note (avoid falsetto), hold it\n\n" +
+                        "3. We'll analyze both your speaking pitch and vocal range to recommend the ideal Sa for you"
+                }
+
                 Text(
-                    text = "1. Find a quiet place\n\n" +
-                           "2. Press 'Start Test' to begin\n\n" +
-                           "Phase 1: Speaking Voice\n" +
-                           "• Count upwards slowly in your natural speaking voice\n\n" +
-                           "Phase 2: Singing Range\n" +
-                           "• Sing 'aaaaah' and glide to your lowest comfortable note, hold it\n" +
-                           "• Then glide to your highest comfortable note (avoid falsetto), hold it\n\n" +
-                           "3. We'll analyze both your speaking pitch and vocal range to recommend the ideal Sa for you",
+                    text = instructions,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -190,6 +346,7 @@ fun NotStartedView(onStartTest: () -> Unit) {
 fun SpeechRecordingView(
     currentPitch: Float,
     samplesCount: Int,
+    testMode: TestMode,
     onNext: () -> Unit
 ) {
     Column(
@@ -239,23 +396,41 @@ fun SpeechRecordingView(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        val buttonText = when (testMode) {
+            TestMode.SPEAKING_ONLY -> "Stop Test"
+            TestMode.BOTH -> "Next: Vocal Range"
+            else -> "Next"
+        }
+
+        val buttonColors = if (testMode == TestMode.SPEAKING_ONLY) {
+            ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        } else {
+            ButtonDefaults.buttonColors()
+        }
+
         Button(
             onClick = onNext,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            enabled = samplesCount >= MIN_SPEECH_SAMPLES
+            enabled = samplesCount >= MIN_SPEECH_SAMPLES,
+            colors = buttonColors
         ) {
             Text(
-                text = "Next: Vocal Range",
+                text = buttonText,
                 style = MaterialTheme.typography.titleMedium
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        val helperText = when (testMode) {
+            TestMode.SPEAKING_ONLY -> "Wait for the 'Ready' indicator before stopping"
+            else -> "Keep counting until ready"
+        }
+
         Text(
-            text = "Keep counting until ready",
+            text = helperText,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -392,6 +567,21 @@ fun ResultsView(
         Text(
             text = "Recommended Sa: ${state.originalSa.name}",
             style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Test mode indicator
+        val testMethodText = when (state.testMode) {
+            TestMode.SPEAKING_ONLY -> "Based on speaking voice"
+            TestMode.SINGING_ONLY -> "Based on singing range"
+            TestMode.BOTH -> "Based on speaking & singing"
+        }
+        Text(
+            text = testMethodText,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 

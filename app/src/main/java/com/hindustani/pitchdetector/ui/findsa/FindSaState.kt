@@ -9,11 +9,39 @@ data class Note(
 )
 
 /**
+ * Test mode for Find Sa feature
+ */
+enum class TestMode {
+    /**
+     * Use only speaking voice analysis
+     * Quick test (~10 seconds) based on natural speaking pitch
+     */
+    SPEAKING_ONLY,
+
+    /**
+     * Use only singing range analysis
+     * Traditional method (~20 seconds) based on vocal range
+     */
+    SINGING_ONLY,
+
+    /**
+     * Use both speaking and singing analysis (recommended)
+     * Most accurate, combines both methods with weighted average
+     */
+    BOTH
+}
+
+/**
  * Sealed class representing the different states of the Find Sa feature
  */
 sealed class FindSaState {
     /**
-     * Initial state - user hasn't started the test yet
+     * Mode selection state - user chooses test mode
+     */
+    object SelectingMode : FindSaState()
+
+    /**
+     * Initial state - user hasn't started the test yet (after mode selection)
      */
     object NotStarted : FindSaState()
 
@@ -39,13 +67,15 @@ sealed class FindSaState {
      * @param lowestNote The lowest comfortable note detected
      * @param highestNote The highest comfortable note detected
      * @param speakingPitch The detected average speaking pitch (null if speech phase skipped)
+     * @param testMode The test mode that was used to generate this recommendation
      */
     data class Finished(
         val originalSa: Note,
         val recommendedSa: Note,
         val lowestNote: Note,
         val highestNote: Note,
-        val speakingPitch: Note? = null
+        val speakingPitch: Note? = null,
+        val testMode: TestMode = TestMode.BOTH
     ) : FindSaState()
 }
 
@@ -53,8 +83,9 @@ sealed class FindSaState {
  * UI state container for the Find Sa feature
  */
 data class FindSaUiState(
-    val currentState: FindSaState = FindSaState.NotStarted,
+    val currentState: FindSaState = FindSaState.SelectingMode,
     val currentPitch: Float = 0f,  // Real-time pitch feedback during recording (in Hz)
     val collectedSamplesCount: Int = 0,  // Number of valid samples collected
-    val error: String? = null
+    val error: String? = null,
+    val testMode: TestMode = TestMode.BOTH  // Selected test mode
 )
