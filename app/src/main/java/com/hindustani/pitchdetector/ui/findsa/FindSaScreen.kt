@@ -80,7 +80,12 @@ fun FindSaScreen(
                 is FindSaState.NotStarted -> NotStartedView(
                     onStartTest = { viewModel.startTest() }
                 )
-                is FindSaState.Recording -> RecordingView(
+                is FindSaState.RecordingSpeech -> SpeechRecordingView(
+                    currentPitch = uiState.currentPitch,
+                    samplesCount = uiState.collectedSamplesCount,
+                    onNext = { viewModel.stopSpeechTest() }
+                )
+                is FindSaState.RecordingSinging -> RecordingView(
                     currentPitch = uiState.currentPitch,
                     samplesCount = uiState.collectedSamplesCount,
                     onStopTest = { viewModel.stopTest() }
@@ -145,11 +150,13 @@ fun NotStartedView(onStartTest: () -> Unit) {
 
                 Text(
                     text = "1. Find a quiet place\n\n" +
-                           "2. Press 'Start Test' and sing 'aaaaah'\n\n" +
-                           "3. Glide to your lowest comfortable note first, hold it for a couple of seconds\n\n" +
-                           "4. Then glide to your highest comfortable note (avoid falsetto), hold it for a couple of seconds\n\n" +
-                           "5. Keep singing until you see 'Ready to analyze'\n\n" +
-                           "6. We'll analyze your voice and recommend the ideal Sa for you",
+                           "2. Press 'Start Test' to begin\n\n" +
+                           "Phase 1: Speaking Voice\n" +
+                           "• Count upwards slowly in your natural speaking voice\n\n" +
+                           "Phase 2: Singing Range\n" +
+                           "• Sing 'aaaaah' and glide to your lowest comfortable note, hold it\n" +
+                           "• Then glide to your highest comfortable note (avoid falsetto), hold it\n\n" +
+                           "3. We'll analyze both your speaking pitch and vocal range to recommend the ideal Sa for you",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -173,7 +180,131 @@ fun NotStartedView(onStartTest: () -> Unit) {
 }
 
 /**
- * Recording view with real-time feedback
+ * Speech recording view for capturing natural speaking voice
+ */
+@Composable
+fun SpeechRecordingView(
+    currentPitch: Float,
+    samplesCount: Int,
+    onNext: () -> Unit
+) {
+    // Define minimum samples at function scope
+    val minSamples = 10
+    val isReady = samplesCount >= minSamples
+    val progress = if (samplesCount < minSamples) samplesCount.toFloat() / minSamples else 1f
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Phase 1: Speaking",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Count upwards slowly and naturally",
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (currentPitch > 0) {
+                    Text(
+                        text = "${currentPitch.roundToInt()} Hz",
+                        style = MaterialTheme.typography.displayMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Visual indicator for sample collection progress
+
+                if (isReady) {
+                    // Show ready indicator
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "✓ Ready",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                } else {
+                    // Show progress
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LinearProgressIndicator(
+                            progress = progress,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Collecting samples...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = onNext,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            enabled = samplesCount >= minSamples
+        ) {
+            Text(
+                text = "Next: Vocal Range",
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Keep counting until ready",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/**
+ * Singing recording view with real-time feedback
  */
 @Composable
 fun RecordingView(
@@ -189,7 +320,7 @@ fun RecordingView(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Listening...",
+            text = "Phase 2: Singing Range",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -341,7 +472,7 @@ fun ResultsView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Your recommended Sa: ${state.originalSa.name}",
+            text = "Recommended Sa: ${state.originalSa.name}",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )

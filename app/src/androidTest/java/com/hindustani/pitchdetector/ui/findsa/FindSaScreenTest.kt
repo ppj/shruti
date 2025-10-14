@@ -70,7 +70,7 @@ class FindSaScreenTest {
     // Recording State Tests
 
     @Test
-    fun findSaScreen_startTestButton_transitionsToRecording() {
+    fun findSaScreen_startTestButton_transitionsToSpeechRecording() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
             FindSaScreen(
@@ -86,18 +86,18 @@ class FindSaScreenTest {
         composeTestRule.onNodeWithText("Start Test").performClick()
         composeTestRule.waitForIdle()
 
-        // Should now show "Stop Test" button
-        composeTestRule.onNodeWithText("Stop Test").assertIsDisplayed()
+        // Should now show Phase 1: Speaking
+        composeTestRule.onNodeWithText("Phase 1: Speaking").assertIsDisplayed()
 
-        // Should show "Listening..." text
-        composeTestRule.onNodeWithText("Listening...").assertIsDisplayed()
+        // Should show counting instruction
+        composeTestRule.onNodeWithText("Count upwards slowly and naturally").assertIsDisplayed()
 
         // Should show progress indicator
         composeTestRule.onNodeWithText("Collecting samples...", substring = true).assertIsDisplayed()
     }
 
     @Test
-    fun findSaScreen_recording_showsRealTimeFeedback() {
+    fun findSaScreen_singingPhase_showsRealTimeFeedback() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
             FindSaScreen(
@@ -110,6 +110,13 @@ class FindSaScreenTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Start Test").performClick()
         composeTestRule.waitForIdle()
+
+        // Transition to singing phase by calling stopSpeechTest
+        viewModel.stopSpeechTest()
+        composeTestRule.waitForIdle()
+
+        // Should show Phase 2: Singing Range
+        composeTestRule.onNodeWithText("Phase 2: Singing Range").assertIsDisplayed()
 
         // Should show guidance text
         composeTestRule.onNodeWithText("Start singing 'aaaaah'", substring = true)
@@ -158,13 +165,17 @@ class FindSaScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Start test
+        // Start test (speech phase)
         composeTestRule.onNodeWithText("Start Test").performClick()
+        composeTestRule.waitForIdle()
+
+        // Transition to singing phase
+        viewModel.stopSpeechTest()
         composeTestRule.waitForIdle()
 
         // In a real test, we would need to inject mock audio data
         // For now, we just verify the UI structure exists
-        // The Stop Test button should be present
+        // The Stop Test button should be present in singing phase
         composeTestRule.onNodeWithText("Stop Test").assertExists()
     }
 
@@ -214,8 +225,12 @@ class FindSaScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Start test
+        // Start test (speech phase)
         composeTestRule.onNodeWithText("Start Test").performClick()
+        composeTestRule.waitForIdle()
+
+        // Transition to singing phase
+        viewModel.stopSpeechTest()
         composeTestRule.waitForIdle()
 
         // Stop test (will show analyzing or error depending on data)
@@ -243,10 +258,15 @@ class FindSaScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Start and immediately stop (no data collected)
+        // Start test (speech phase)
         composeTestRule.onNodeWithText("Start Test").performClick()
         composeTestRule.waitForIdle()
 
+        // Transition to singing phase
+        viewModel.stopSpeechTest()
+        composeTestRule.waitForIdle()
+
+        // Immediately stop (no singing data collected)
         composeTestRule.onNodeWithText("Stop Test").performClick()
         composeTestRule.waitForIdle()
 
@@ -274,7 +294,8 @@ class FindSaScreenTest {
 
         // Recording-specific elements should not be visible
         composeTestRule.onNodeWithText("Stop Test").assertDoesNotExist()
-        composeTestRule.onNodeWithText("Listening...").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Phase 1: Speaking").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Phase 2: Singing Range").assertDoesNotExist()
         composeTestRule.onNodeWithText("Accept and Save").assertDoesNotExist()
     }
 

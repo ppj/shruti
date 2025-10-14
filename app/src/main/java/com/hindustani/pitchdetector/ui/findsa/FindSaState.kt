@@ -18,9 +18,14 @@ sealed class FindSaState {
     object NotStarted : FindSaState()
 
     /**
-     * User is actively recording their vocal range
+     * User is recording their natural speaking voice
      */
-    object Recording : FindSaState()
+    object RecordingSpeech : FindSaState()
+
+    /**
+     * User is actively recording their vocal singing range
+     */
+    object RecordingSinging : FindSaState()
 
     /**
      * Processing and analyzing the recorded data
@@ -33,12 +38,14 @@ sealed class FindSaState {
      * @param recommendedSa The current Sa recommendation (can be adjusted by user)
      * @param lowestNote The lowest comfortable note detected
      * @param highestNote The highest comfortable note detected
+     * @param speakingPitch The detected average speaking pitch (null if speech phase skipped)
      */
     data class Finished(
         val originalSa: Note,
         val recommendedSa: Note,
         val lowestNote: Note,
-        val highestNote: Note
+        val highestNote: Note,
+        val speakingPitch: Note? = null
     ) : FindSaState()
 }
 
