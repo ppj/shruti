@@ -32,20 +32,36 @@ fun FindSaScreen(
 
     // Handle system back button (phone back button)
     BackHandler {
-        viewModel.stopPlaying()
-        viewModel.resetTest()
-        onNavigateBack()
+        if (uiState.currentState is FindSaState.NotStarted) {
+            // Go back to mode selection
+            viewModel.resetToModeSelection()
+        } else {
+            viewModel.stopPlaying()
+            viewModel.resetTest()
+            onNavigateBack()
+        }
+    }
+
+    // Dynamic title based on state
+    val topBarTitle = when (uiState.currentState) {
+        is FindSaState.NotStarted -> "Choose Test Method"
+        else -> "Find Your Sa"
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Find Your Sa") },
+                title = { Text(topBarTitle) },
                 navigationIcon = {
                     IconButton(onClick = {
-                        viewModel.stopPlaying()
-                        viewModel.resetTest()
-                        onNavigateBack()
+                        if (uiState.currentState is FindSaState.NotStarted) {
+                            // Go back to mode selection
+                            viewModel.resetToModeSelection()
+                        } else {
+                            viewModel.stopPlaying()
+                            viewModel.resetTest()
+                            onNavigateBack()
+                        }
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }

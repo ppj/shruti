@@ -577,6 +577,25 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Reset back to mode selection screen
+     */
+    fun resetToModeSelection() {
+        audioCapture.stop()
+        recordingJob?.cancel()
+        recordingJob = null
+        tanpuraPlayer.stop()
+        collectedSpeechPitches.clear()
+        collectedSingingPitches.clear()
+
+        _uiState.update { it.copy(
+            currentState = FindSaState.SelectingMode,
+            currentPitch = 0f,
+            collectedSamplesCount = 0,
+            error = null
+        )}
+    }
+
+    /**
      * Get the recommended Sa as a western note string (for updating app settings)
      */
     fun getRecommendedSaNote(): String? {
