@@ -1,4 +1,4 @@
-# Kansen UX Upgrade Checklist
+# Shruti UX Upgrade Checklist
 
 ## 1. Piano Keyboard Sa Selector
 - [x] Create `PianoKeyboardSelector.kt` component

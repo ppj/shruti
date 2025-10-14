@@ -5,20 +5,21 @@ This document provides an overview of the test suite for the Shruti app.
 ## Test Coverage Summary
 
 ### Unit Tests (runs on JVM, fast)
-- **SaParserTest**: 14 tests
-- **HindustaniNoteConverterTest**: 18 tests
-- **PYINDetectorTest**: 17 tests
-- **PitchViewModelTest**: 20 tests
+- **SaParserTest**: 10 tests
+- **HindustaniNoteConverterTest**: 19 tests
+- **UserSettingsRepositoryTest**: 16 tests
+- **FindSaAlgorithmTest**: 16 tests
 
-**Total Unit Tests: 69**
+**Total Unit Tests: 61**
 
 ### UI/Integration Tests (requires Android device/emulator)
-- **MainScreenTest**: 11 tests
-- **SettingsScreenTest**: 15 tests
+- **MainScreenTest**: 3 tests
+- **SettingsScreenTest**: 0 tests (to be implemented)
+- **FindSaScreenTest**: 12 tests
 
-**Total UI Tests: 26**
+**Total UI Tests: 15**
 
-**Grand Total: 95 tests**
+**Grand Total: 76 tests**
 
 ## Test Coverage by Component
 
@@ -39,17 +40,18 @@ This document provides an overview of the test suite for the Shruti app.
   - Just Intonation ratio accuracy
   - Different Sa (tonic) frequencies
 
-### 🎤 Audio Processing (23 tests)
-- **PYINDetector** (Pitch detection algorithm)
-  - Pure sine wave detection (various frequencies)
-  - Noisy signal handling
-  - Confidence score validation
-  - Vocal range testing (80-1000 Hz)
-  - Buffer size requirements
-  - Silence and noise rejection
-  - Amplitude variation (vibrato-like)
-  - Frequency discrimination
-  - Consistency across multiple calls
+### 🎯 Find Your Sa Algorithm (16 tests)
+- **FindSaAlgorithmTest** (Vocal range analysis & Sa recommendation)
+  - 7 semitones formula accuracy (2^(7/12) ≈ 1.498)
+  - Sa calculation from various lowest frequencies
+  - Male voice range testing (100-150 Hz)
+  - Female voice range testing (180+ Hz)
+  - Outlier removal (bottom/top 10%)
+  - Frequency snapping to standard notes (C3, D3, G3, A3, etc.)
+  - Semitone adjustment calculations (±1 semitone)
+  - Edge cases: identical frequencies, narrow/wide ranges
+  - Data validation (minimum 20 samples)
+  - Algorithm correctness without Android dependencies
 
 ### 🔧 ViewModel Integration (22 tests)
 - **PitchViewModel** (State management)
@@ -62,22 +64,24 @@ This document provides an overview of the test suite for the Shruti app.
   - Enharmonic note handling
   - Rapid update handling
 
-### 🖥️ User Interface (25 tests)
+### 🖥️ User Interface (15 tests)
 - **MainScreen** (Primary pitch detection UI)
   - Sa display
-  - Start/Stop button functionality
-  - Settings navigation
-  - Pitch indicator display
-  - Note display updates
-  - Recording state changes
+  - Piano keyboard Sa selector
+  - Sa selection persistence
+
+- **FindSaScreen** (Vocal range test & Sa finder UI)
+  - Initial state: instructions and Start Test button
+  - Recording state: real-time feedback and Stop button
+  - State transitions: NotStarted → Recording → Analyzing
+  - Navigation: Back button and navigation callbacks
+  - Error handling: Insufficient data messages
+  - Component visibility toggling based on state
+  - Accessibility: Content descriptions for interactive elements
+  - Try Again functionality to reset test
 
 - **SettingsScreen** (Configuration UI)
-  - Sa input field editing
-  - Tolerance slider
-  - Tuning system radio buttons
-  - Back navigation
-  - Settings persistence
-  - Info card display
+  - To be implemented
 
 ## Running Tests
 
@@ -112,19 +116,20 @@ This document provides an overview of the test suite for the Shruti app.
 app/src/
 ├── test/java/                          # Unit tests (JVM)
 │   └── com/hindustani/pitchdetector/
-│       ├── audio/
-│       │   └── PYINDetectorTest.kt     # Pitch detection algorithm tests
+│       ├── data/
+│       │   └── UserSettingsRepositoryTest.kt  # Settings persistence tests
 │       ├── music/
 │       │   ├── SaParserTest.kt         # Western notation parser tests
 │       │   └── HindustaniNoteConverterTest.kt  # Note conversion tests
 │       └── viewmodel/
-│           └── PitchViewModelTest.kt   # ViewModel integration tests
+│           └── FindSaAlgorithmTest.kt  # Find Sa algorithm logic tests
 │
 └── androidTest/java/                   # UI/Instrumentation tests (Android)
     └── com/hindustani/pitchdetector/
         └── ui/
             ├── MainScreenTest.kt       # Main screen UI tests
-            └── SettingsScreenTest.kt   # Settings screen UI tests
+            └── findsa/
+                └── FindSaScreenTest.kt # Find Sa screen UI tests
 ```
 
 ## Test Dependencies
@@ -308,6 +313,11 @@ After running tests, view detailed reports at:
 
 ---
 
-**Last Updated**: Created with initial test suite
-**Test Count**: 95 tests (69 unit + 26 UI)
-**Coverage**: ~85% overall
+**Last Updated**: 2025-10-13 (Added Find Your Sa tests)
+**Test Count**: 76 tests (61 unit + 15 UI)
+**Coverage**: ~80% overall
+
+### Recent Additions
+- **FindSaAlgorithmTest**: 16 unit tests for vocal range analysis algorithm
+- **FindSaScreenTest**: 12 UI tests for Find Your Sa feature
+- Tests validate the 7-semitone formula, outlier removal, and UI state transitions

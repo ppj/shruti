@@ -27,7 +27,7 @@ class MainScreenTest {
     fun mainScreen_displaysAllElements() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            MainScreen(viewModel = viewModel, onNavigateToSettings = {})
+            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
         }
 
         composeTestRule.waitForIdle()
@@ -42,7 +42,7 @@ class MainScreenTest {
     fun mainScreen_saCanBeChanged() {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            MainScreen(viewModel = viewModel, onNavigateToSettings = {})
+            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
         }
 
         composeTestRule.waitForIdle()
@@ -59,7 +59,7 @@ class MainScreenTest {
         val viewModel = createViewModel()
 
         composeTestRule.setContent {
-            MainScreen(viewModel = viewModel, onNavigateToSettings = {})
+            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
         }
 
         composeTestRule.waitForIdle()
