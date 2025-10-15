@@ -44,6 +44,17 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$PROMPT\" | grep -qi \"\\(commit\\|push\\|pr\\|pull request\\)\"; then echo \"💡 Reminder: Custom commands available: /cleanup (code quality), /test-coverage (test analysis), /pr-description (PR generation)\"; fi",
+            "description": "Context-aware suggestions: Remind about custom commands when relevant"
+          }
+        ]
+      }
     ]
   }
 }
