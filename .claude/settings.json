@@ -13,6 +13,16 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" && echo \"⏳ Checking code formatting before commit...\" && ./gradlew ktlintCheck --quiet 2>&1 | tail -20 && echo \"✓ Code formatting verified\" || (echo \"✗ Formatting issues found. Run './gradlew ktlintFormat' to auto-fix or fix manually.\" && exit 1)",
+            "description": "Pre-commit formatting gate: Ensure code follows formatting standards"
+          }
+        ]
+      },
+      {
         "matcher": "Bash(git push*)",
         "hooks": [
           {
