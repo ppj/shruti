@@ -10,6 +10,18 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git push*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" && echo \"⏳ Running tests before push...\" && ./gradlew test --quiet > /dev/null 2>&1 && echo \"✓ Tests passed - safe to push\" || (echo \"✗ Tests failing - please fix before pushing\" && exit 1)",
+            "description": "Pre-push safety gate: Ensure tests pass before pushing code"
+          }
+        ]
+      }
     ]
   }
 }
