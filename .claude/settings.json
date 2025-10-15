@@ -32,6 +32,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(./gradlew test*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"\" && echo \"📊 Test run complete!\" && echo \"Next steps: Consider running /cleanup to check code quality, then commit and push your changes.\"",
+            "description": "Post-test summary: Provide actionable next steps after test completion"
+          }
+        ]
+      }
     ]
   }
 }
