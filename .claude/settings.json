@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" && echo \"✓ Java runtime configured: $JAVA_HOME\"",
+            "description": "Auto-configure Android Studio Java runtime for Gradle commands"
+          }
+        ]
+      }
+    ]
+  }
+}
