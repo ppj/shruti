@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" && echo \"✓ Java runtime configured: $JAVA_HOME\"",
+            "description": "Auto-configure Android Studio Java runtime for Gradle commands"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+
+
+      {
+        "matcher": "Bash(gh pr create*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" && echo \"⏳ Verifying tests before creating PR...\" && ./gradlew test --quiet > /dev/null 2>&1 && echo \"✓ Tests passed - ready to create PR\" || (echo \"✗ Tests failing - please fix before creating PR\" && exit 1)",
+            "description": "Pre-PR quality gate: Ensure tests pass before creating pull request"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(./gradlew test*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"\" && echo \"📊 Test run complete!\" && echo \"Next steps: Consider running /cleanup to check code quality, then commit and push your changes.\"",
+            "description": "Post-test summary: Provide actionable next steps after test completion"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$PROMPT\" | grep -qi \"\\(commit\\|push\\|pr\\|pull request\\)\"; then echo \"💡 Reminder: Custom commands available: /cleanup (code quality), /test-coverage (test analysis), /pr-description (PR generation)\"; fi",
+            "description": "Context-aware suggestions: Remind about custom commands when relevant"
+          }
+        ]
+      }
+    ]
+  }
+}
