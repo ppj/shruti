@@ -115,6 +115,14 @@ A real-time pitch detection Android app for Hindustani classical music students.
 - **Debug**: Development build with debugging enabled
 - **Release**: Production build with ProGuard optimization
 
+## Development Setup
+
+After cloning the repository, run the setup script to configure the git hooks:
+
+```bash
+./setup.sh
+```
+
 ## Usage Guide
 
 ### Initial Setup
