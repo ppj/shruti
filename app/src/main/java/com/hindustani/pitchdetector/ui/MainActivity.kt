@@ -23,16 +23,16 @@ import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 
 class MainActivity : ComponentActivity() {
-
     private val viewModel: PitchViewModel by viewModels()
     private val findSaViewModel: FindSaViewModel by viewModels()
     private var hasPermission by mutableStateOf(false)
 
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasPermission = isGranted
-    }
+    private val permissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            hasPermission = isGranted
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,14 +40,14 @@ class MainActivity : ComponentActivity() {
         // Check permission status
         hasPermission = ContextCompat.checkSelfPermission(
             this,
-            Manifest.permission.RECORD_AUDIO
+            Manifest.permission.RECORD_AUDIO,
         ) == PackageManager.PERMISSION_GRANTED
 
         setContent {
             ShrutiTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     if (hasPermission) {
                         AppNavigation(viewModel, findSaViewModel)
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
                         PermissionScreen(
                             onRequestPermission = {
                                 permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                            }
+                            },
                         )
                     }
                 }
@@ -65,7 +65,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(viewModel: PitchViewModel, findSaViewModel: FindSaViewModel) {
+fun AppNavigation(
+    viewModel: PitchViewModel,
+    findSaViewModel: FindSaViewModel,
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "main") {
@@ -77,7 +80,7 @@ fun AppNavigation(viewModel: PitchViewModel, findSaViewModel: FindSaViewModel) {
                 },
                 onNavigateToFindSa = {
                     navController.navigate("findSa")
-                }
+                },
             )
         }
         composable("settings") {
@@ -85,7 +88,7 @@ fun AppNavigation(viewModel: PitchViewModel, findSaViewModel: FindSaViewModel) {
                 viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
             )
         }
         composable("findSa") {
@@ -97,7 +100,7 @@ fun AppNavigation(viewModel: PitchViewModel, findSaViewModel: FindSaViewModel) {
                 onSaSelected = { saNote ->
                     // Update the Sa in PitchViewModel and persist it
                     viewModel.updateSa(saNote)
-                }
+                },
             )
         }
     }
@@ -106,15 +109,16 @@ fun AppNavigation(viewModel: PitchViewModel, findSaViewModel: FindSaViewModel) {
 @Composable
 fun PermissionScreen(onRequestPermission: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = "Microphone Permission Required",
-            style = MaterialTheme.typography.headlineLarge
+            style = MaterialTheme.typography.headlineLarge,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -122,14 +126,14 @@ fun PermissionScreen(onRequestPermission: () -> Unit) {
         Text(
             text = "This app needs access to your microphone to detect pitch and help you practice Hindustani classical music.",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = onRequestPermission,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Grant Permission")
         }

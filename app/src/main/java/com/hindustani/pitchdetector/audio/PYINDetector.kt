@@ -9,11 +9,11 @@ import kotlin.math.min
  */
 class PYINDetector(
     private val sampleRate: Int = 44100,
-    private val threshold: Float = 0.15f
+    private val threshold: Float = 0.15f,
 ) {
     data class PitchResult(
         val frequency: Float?,
-        val confidence: Float
+        val confidence: Float,
     )
 
     fun detectPitch(audioBuffer: FloatArray): PitchResult {
@@ -54,7 +54,10 @@ class PYINDetector(
         return PitchResult(frequency, confidence)
     }
 
-    private fun calculateDifferenceFunction(audioBuffer: FloatArray, yinBuffer: FloatArray) {
+    private fun calculateDifferenceFunction(
+        audioBuffer: FloatArray,
+        yinBuffer: FloatArray,
+    ) {
         for (tau in yinBuffer.indices) {
             var sum = 0f
             val maxI = audioBuffer.size - tau - 1
@@ -83,7 +86,7 @@ class PYINDetector(
     private data class PitchCandidate(
         val tau: Int,
         val value: Float,
-        val probability: Float
+        val probability: Float,
     )
 
     private fun getPitchCandidates(yinBuffer: FloatArray): List<PitchCandidate> {
@@ -117,7 +120,7 @@ class PYINDetector(
 
     private fun calculateConfidence(
         bestCandidate: PitchCandidate,
-        allCandidates: List<PitchCandidate>
+        allCandidates: List<PitchCandidate>,
     ): Float {
         // Confidence based on:
         // 1. How low the YIN value is (lower is better)
@@ -126,22 +129,27 @@ class PYINDetector(
         val valueConfidence = 1f - bestCandidate.value
 
         // Calculate separation from second best candidate
-        val secondBest = allCandidates
-            .filter { it.tau != bestCandidate.tau }
-            .maxByOrNull { it.probability }
+        val secondBest =
+            allCandidates
+                .filter { it.tau != bestCandidate.tau }
+                .maxByOrNull { it.probability }
 
-        val separationConfidence = if (secondBest != null) {
-            val separation = abs(bestCandidate.probability - secondBest.probability)
-            min(separation * 2f, 1f)  // Scale separation
-        } else {
-            1f
-        }
+        val separationConfidence =
+            if (secondBest != null) {
+                val separation = abs(bestCandidate.probability - secondBest.probability)
+                min(separation * 2f, 1f) // Scale separation
+            } else {
+                1f
+            }
 
         // Combine both factors
         return (valueConfidence * 0.7f + separationConfidence * 0.3f).coerceIn(0f, 1f)
     }
 
-    private fun parabolicInterpolation(array: FloatArray, x: Int): Float {
+    private fun parabolicInterpolation(
+        array: FloatArray,
+        x: Int,
+    ): Float {
         if (x < 1 || x >= array.size - 1) return x.toFloat()
 
         val s0 = array[x - 1]

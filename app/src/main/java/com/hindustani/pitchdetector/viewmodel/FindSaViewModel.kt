@@ -27,7 +27,6 @@ import kotlin.math.pow
  * Helps users discover their ideal Sa (tonic) note through vocal range analysis
  */
 class FindSaViewModel(application: Application) : AndroidViewModel(application) {
-
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
     private val tanpuraPlayer = TanpuraPlayer(application.applicationContext)
@@ -51,12 +50,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         private const val MIN_SAMPLES_FOR_OUTLIER_REMOVAL = 20
 
         // Outlier removal percentages
-        private const val SPEECH_OUTLIER_PERCENTAGE = 0.05  // 5%
-        private const val SINGING_OUTLIER_PERCENTAGE = 0.1  // 10%
+        private const val SPEECH_OUTLIER_PERCENTAGE = 0.05 // 5%
+        private const val SINGING_OUTLIER_PERCENTAGE = 0.1 // 10%
 
         // Musical interval calculations (in semitones)
-        private const val SA_FROM_SPEAKING_SEMITONES = 5  // Perfect fourth above speaking pitch
-        private const val SA_FROM_SINGING_SEMITONES = 7   // Perfect fifth above lowest note
+        private const val SA_FROM_SPEAKING_SEMITONES = 5 // Perfect fourth above speaking pitch
+        private const val SA_FROM_SINGING_SEMITONES = 7 // Perfect fifth above lowest note
 
         // Combination algorithm parameters
         private const val SEMITONE_AGREEMENT_THRESHOLD = 3.5
@@ -69,34 +68,37 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
 
     // Standard Sa notes with their frequencies
     // These are the typical Sa recommendations for different voice types
-    private val standardSaNotes = mapOf(
-        "G#2" to 103.83,
-        "A2" to 110.00,
-        "A#2" to 116.54,
-        "B2" to 123.47,
-        "C3" to 130.81,   // Male bass/heavy
-        "C#3" to 138.59,  // Male baritone
-        "D3" to 146.83,   // Male tenor
-        "D#3" to 155.56,
-        "E3" to 164.81,
-        "F3" to 174.61,
-        "F#3" to 185.00,
-        "G3" to 196.00,   // Female alto/contralto
-        "G#3" to 207.65,  // Female mezzo-soprano
-        "A3" to 220.00,   // Female soprano
-        "A#3" to 233.08,
-        "B3" to 246.94
-    )
+    private val standardSaNotes =
+        mapOf(
+            "G#2" to 103.83,
+            "A2" to 110.00,
+            "A#2" to 116.54,
+            "B2" to 123.47,
+            "C3" to 130.81, // Male bass/heavy
+            "C#3" to 138.59, // Male baritone
+            "D3" to 146.83, // Male tenor
+            "D#3" to 155.56,
+            "E3" to 164.81,
+            "F3" to 174.61,
+            "F#3" to 185.00,
+            "G3" to 196.00, // Female alto/contralto
+            "G#3" to 207.65, // Female mezzo-soprano
+            "A3" to 220.00, // Female soprano
+            "A#3" to 233.08,
+            "B3" to 246.94,
+        )
 
     /**
      * Set the test mode and reset to initial state
      */
     fun setTestMode(mode: TestMode) {
-        _uiState.update { it.copy(
-            testMode = mode,
-            currentState = FindSaState.NotStarted,
-            error = null
-        )}
+        _uiState.update {
+            it.copy(
+                testMode = mode,
+                currentState = FindSaState.NotStarted,
+                error = null,
+            )
+        }
     }
 
     /**
@@ -112,35 +114,42 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
 
         when (currentMode) {
             TestMode.SPEAKING_ONLY,
-            TestMode.BOTH -> {
+            TestMode.BOTH,
+            -> {
                 // Start with speaking phase
-                _uiState.update { it.copy(
-                    currentState = FindSaState.RecordingSpeech,
-                    collectedSamplesCount = 0,
-                    error = null
-                )}
+                _uiState.update {
+                    it.copy(
+                        currentState = FindSaState.RecordingSpeech,
+                        collectedSamplesCount = 0,
+                        error = null,
+                    )
+                }
 
                 // Start audio capture for speech
-                recordingJob = audioCapture.startCapture { audioData ->
-                    viewModelScope.launch(Dispatchers.Default) {
-                        processSpeechData(audioData)
+                recordingJob =
+                    audioCapture.startCapture { audioData ->
+                        viewModelScope.launch(Dispatchers.Default) {
+                            processSpeechData(audioData)
+                        }
                     }
-                }
             }
             TestMode.SINGING_ONLY -> {
                 // Skip speaking phase, go directly to singing
-                _uiState.update { it.copy(
-                    currentState = FindSaState.RecordingSinging,
-                    collectedSamplesCount = 0,
-                    error = null
-                )}
+                _uiState.update {
+                    it.copy(
+                        currentState = FindSaState.RecordingSinging,
+                        collectedSamplesCount = 0,
+                        error = null,
+                    )
+                }
 
                 // Start audio capture for singing
-                recordingJob = audioCapture.startCapture { audioData ->
-                    viewModelScope.launch(Dispatchers.Default) {
-                        processSingingData(audioData)
+                recordingJob =
+                    audioCapture.startCapture { audioData ->
+                        viewModelScope.launch(Dispatchers.Default) {
+                            processSingingData(audioData)
+                        }
                     }
-                }
             }
         }
     }
@@ -170,27 +179,32 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
                         }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
-                            _uiState.update { it.copy(
-                                currentState = FindSaState.NotStarted,
-                                error = "Unable to analyze: ${e.message}"
-                            )}
+                            _uiState.update {
+                                it.copy(
+                                    currentState = FindSaState.NotStarted,
+                                    error = "Unable to analyze: ${e.message}",
+                                )
+                            }
                         }
                     }
                 }
             }
             TestMode.BOTH -> {
                 // Transition to singing phase
-                _uiState.update { it.copy(
-                    currentState = FindSaState.RecordingSinging,
-                    collectedSamplesCount = 0
-                )}
+                _uiState.update {
+                    it.copy(
+                        currentState = FindSaState.RecordingSinging,
+                        collectedSamplesCount = 0,
+                    )
+                }
 
                 // Start audio capture for singing
-                recordingJob = audioCapture.startCapture { audioData ->
-                    viewModelScope.launch(Dispatchers.Default) {
-                        processSingingData(audioData)
+                recordingJob =
+                    audioCapture.startCapture { audioData ->
+                        viewModelScope.launch(Dispatchers.Default) {
+                            processSingingData(audioData)
+                        }
                     }
-                }
             }
             TestMode.SINGING_ONLY -> {
                 // This shouldn't happen, but handle it gracefully
@@ -220,10 +234,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    _uiState.update { it.copy(
-                        currentState = FindSaState.NotStarted,
-                        error = "Unable to analyze: ${e.message}"
-                    )}
+                    _uiState.update {
+                        it.copy(
+                            currentState = FindSaState.NotStarted,
+                            error = "Unable to analyze: ${e.message}",
+                        )
+                    }
                 }
             }
         }
@@ -242,10 +258,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
                 collectedSpeechPitches.add(frequency)
 
                 withContext(Dispatchers.Main) {
-                    _uiState.update { it.copy(
-                        currentPitch = frequency,
-                        collectedSamplesCount = collectedSpeechPitches.size
-                    )}
+                    _uiState.update {
+                        it.copy(
+                            currentPitch = frequency,
+                            collectedSamplesCount = collectedSpeechPitches.size,
+                        )
+                    }
                 }
             }
         }
@@ -264,10 +282,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
                 collectedSingingPitches.add(frequency)
 
                 withContext(Dispatchers.Main) {
-                    _uiState.update { it.copy(
-                        currentPitch = frequency,
-                        collectedSamplesCount = collectedSingingPitches.size
-                    )}
+                    _uiState.update {
+                        it.copy(
+                            currentPitch = frequency,
+                            collectedSamplesCount = collectedSingingPitches.size,
+                        )
+                    }
                 }
             }
         }
@@ -277,7 +297,10 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
      * Analyze collected pitches and calculate the recommended Sa
      * @return FindSaState.Finished with the recommendation, or throws exception if insufficient data
      */
-    private fun analyzePitches(speechPitches: List<Float>, singingPitches: List<Float>): FindSaState.Finished {
+    private fun analyzePitches(
+        speechPitches: List<Float>,
+        singingPitches: List<Float>,
+    ): FindSaState.Finished {
         val currentMode = _uiState.value.testMode
 
         return when (currentMode) {
@@ -312,11 +335,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Calculate speaking pitch note
         val sortedSpeech = speechPitches.sorted()
         val speechOutlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
-        val filteredSpeech = if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-            sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
-        } else {
-            sortedSpeech
-        }
+        val filteredSpeech =
+            if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
+                sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
+            } else {
+                sortedSpeech
+            }
         val speakingPitchNote = frequencyToNote(filteredSpeech.average())
 
         // For speaking only, use speaking pitch range as vocal range estimate
@@ -329,7 +353,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             lowestNote = lowestNote,
             highestNote = highestNote,
             speakingPitch = speakingPitchNote,
-            testMode = TestMode.SPEAKING_ONLY
+            testMode = TestMode.SPEAKING_ONLY,
         )
     }
 
@@ -348,11 +372,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Process singing pitches
         val sortedSingingPitches = singingPitches.sorted()
         val outlierCutoff = (sortedSingingPitches.size * SINGING_OUTLIER_PERCENTAGE).toInt()
-        val filteredSingingPitches = if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-            sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
-        } else {
-            sortedSingingPitches
-        }
+        val filteredSingingPitches =
+            if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
+                sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
+            } else {
+                sortedSingingPitches
+            }
 
         // Find minimum and maximum comfortable frequencies
         val lowestFreq = filteredSingingPitches.first().toDouble()
@@ -371,14 +396,17 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             lowestNote = lowestNote,
             highestNote = highestNote,
             speakingPitch = null,
-            testMode = TestMode.SINGING_ONLY
+            testMode = TestMode.SINGING_ONLY,
         )
     }
 
     /**
      * Analyze using both speaking and singing methods (original algorithm)
      */
-    private fun analyzeBothMethods(speechPitches: List<Float>, singingPitches: List<Float>): FindSaState.Finished {
+    private fun analyzeBothMethods(
+        speechPitches: List<Float>,
+        singingPitches: List<Float>,
+    ): FindSaState.Finished {
         if (singingPitches.isEmpty()) {
             throw IllegalStateException("No valid pitches recorded. Please try again.")
         }
@@ -390,11 +418,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Process singing pitches
         val sortedSingingPitches = singingPitches.sorted()
         val outlierCutoff = (sortedSingingPitches.size * SINGING_OUTLIER_PERCENTAGE).toInt()
-        val filteredSingingPitches = if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-            sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
-        } else {
-            sortedSingingPitches
-        }
+        val filteredSingingPitches =
+            if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
+                sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
+            } else {
+                sortedSingingPitches
+            }
 
         // Find minimum and maximum comfortable frequencies
         val lowestFreq = filteredSingingPitches.first().toDouble()
@@ -402,18 +431,20 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
 
         val saFromSinging = lowestFreq * 2.0.pow(SA_FROM_SINGING_SEMITONES.toDouble() / 12.0)
 
-        val saFromSpeaking = if (speechPitches.size >= MIN_SPEECH_SAMPLES) {
-            calculateSaFromSpeaking(speechPitches)
-        } else {
-            null
-        }
+        val saFromSpeaking =
+            if (speechPitches.size >= MIN_SPEECH_SAMPLES) {
+                calculateSaFromSpeaking(speechPitches)
+            } else {
+                null
+            }
 
         // Combine recommendations if both are available
-        val finalSaFreq = if (saFromSpeaking != null) {
-            combineRecommendations(saFromSpeaking, saFromSinging)
-        } else {
-            saFromSinging
-        }
+        val finalSaFreq =
+            if (saFromSpeaking != null) {
+                combineRecommendations(saFromSpeaking, saFromSinging)
+            } else {
+                saFromSinging
+            }
 
         // Snap recommended Sa to nearest standard Sa note
         val recommendedSa = snapToNearestNote(finalSaFreq)
@@ -423,18 +454,20 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         val highestNote = frequencyToNote(highestFreq)
 
         // Calculate speaking pitch note if available
-        val speakingPitchNote = if (saFromSpeaking != null && speechPitches.size >= MIN_SPEECH_SAMPLES) {
-            val sortedSpeech = speechPitches.sorted()
-            val speechOutlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
-            val filteredSpeech = if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-                sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
+        val speakingPitchNote =
+            if (saFromSpeaking != null && speechPitches.size >= MIN_SPEECH_SAMPLES) {
+                val sortedSpeech = speechPitches.sorted()
+                val speechOutlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
+                val filteredSpeech =
+                    if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
+                        sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
+                    } else {
+                        sortedSpeech
+                    }
+                frequencyToNote(filteredSpeech.average())
             } else {
-                sortedSpeech
+                null
             }
-            frequencyToNote(filteredSpeech.average())
-        } else {
-            null
-        }
 
         return FindSaState.Finished(
             originalSa = recommendedSa,
@@ -442,7 +475,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             lowestNote = lowestNote,
             highestNote = highestNote,
             speakingPitch = speakingPitchNote,
-            testMode = TestMode.BOTH
+            testMode = TestMode.BOTH,
         )
     }
 
@@ -454,11 +487,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         val sortedSpeech = speechPitches.sorted()
 
         val outlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
-        val filteredSpeech = if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-            sortedSpeech.subList(outlierCutoff, sortedSpeech.size - outlierCutoff)
-        } else {
-            sortedSpeech
-        }
+        val filteredSpeech =
+            if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
+                sortedSpeech.subList(outlierCutoff, sortedSpeech.size - outlierCutoff)
+            } else {
+                sortedSpeech
+            }
 
         val meanSpeakingFreq = filteredSpeech.average()
 
@@ -469,7 +503,10 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
      * Combine Sa recommendations from speaking and singing
      * Uses weighted average if they're close, otherwise defaults to singing
      */
-    private fun combineRecommendations(saFromSpeaking: Double, saFromSinging: Double): Double {
+    private fun combineRecommendations(
+        saFromSpeaking: Double,
+        saFromSinging: Double,
+    ): Double {
         val semitoneDiff = abs(kotlin.math.log2(saFromSpeaking / saFromSinging) * 12.0)
 
         return if (semitoneDiff < SEMITONE_AGREEMENT_THRESHOLD) {
@@ -535,9 +572,11 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             val adjustedFreq = currentFreq * 2.0.pow(semitones / 12.0)
             val adjustedNote = snapToNearestNote(adjustedFreq)
 
-            _uiState.update { it.copy(
-                currentState = currentState.copy(recommendedSa = adjustedNote)
-            )}
+            _uiState.update {
+                it.copy(
+                    currentState = currentState.copy(recommendedSa = adjustedNote),
+                )
+            }
         }
     }
 
@@ -550,7 +589,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
             tanpuraPlayer.start(
                 saFreq = currentState.recommendedSa.frequency,
                 string1 = "P",
-                vol = PREVIEW_VOLUME
+                vol = PREVIEW_VOLUME,
             )
         }
     }
@@ -587,12 +626,14 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         collectedSpeechPitches.clear()
         collectedSingingPitches.clear()
 
-        _uiState.update { it.copy(
-            currentState = FindSaState.SelectingMode,
-            currentPitch = 0f,
-            collectedSamplesCount = 0,
-            error = null
-        )}
+        _uiState.update {
+            it.copy(
+                currentState = FindSaState.SelectingMode,
+                currentPitch = 0f,
+                collectedSamplesCount = 0,
+                error = null,
+            )
+        }
     }
 
     /**

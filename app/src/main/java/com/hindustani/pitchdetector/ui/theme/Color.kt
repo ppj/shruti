@@ -25,9 +25,9 @@ val DarkSurface = Color(0xFF1a2436)
 val DarkSurfaceVariant = Color(0xFF2a3446)
 
 // Functional colors for pitch indication (semantic)
-val PitchFlat = Color(0xFF3d88c4)      // Cool blue for flat/low pitch
-val PitchPerfect = Color(0xFF7cb342)   // Warm green for perfect pitch
-val PitchSharp = Color(0xFFe57373)     // Warm red for sharp/high pitch
+val PitchFlat = Color(0xFF3d88c4) // Cool blue for flat/low pitch
+val PitchPerfect = Color(0xFF7cb342) // Warm green for perfect pitch
+val PitchSharp = Color(0xFFe57373) // Warm red for sharp/high pitch
 
 // Additional UI colors
 val TextDark = Color(0xFF1C1B1F)

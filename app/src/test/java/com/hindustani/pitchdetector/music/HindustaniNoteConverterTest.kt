@@ -6,17 +6,17 @@ import org.junit.Test
 import kotlin.math.abs
 
 class HindustaniNoteConverterTest {
-
     private lateinit var converter: HindustaniNoteConverter
     private val saFrequency = 261.63 // C4
 
     @Before
     fun setup() {
-        converter = HindustaniNoteConverter(
-            saFrequency = saFrequency,
-            toleranceCents = 15.0,
-            use22Shruti = false
-        )
+        converter =
+            HindustaniNoteConverter(
+                saFrequency = saFrequency,
+                toleranceCents = 15.0,
+                use22Shruti = false,
+            )
     }
 
     @Test
@@ -99,11 +99,12 @@ class HindustaniNoteConverterTest {
 
     @Test
     fun `convertFrequency respects custom tolerance`() {
-        val strictConverter = HindustaniNoteConverter(
-            saFrequency = saFrequency,
-            toleranceCents = 5.0,
-            use22Shruti = false
-        )
+        val strictConverter =
+            HindustaniNoteConverter(
+                saFrequency = saFrequency,
+                toleranceCents = 5.0,
+                use22Shruti = false,
+            )
 
         // 8 cents deviation
         val slightlyOffFrequency = saFrequency * Math.pow(2.0, 8.0 / 1200.0)
@@ -117,10 +118,11 @@ class HindustaniNoteConverterTest {
     @Test
     fun `convertFrequency handles all 12 basic notes`() {
         val expectedNotes = listOf("S", "r", "R", "g", "G", "m", "M", "P", "d", "D", "n", "N")
-        val ratios = listOf(
-            1.0 / 1.0, 16.0 / 15.0, 9.0 / 8.0, 6.0 / 5.0, 5.0 / 4.0, 4.0 / 3.0,
-            45.0 / 32.0, 3.0 / 2.0, 8.0 / 5.0, 5.0 / 3.0, 16.0 / 9.0, 15.0 / 8.0
-        )
+        val ratios =
+            listOf(
+                1.0 / 1.0, 16.0 / 15.0, 9.0 / 8.0, 6.0 / 5.0, 5.0 / 4.0, 4.0 / 3.0,
+                45.0 / 32.0, 3.0 / 2.0, 8.0 / 5.0, 5.0 / 3.0, 16.0 / 9.0, 15.0 / 8.0,
+            )
 
         expectedNotes.forEachIndexed { index, expectedNote ->
             val frequency = saFrequency * ratios[index]
@@ -130,7 +132,6 @@ class HindustaniNoteConverterTest {
             assertThat(result.isPerfect).isTrue()
         }
     }
-
 
     @Test
     fun `cents deviation calculation is accurate`() {
@@ -167,11 +168,12 @@ class HindustaniNoteConverterTest {
     @Test
     fun `different Sa frequencies work correctly`() {
         val differentSa = 440.0 // A4 as Sa
-        val converterA4 = HindustaniNoteConverter(
-            saFrequency = differentSa,
-            toleranceCents = 15.0,
-            use22Shruti = false
-        )
+        val converterA4 =
+            HindustaniNoteConverter(
+                saFrequency = differentSa,
+                toleranceCents = 15.0,
+                use22Shruti = false,
+            )
 
         val result = converterA4.convertFrequency(differentSa)
         assertThat(result.swara).isEqualTo("S")
@@ -238,24 +240,27 @@ class HindustaniNoteConverterTest {
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
 
-
     @Test
     fun `octave boundaries are detected correctly`() {
         // Test notes near octave boundaries
-        val nearLowerBoundary = saFrequency * 0.55  // Close to lower octave
-        val nearUpperBoundary = saFrequency * 1.8   // Close to upper octave
+        val nearLowerBoundary = saFrequency * 0.55 // Close to lower octave
+        val nearUpperBoundary = saFrequency * 1.8 // Close to upper octave
 
         val lowerResult = converter.convertFrequency(nearLowerBoundary)
         val upperResult = converter.convertFrequency(nearUpperBoundary)
 
         // Should pick closest note in appropriate octave
-        assertThat(lowerResult.octave).isIn(listOf(
-            HindustaniNoteConverter.Octave.MANDRA,
-            HindustaniNoteConverter.Octave.MADHYA
-        ))
-        assertThat(upperResult.octave).isIn(listOf(
-            HindustaniNoteConverter.Octave.MADHYA,
-            HindustaniNoteConverter.Octave.TAAR
-        ))
+        assertThat(lowerResult.octave).isIn(
+            listOf(
+                HindustaniNoteConverter.Octave.MANDRA,
+                HindustaniNoteConverter.Octave.MADHYA,
+            ),
+        )
+        assertThat(upperResult.octave).isIn(
+            listOf(
+                HindustaniNoteConverter.Octave.MADHYA,
+                HindustaniNoteConverter.Octave.TAAR,
+            ),
+        )
     }
 }

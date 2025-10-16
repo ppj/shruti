@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_settings")
 
 class UserSettingsRepository(context: Context) {
-
     private val dataStore = context.dataStore
 
     private object PreferencesKeys {
@@ -28,65 +27,66 @@ class UserSettingsRepository(context: Context) {
         val TANPURA_VOLUME = floatPreferencesKey("tanpura_volume")
     }
 
-    val userSettings: Flow<UserSettings> = dataStore.data.map {
-        preferences ->
-        val saNote = preferences[PreferencesKeys.SA_NOTE] ?: "C3"
-        val toleranceCents = preferences[PreferencesKeys.TOLERANCE_CENTS] ?: 15.0
-        val use22Shruti = preferences[PreferencesKeys.USE_22_SHRUTI] ?: false
-        val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: false
-        val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: "P"
-        val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: 0.5f
-        // Calculate saFrequency from saNote
-        val saFrequency = SaParser.parseToFrequency(saNote) ?: 130.81
-        UserSettings(
-            saNote = saNote,
-            saFrequency = saFrequency,
-            toleranceCents = toleranceCents,
-            use22Shruti = use22Shruti,
-            isTanpuraEnabled = isTanpuraEnabled,
-            tanpuraString1 = tanpuraString1,
-            tanpuraVolume = tanpuraVolume
-        )
-    }
+    val userSettings: Flow<UserSettings> =
+        dataStore.data.map {
+                preferences ->
+            val saNote = preferences[PreferencesKeys.SA_NOTE] ?: "C3"
+            val toleranceCents = preferences[PreferencesKeys.TOLERANCE_CENTS] ?: 15.0
+            val use22Shruti = preferences[PreferencesKeys.USE_22_SHRUTI] ?: false
+            val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: false
+            val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: "P"
+            val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: 0.5f
+            // Calculate saFrequency from saNote
+            val saFrequency = SaParser.parseToFrequency(saNote) ?: 130.81
+            UserSettings(
+                saNote = saNote,
+                saFrequency = saFrequency,
+                toleranceCents = toleranceCents,
+                use22Shruti = use22Shruti,
+                isTanpuraEnabled = isTanpuraEnabled,
+                tanpuraString1 = tanpuraString1,
+                tanpuraVolume = tanpuraVolume,
+            )
+        }
 
     suspend fun updateSaNote(saNote: String) {
         dataStore.edit {
-            preferences ->
+                preferences ->
             preferences[PreferencesKeys.SA_NOTE] = saNote
         }
     }
 
     suspend fun updateTolerance(tolerance: Double) {
         dataStore.edit {
-            preferences ->
+                preferences ->
             preferences[PreferencesKeys.TOLERANCE_CENTS] = tolerance
         }
     }
 
     suspend fun updateTuningSystem(use22Shruti: Boolean) {
         dataStore.edit {
-            preferences ->
+                preferences ->
             preferences[PreferencesKeys.USE_22_SHRUTI] = use22Shruti
         }
     }
 
     suspend fun updateTanpuraEnabled(enabled: Boolean) {
         dataStore.edit {
-            preferences ->
+                preferences ->
             preferences[PreferencesKeys.IS_TANPURA_ENABLED] = enabled
         }
     }
 
     suspend fun updateTanpuraString1(string1: String) {
         dataStore.edit {
-            preferences ->
+                preferences ->
             preferences[PreferencesKeys.TANPURA_STRING1] = string1
         }
     }
 
     suspend fun updateTanpuraVolume(volume: Float) {
         dataStore.edit {
-            preferences ->
+                preferences ->
             preferences[PreferencesKeys.TANPURA_VOLUME] = volume
         }
     }

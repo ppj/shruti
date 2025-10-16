@@ -4,8 +4,8 @@ package com.hindustani.pitchdetector.ui.findsa
  * Represents a musical note with its name and frequency
  */
 data class Note(
-    val name: String,        // e.g., "C3", "G#3"
-    val frequency: Double    // in Hz
+    val name: String, // e.g., "C3", "G#3"
+    val frequency: Double, // in Hz
 )
 
 /**
@@ -28,7 +28,7 @@ enum class TestMode {
      * Use both speaking and singing analysis (recommended)
      * Most accurate, combines both methods with weighted average
      */
-    BOTH
+    BOTH,
 }
 
 /**
@@ -75,7 +75,7 @@ sealed class FindSaState {
         val lowestNote: Note,
         val highestNote: Note,
         val speakingPitch: Note? = null,
-        val testMode: TestMode = TestMode.BOTH
+        val testMode: TestMode = TestMode.BOTH,
     ) : FindSaState()
 }
 
@@ -84,8 +84,8 @@ sealed class FindSaState {
  */
 data class FindSaUiState(
     val currentState: FindSaState = FindSaState.SelectingMode,
-    val currentPitch: Float = 0f,  // Real-time pitch feedback during recording (in Hz)
-    val collectedSamplesCount: Int = 0,  // Number of valid samples collected
+    val currentPitch: Float = 0f, // Real-time pitch feedback during recording (in Hz)
+    val collectedSamplesCount: Int = 0, // Number of valid samples collected
     val error: String? = null,
-    val testMode: TestMode = TestMode.BOTH  // Selected test mode
+    val testMode: TestMode = TestMode.BOTH, // Selected test mode
 )

@@ -18,17 +18,18 @@ fun HelpTooltip(
     text: String,
     modifier: Modifier = Modifier,
     actionLabel: String? = null,
-    onActionClick: (() -> Unit)? = null
+    onActionClick: (() -> Unit)? = null,
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
     Icon(
         imageVector = Icons.Default.Info,
         contentDescription = "Tip",
-        modifier = modifier
-            .size(20.dp)
-            .clickable { showDialog = true },
-        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        modifier =
+            modifier
+                .size(20.dp)
+                .clickable { showDialog = true },
+        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
     )
 
     if (showDialog) {
@@ -41,18 +42,21 @@ fun HelpTooltip(
                     Text("Got it")
                 }
             },
-            dismissButton = if (actionLabel != null && onActionClick != null) {
-                {
-                    TextButton(
-                        onClick = {
-                            showDialog = false
-                            onActionClick()
+            dismissButton =
+                if (actionLabel != null && onActionClick != null) {
+                    {
+                        TextButton(
+                            onClick = {
+                                showDialog = false
+                                onActionClick()
+                            },
+                        ) {
+                            Text(actionLabel)
                         }
-                    ) {
-                        Text(actionLabel)
                     }
-                }
-            } else null
+                } else {
+                    null
+                },
         )
     }
 }

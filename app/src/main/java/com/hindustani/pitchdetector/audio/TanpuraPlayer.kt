@@ -31,35 +31,37 @@ class TanpuraPlayer(private val context: Context) {
 
         // Map frequencies to Sa note names for file lookup
         // Covers G#2 to A#3 (15 semitones)
-        private val SA_FREQUENCY_MAP = mapOf(
-            103.83 to "gs2",
-            110.00 to "a2",
-            116.54 to "as2",
-            123.47 to "b2",
-            130.81 to "c3",
-            138.59 to "cs3",
-            146.83 to "d3",
-            155.56 to "ds3",
-            164.81 to "e3",
-            174.61 to "f3",
-            185.00 to "fs3",
-            196.00 to "g3",
-            207.65 to "gs3",
-            220.00 to "a3",
-            233.08 to "as3"
-        )
+        private val SA_FREQUENCY_MAP =
+            mapOf(
+                103.83 to "gs2",
+                110.00 to "a2",
+                116.54 to "as2",
+                123.47 to "b2",
+                130.81 to "c3",
+                138.59 to "cs3",
+                146.83 to "d3",
+                155.56 to "ds3",
+                164.81 to "e3",
+                174.61 to "f3",
+                185.00 to "fs3",
+                196.00 to "g3",
+                207.65 to "gs3",
+                220.00 to "a3",
+                233.08 to "as3",
+            )
 
         // Available String 1 notes (most common)
         private val AVAILABLE_STRING1_NOTES = listOf("P", "m", "M", "S", "N")
 
         // Map user-facing note names to filename suffixes (case-insensitive for macOS)
-        private val NOTE_TO_FILENAME = mapOf(
-            "P" to "P",
-            "m" to "ms",   // shuddha madhyam
-            "M" to "Mt",   // tivra madhyam
-            "S" to "S",
-            "N" to "N"
-        )
+        private val NOTE_TO_FILENAME =
+            mapOf(
+                "P" to "P",
+                "m" to "ms", // shuddha madhyam
+                "M" to "Mt", // tivra madhyam
+                "S" to "S",
+                "N" to "N",
+            )
     }
 
     private var audioTrack: AudioTrack? = null
@@ -67,14 +69,18 @@ class TanpuraPlayer(private val context: Context) {
     private var pcmData: ShortArray? = null
 
     // Tanpura configuration
-    private var currentSaFrequency: Double = 130.81  // Default C3
-    private var currentString1Note: String = "P"     // Default to Pa
+    private var currentSaFrequency: Double = 130.81 // Default C3
+    private var currentString1Note: String = "P" // Default to Pa
     private var currentVolume: Float = 0.5f
 
     /**
      * Start playing the tanpura
      */
-    fun start(saFreq: Double, string1: String, vol: Float = 0.5f) {
+    fun start(
+        saFreq: Double,
+        string1: String,
+        vol: Float = 0.5f,
+    ) {
         Log.d(TAG, "start() called: saFreq=$saFreq, string1=$string1, vol=$vol")
 
         // Stop existing playback
@@ -85,111 +91,114 @@ class TanpuraPlayer(private val context: Context) {
         currentString1Note = string1
         currentVolume = vol.coerceIn(0f, 1f)
 
-        playbackJob = CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // Find closest Sa frequency in our map
-                val saName = findClosestSaName(saFreq)
+        playbackJob =
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // Find closest Sa frequency in our map
+                    val saName = findClosestSaName(saFreq)
 
-                // Map user-facing note name to filename suffix
-                val filenameSuffix = NOTE_TO_FILENAME[string1] ?: string1
+                    // Map user-facing note name to filename suffix
+                    val filenameSuffix = NOTE_TO_FILENAME[string1] ?: string1
 
-                // Construct filename: tanpura/<sa>_<suffix>.ogg
-                val filename = "tanpura/${saName}_${filenameSuffix}.ogg"
+                    // Construct filename: tanpura/<sa>_<suffix>.ogg
+                    val filename = "tanpura/${saName}_$filenameSuffix.ogg"
 
-                Log.d(TAG, "Loading and decoding file: $filename")
+                    Log.d(TAG, "Loading and decoding file: $filename")
 
-                // Decode OGG to PCM
-                val decodedPcm = decodeOggToPcm(filename)
-                if (decodedPcm == null || decodedPcm.isEmpty()) {
-                    Log.e(TAG, "Failed to decode audio file")
-                    return@launch
-                }
-
-                pcmData = decodedPcm
-                Log.d(TAG, "Decoded ${decodedPcm.size} samples")
-
-                // Calculate buffer size
-                val bufferSize = AudioTrack.getMinBufferSize(
-                    SAMPLE_RATE,
-                    AudioFormat.CHANNEL_OUT_STEREO,
-                    AudioFormat.ENCODING_PCM_16BIT
-                ).let { minSize ->
-                    maxOf(minSize * 2, 8192)
-                }
-
-                // Create AudioTrack
-                audioTrack = AudioTrack.Builder()
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .build()
-                    )
-                    .setAudioFormat(
-                        AudioFormat.Builder()
-                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                            .setSampleRate(SAMPLE_RATE)
-                            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-                            .build()
-                    )
-                    .setBufferSizeInBytes(bufferSize)
-                    .setTransferMode(AudioTrack.MODE_STREAM)
-                    .build()
-
-                if (audioTrack?.state != AudioTrack.STATE_INITIALIZED) {
-                    Log.e(TAG, "AudioTrack initialization failed")
-                    return@launch
-                }
-
-                // Set volume
-                audioTrack?.setVolume(currentVolume)
-
-                // Start playback
-                audioTrack?.play()
-                Log.d(TAG, "AudioTrack started, beginning gapless loop")
-
-                // Continuous gapless looping
-                var position = 0
-                val writeSize = minOf(bufferSize / 2, decodedPcm.size)
-
-                while (isActive) {
-                    // Write chunk to AudioTrack
-                    val written = audioTrack?.write(
-                        decodedPcm,
-                        position,
-                        minOf(writeSize, decodedPcm.size - position)
-                    ) ?: 0
-
-                    if (written > 0) {
-                        position += written
-
-                        // Loop seamlessly
-                        if (position >= decodedPcm.size) {
-                            position = 0
-                        }
-                    } else {
-                        Log.w(TAG, "AudioTrack write returned $written")
-                        break
+                    // Decode OGG to PCM
+                    val decodedPcm = decodeOggToPcm(filename)
+                    if (decodedPcm == null || decodedPcm.isEmpty()) {
+                        Log.e(TAG, "Failed to decode audio file")
+                        return@launch
                     }
-                }
 
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in tanpura playback", e)
-            } finally {
-                // Cleanup
-                audioTrack?.apply {
-                    try {
-                        if (playState == AudioTrack.PLAYSTATE_PLAYING) {
-                            stop()
+                    pcmData = decodedPcm
+                    Log.d(TAG, "Decoded ${decodedPcm.size} samples")
+
+                    // Calculate buffer size
+                    val bufferSize =
+                        AudioTrack.getMinBufferSize(
+                            SAMPLE_RATE,
+                            AudioFormat.CHANNEL_OUT_STEREO,
+                            AudioFormat.ENCODING_PCM_16BIT,
+                        ).let { minSize ->
+                            maxOf(minSize * 2, 8192)
                         }
-                        release()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error cleaning up AudioTrack", e)
+
+                    // Create AudioTrack
+                    audioTrack =
+                        AudioTrack.Builder()
+                            .setAudioAttributes(
+                                AudioAttributes.Builder()
+                                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                    .build(),
+                            )
+                            .setAudioFormat(
+                                AudioFormat.Builder()
+                                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                    .setSampleRate(SAMPLE_RATE)
+                                    .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+                                    .build(),
+                            )
+                            .setBufferSizeInBytes(bufferSize)
+                            .setTransferMode(AudioTrack.MODE_STREAM)
+                            .build()
+
+                    if (audioTrack?.state != AudioTrack.STATE_INITIALIZED) {
+                        Log.e(TAG, "AudioTrack initialization failed")
+                        return@launch
                     }
+
+                    // Set volume
+                    audioTrack?.setVolume(currentVolume)
+
+                    // Start playback
+                    audioTrack?.play()
+                    Log.d(TAG, "AudioTrack started, beginning gapless loop")
+
+                    // Continuous gapless looping
+                    var position = 0
+                    val writeSize = minOf(bufferSize / 2, decodedPcm.size)
+
+                    while (isActive) {
+                        // Write chunk to AudioTrack
+                        val written =
+                            audioTrack?.write(
+                                decodedPcm,
+                                position,
+                                minOf(writeSize, decodedPcm.size - position),
+                            ) ?: 0
+
+                        if (written > 0) {
+                            position += written
+
+                            // Loop seamlessly
+                            if (position >= decodedPcm.size) {
+                                position = 0
+                            }
+                        } else {
+                            Log.w(TAG, "AudioTrack write returned $written")
+                            break
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in tanpura playback", e)
+                } finally {
+                    // Cleanup
+                    audioTrack?.apply {
+                        try {
+                            if (playState == AudioTrack.PLAYSTATE_PLAYING) {
+                                stop()
+                            }
+                            release()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error cleaning up AudioTrack", e)
+                        }
+                    }
+                    audioTrack = null
                 }
-                audioTrack = null
             }
-        }
     }
 
     /**
@@ -277,7 +286,6 @@ class TanpuraPlayer(private val context: Context) {
             }
 
             return pcmBuffer.toShortArray()
-
         } catch (e: Exception) {
             Log.e(TAG, "Error decoding OGG to PCM", e)
             return null
@@ -314,7 +322,11 @@ class TanpuraPlayer(private val context: Context) {
     /**
      * Update tanpura parameters while playing
      */
-    fun updateParameters(saFreq: Double, string1: String, vol: Float = 0.5f) {
+    fun updateParameters(
+        saFreq: Double,
+        string1: String,
+        vol: Float = 0.5f,
+    ) {
         Log.d(TAG, "updateParameters() called: saFreq=$saFreq, string1=$string1, vol=$vol")
 
         // Check if we need to reload a different file
@@ -352,8 +364,9 @@ class TanpuraPlayer(private val context: Context) {
      */
     private fun findClosestSaName(frequency: Double): String {
         // Find the closest frequency in our map
-        val closestFreq = SA_FREQUENCY_MAP.keys.minByOrNull { abs(it - frequency) }
-            ?: 130.81  // Default to C3 if nothing found
+        val closestFreq =
+            SA_FREQUENCY_MAP.keys.minByOrNull { abs(it - frequency) }
+                ?: 130.81 // Default to C3 if nothing found
 
         return SA_FREQUENCY_MAP[closestFreq] ?: "c3"
     }

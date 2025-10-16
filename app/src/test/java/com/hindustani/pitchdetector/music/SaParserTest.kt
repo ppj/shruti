@@ -2,10 +2,8 @@ package com.hindustani.pitchdetector.music
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import kotlin.math.abs
 
 class SaParserTest {
-
     @Test
     fun `parseToFrequency returns correct frequency for C4`() {
         val frequency = SaParser.parseToFrequency("C4")

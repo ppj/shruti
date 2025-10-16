@@ -9,7 +9,6 @@ import kotlin.math.pow
  * These tests verify the mathematical correctness of the Sa calculation without Android dependencies
  */
 class FindSaAlgorithmTest {
-
     // Test the 7 semitones formula (core of the algorithm)
 
     @Test

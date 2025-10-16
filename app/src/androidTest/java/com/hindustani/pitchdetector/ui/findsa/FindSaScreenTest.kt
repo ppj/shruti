@@ -12,7 +12,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class FindSaScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -30,7 +29,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -53,7 +52,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -80,7 +79,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -111,7 +110,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -149,7 +148,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = { backPressed = true },
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -170,7 +169,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -202,7 +201,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -238,7 +237,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -275,7 +274,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -313,7 +312,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -334,7 +333,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -362,7 +361,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -382,7 +381,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -405,7 +404,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -425,7 +424,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -443,7 +442,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -470,7 +469,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -493,7 +492,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -520,7 +519,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -550,7 +549,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -577,7 +576,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -615,7 +614,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -645,7 +644,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -675,7 +674,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
@@ -694,7 +693,7 @@ class FindSaScreenTest {
             FindSaScreen(
                 viewModel = viewModel,
                 onNavigateBack = {},
-                onSaSelected = {}
+                onSaSelected = {},
             )
         }
 
