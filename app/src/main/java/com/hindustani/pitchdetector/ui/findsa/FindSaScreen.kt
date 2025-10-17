@@ -843,7 +843,7 @@ private fun SampleCollectionProgress(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier =
                     Modifier
                         .fillMaxWidth()
