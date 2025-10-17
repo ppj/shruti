@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.hindustani.pitchdetector.constants.AppRoutes
 import com.hindustani.pitchdetector.ui.findsa.FindSaScreen
 import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
@@ -71,19 +72,19 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "main") {
-        composable("main") {
+    NavHost(navController = navController, startDestination = AppRoutes.MAIN) {
+        composable(AppRoutes.MAIN) {
             MainScreen(
                 viewModel = viewModel,
                 onNavigateToSettings = {
-                    navController.navigate("settings")
+                    navController.navigate(AppRoutes.SETTINGS)
                 },
                 onNavigateToFindSa = {
-                    navController.navigate("findSa")
+                    navController.navigate(AppRoutes.FIND_SA)
                 },
             )
         }
-        composable("settings") {
+        composable(AppRoutes.SETTINGS) {
             SettingsScreen(
                 viewModel = viewModel,
                 onNavigateBack = {
@@ -91,7 +92,7 @@ fun AppNavigation(
                 },
             )
         }
-        composable("findSa") {
+        composable(AppRoutes.FIND_SA) {
             FindSaScreen(
                 viewModel = findSaViewModel,
                 onNavigateBack = {

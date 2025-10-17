@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +17,13 @@ import kotlinx.coroutines.launch
 class AudioCaptureManager(
     private val sampleRate: Int = 44100,
 ) {
+    companion object {
+        private const val TAG = "AudioCaptureManager"
+        private const val BUFFER_SIZE_MULTIPLIER = 2
+        private const val DEFAULT_BUFFER_SIZE = 4096
+        private const val PCM_MAX_VALUE = 32768f
+    }
+
     private var audioRecord: AudioRecord? = null
     private var captureJob: Job? = null
 
@@ -26,7 +34,7 @@ class AudioCaptureManager(
             AudioFormat.ENCODING_PCM_16BIT,
         ).let { minSize ->
             // Use 2x minimum buffer size for better stability
-            maxOf(minSize * 2, 4096)
+            maxOf(minSize * BUFFER_SIZE_MULTIPLIER, DEFAULT_BUFFER_SIZE)
         }
 
     /**
@@ -39,7 +47,6 @@ class AudioCaptureManager(
      */
     @SuppressLint("MissingPermission")
     fun startCapture(onAudioData: (FloatArray) -> Unit): Job {
-        // Stop any existing capture
         stop()
 
         return CoroutineScope(Dispatchers.IO).launch {
@@ -67,13 +74,13 @@ class AudioCaptureManager(
                         // Convert 16-bit PCM to normalized float (-1.0 to 1.0)
                         val floatBuffer =
                             FloatArray(samplesRead) { i ->
-                                buffer[i] / 32768f
+                                buffer[i] / PCM_MAX_VALUE
                             }
                         onAudioData(floatBuffer)
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Error during audio capture", e)
             } finally {
                 stop()
             }
@@ -96,7 +103,7 @@ class AudioCaptureManager(
                 }
                 release()
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Error stopping AudioRecord", e)
             }
         }
         audioRecord = null
