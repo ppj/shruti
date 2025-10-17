@@ -7,6 +7,7 @@ import com.hindustani.pitchdetector.audio.AudioCaptureManager
 import com.hindustani.pitchdetector.audio.PYINDetector
 import com.hindustani.pitchdetector.audio.TanpuraPlayer
 import com.hindustani.pitchdetector.constants.VocalRangeConstants
+import com.hindustani.pitchdetector.music.SaNotes
 import com.hindustani.pitchdetector.ui.findsa.FindSaState
 import com.hindustani.pitchdetector.ui.findsa.FindSaUiState
 import com.hindustani.pitchdetector.ui.findsa.Note
@@ -65,28 +66,6 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Playback settings
         private const val PREVIEW_VOLUME = 0.5f
     }
-
-    // Standard Sa notes with their frequencies
-    // These are the typical Sa recommendations for different voice types
-    private val standardSaNotes =
-        mapOf(
-            "G#2" to 103.83,
-            "A2" to 110.00,
-            "A#2" to 116.54,
-            "B2" to 123.47,
-            "C3" to 130.81, // Male bass/heavy
-            "C#3" to 138.59, // Male baritone
-            "D3" to 146.83, // Male tenor
-            "D#3" to 155.56,
-            "E3" to 164.81,
-            "F3" to 174.61,
-            "F#3" to 185.00,
-            "G3" to 196.00, // Female alto/contralto
-            "G#3" to 207.65, // Female mezzo-soprano
-            "A3" to 220.00, // Female soprano
-            "A#3" to 233.08,
-            "B3" to 246.94,
-        )
 
     /**
      * Set the test mode and reset to initial state
@@ -520,18 +499,8 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
      * Snap a frequency to the nearest standard Sa note
      */
     private fun snapToNearestNote(frequency: Double): Note {
-        var closestNote = standardSaNotes.entries.first()
-        var minDifference = abs(frequency - closestNote.value)
-
-        for (entry in standardSaNotes.entries) {
-            val difference = abs(frequency - entry.value)
-            if (difference < minDifference) {
-                minDifference = difference
-                closestNote = entry
-            }
-        }
-
-        return Note(name = closestNote.key, frequency = closestNote.value)
+        val (noteName, noteFreq) = SaNotes.findClosestNote(frequency)
+        return Note(name = noteName, frequency = noteFreq)
     }
 
     /**

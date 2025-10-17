@@ -8,12 +8,12 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Log
+import com.hindustani.pitchdetector.music.SaNotes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 /**
  * Plays pre-recorded tanpura sound with 4 strings from OGG files
@@ -28,27 +28,6 @@ class TanpuraPlayer(private val context: Context) {
     companion object {
         private const val TAG = "TanpuraPlayer"
         private const val SAMPLE_RATE = 44100
-
-        // Map frequencies to Sa note names for file lookup
-        // Covers G#2 to A#3 (15 semitones)
-        private val SA_FREQUENCY_MAP =
-            mapOf(
-                103.83 to "gs2",
-                110.00 to "a2",
-                116.54 to "as2",
-                123.47 to "b2",
-                130.81 to "c3",
-                138.59 to "cs3",
-                146.83 to "d3",
-                155.56 to "ds3",
-                164.81 to "e3",
-                174.61 to "f3",
-                185.00 to "fs3",
-                196.00 to "g3",
-                207.65 to "gs3",
-                220.00 to "a3",
-                233.08 to "as3",
-            )
 
         // Available String 1 notes (most common)
         private val AVAILABLE_STRING1_NOTES = listOf("P", "m", "M", "S", "N")
@@ -362,12 +341,5 @@ class TanpuraPlayer(private val context: Context) {
     /**
      * Find the closest Sa name for a given frequency
      */
-    private fun findClosestSaName(frequency: Double): String {
-        // Find the closest frequency in our map
-        val closestFreq =
-            SA_FREQUENCY_MAP.keys.minByOrNull { abs(it - frequency) }
-                ?: 130.81 // Default to C3 if nothing found
-
-        return SA_FREQUENCY_MAP[closestFreq] ?: "c3"
-    }
+    private fun findClosestSaName(frequency: Double): String = SaNotes.findClosestSaName(frequency)
 }
