@@ -30,14 +30,14 @@ class UserSettingsRepository(context: Context) {
     val userSettings: Flow<UserSettings> =
         dataStore.data.map {
                 preferences ->
-            val saNote = preferences[PreferencesKeys.SA_NOTE] ?: "C3"
-            val toleranceCents = preferences[PreferencesKeys.TOLERANCE_CENTS] ?: 15.0
-            val use22Shruti = preferences[PreferencesKeys.USE_22_SHRUTI] ?: false
-            val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: false
-            val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: "P"
-            val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: 0.5f
+            val saNote = preferences[PreferencesKeys.SA_NOTE] ?: UserSettings.DEFAULT_SA_NOTE
+            val toleranceCents = preferences[PreferencesKeys.TOLERANCE_CENTS] ?: UserSettings.DEFAULT_TOLERANCE_CENTS
+            val use22Shruti = preferences[PreferencesKeys.USE_22_SHRUTI] ?: UserSettings.DEFAULT_USE_22_SHRUTI
+            val isTanpuraEnabled = preferences[PreferencesKeys.IS_TANPURA_ENABLED] ?: UserSettings.DEFAULT_TANPURA_ENABLED
+            val tanpuraString1 = preferences[PreferencesKeys.TANPURA_STRING1] ?: UserSettings.DEFAULT_TANPURA_STRING1
+            val tanpuraVolume = preferences[PreferencesKeys.TANPURA_VOLUME] ?: UserSettings.DEFAULT_TANPURA_VOLUME
             // Calculate saFrequency from saNote
-            val saFrequency = SaParser.parseToFrequency(saNote) ?: 130.81
+            val saFrequency = SaParser.parseToFrequency(saNote) ?: UserSettings.DEFAULT_SA_FREQUENCY
             UserSettings(
                 saNote = saNote,
                 saFrequency = saFrequency,
