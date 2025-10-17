@@ -34,8 +34,7 @@ object SaNotes {
      * Get list of Sa note-frequency pairs
      * Used by UI dropdowns and pickers
      */
-    fun getSaOptionsInRange(): List<Pair<String, Double>> =
-        SA_NOTE_TO_FREQUENCY.entries.map { (key, value) -> key to value }
+    fun getSaOptionsInRange(): List<Pair<String, Double>> = SA_NOTE_TO_FREQUENCY.entries.map { (key, value) -> key to value }
 
     /**
      * Get list of Sa note names only
@@ -69,7 +68,7 @@ object SaNotes {
     fun findClosestNote(frequency: Double): Pair<String, Double> {
         val closestEntry =
             SA_NOTE_TO_FREQUENCY.entries.minByOrNull { abs(it.value - frequency) }
-                ?: ("C3" to 130.81)
+                ?: return "C3" to 130.81
 
         return closestEntry.key to closestEntry.value
     }
