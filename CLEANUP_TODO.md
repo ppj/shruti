@@ -2,9 +2,10 @@
 
 This document contains cleanup tasks identified through code analysis and Android Lint. These will be addressed in a future PR.
 
-**Analysis Date:** 2025-10-17 (Updated with comprehensive lint analysis)
+**Analysis Date:** 2025-10-17 (Updated with comprehensive lint + DRY analysis)
 **Branch Analyzed:** `cleanup/comprehensive-cleanup` vs `main`
 **Files Analyzed:** 30 Kotlin files + all resources + manifest + build files
+**Analysis Types:** Android Lint, Code Quality Review, DRY Violations, Single Source of Truth
 
 ---
 
@@ -15,6 +16,66 @@ This document contains cleanup tasks identified through code analysis and Androi
   - Current: Directly instantiates AudioRecord without permission check
   - Risk: App will crash if permission denied
   - Solution: Wrap in permission check or add `@SuppressLint("MissingPermission")` if permission is guaranteed by caller
+
+---
+
+## Priority 1.5: Single Source of Truth - DRY Violations (CRITICAL)
+
+### 🔴 CRITICAL: Consolidate Pitch Analysis Constants
+- [ ] **FindSaViewModel.kt & FindSaScreen.kt** - Unify duplicated algorithm constants
+  - Duplicated locations:
+    - `FindSaViewModel.kt:40-59` - Defines algorithm constants (MIN_SPEECH_SAMPLES, MIN_SINGING_SAMPLES, etc.)
+    - `FindSaScreen.kt:21-22` - Redefines MIN_SPEECH_SAMPLES and MIN_SINGING_SAMPLES
+  - Risk: Algorithm parameters can drift out of sync causing bugs and making tuning difficult
+  - Solution: Consolidate all algorithm constants in FindSaViewModel companion object, remove duplicates from FindSaScreen
+  - Priority: **CRITICAL** (affects algorithm correctness)
+
+### 🟠 HIGH: Unify Default User Settings
+- [ ] **UserSettings.kt & UserSettingsRepository.kt** - Create single source of truth for defaults
+  - Duplicated locations:
+    - `UserSettings.kt:6-12` - Data class constructor default arguments
+    - `UserSettingsRepository.kt:31-37` - Null-coalescing operators with duplicate default values
+  - Risk: Defaults can diverge, causing inconsistent app behavior between fresh installs and migrations
+  - Solution: Create `companion object` in UserSettings with named constants for all defaults, reference these in repository
+  - Example:
+    ```kotlin
+    companion object {
+        const val DEFAULT_SA = "C4"
+        const val DEFAULT_TOLERANCE = 20
+        // ... etc
+    }
+    ```
+
+### 🟠 HIGH: Centralize Sa Note/Frequency Mapping
+- [ ] **Create SaNotes.kt** - Single source of truth for Sa notes and frequencies
+  - Currently duplicated in 3 files:
+    - `TanpuraPlayer.kt:23-43` - SA_FREQUENCY_MAP
+    - `SaParser.kt:47-66` - getSaOptionsInRange logic
+    - `FindSaViewModel.kt:98-117` - standardSaNotes list
+  - Risk: Adding/modifying Sa range requires changes in 3 separate files, error-prone
+  - Solution: Create new file `com.hindustani.pitchdetector.music.SaNotes.kt` with canonical mapping
+  - All three classes should reference this single source
+  - Refactoring complexity: Medium
+
+### 🟡 MEDIUM: Eliminate Test Boilerplate Duplication
+- [ ] **UI Test Files** - Create shared test utilities for ViewModel creation
+  - Duplicated in:
+    - `MainScreenTest.kt:21-24`
+    - `SettingsScreenTest.kt:19-22`
+    - `FindSaScreenTest.kt:21-24`
+  - Issue: Identical ViewModel creation boilerplate copied 3 times
+  - Solution: Create `TestViewModelFactory.kt` in androidTest or base test class with helper methods
+  - Refactoring complexity: Low
+
+### 🟢 LOW: Create Reusable UI Components
+- [ ] **SettingsScreen.kt** - Extract repeated UI patterns into reusable Composables
+  - Pattern 1: Settings section headers (duplicated 3 times)
+    - Lines 49-59 (Tolerance), 90-103 (Tuning System), 134-142 (Tanpura Volume)
+    - Solution: Create `SettingsSectionHeader(title: String, tooltipText: String)` composable
+  - Pattern 2: Labeled sliders (duplicated 2 times)
+    - Lines 61-79 (Tolerance slider), 144-162 (Volume slider)
+    - Solution: Create `LabelledSlider(value, range, labels, onValueChange)` composable
+  - Refactoring complexity: Medium
 
 ---
 
@@ -285,25 +346,40 @@ After completing cleanup tasks:
 
 ## Notes
 
-- **Estimated effort**: 4-6 hours for comprehensive cleanup
+- **Total items**: 95+ cleanup tasks identified
+- **Estimated effort**: 6-8 hours for comprehensive cleanup
+- **Critical items**: 4 (Permission check + 3 DRY violations affecting algorithm correctness)
 - **Breaking changes**: Dependency updates may introduce API changes
-- **Testing**: Thorough testing required after dependency updates
+- **Testing**: Thorough testing required after dependency updates and refactoring
 - **Priority order**: Can tackle in stages across multiple PRs if needed
+- **DRY focus**: Priority 1.5 addresses single source of truth violations that could cause bugs
 
 ---
 
 ## Recommended PR Strategy
 
 ### Option A: Single Comprehensive PR
-- All 90+ items in one PR
+- All 95+ items in one PR
 - Pros: Complete cleanup in one go
-- Cons: Very large PR, harder to review
+- Cons: Very large PR, harder to review, high risk
 
-### Option B: Multiple Focused PRs
-1. **PR 1: Critical fixes** (Priority 1-2)
-2. **PR 2: Code quality** (Priority 3-7)
+### Option B: Multiple Focused PRs (RECOMMENDED)
+1. **PR 1: Critical fixes** (Priority 1 + Priority 1.5 critical/high items)
+   - Missing permission check
+   - Critical DRY violations (pitch analysis constants, user settings defaults, Sa note mapping)
+2. **PR 2: Code quality & refactoring** (Priority 1.5 medium/low + Priority 2-7)
+   - Test utilities, UI components
+   - Error handling, business logic refactoring
+   - Remove redundant comments, extract magic numbers
 3. **PR 3: Dependency updates** (Priority 8)
+   - SDK versions
+   - AndroidX dependencies
+   - Test dependencies
 4. **PR 4: Resources & manifest** (Priority 9-10)
+   - Remove unused resources
+   - Fix string pluralization
+   - Icon improvements
+   - Screen orientation review
 
 ### Option C: As Time Permits
 - Tackle items opportunistically while working on related code
