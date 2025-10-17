@@ -12,7 +12,7 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 1: Critical Issues (Must Fix)
 
 ### 🔴 CRITICAL: Missing Permission Check
-- [ ] **AudioCaptureManager.kt:43** - Add permission check before creating AudioRecord
+- [x] **AudioCaptureManager.kt:43** - Add permission check before creating AudioRecord
   - Current: Directly instantiates AudioRecord without permission check
   - Risk: App will crash if permission denied
   - Solution: Wrap in permission check or add `@SuppressLint("MissingPermission")` if permission is guaranteed by caller
@@ -22,7 +22,7 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 1.5: Single Source of Truth - DRY Violations (CRITICAL)
 
 ### 🔴 CRITICAL: Consolidate Pitch Analysis Constants
-- [ ] **FindSaViewModel.kt & FindSaScreen.kt** - Unify duplicated algorithm constants
+- [x] **FindSaViewModel.kt & FindSaScreen.kt** - Unify duplicated algorithm constants
   - Duplicated locations:
     - `FindSaViewModel.kt:40-59` - Defines algorithm constants (MIN_SPEECH_SAMPLES, MIN_SINGING_SAMPLES, etc.)
     - `FindSaScreen.kt:21-22` - Redefines MIN_SPEECH_SAMPLES and MIN_SINGING_SAMPLES
@@ -31,7 +31,7 @@ This document contains cleanup tasks identified through code analysis and Androi
   - Priority: **CRITICAL** (affects algorithm correctness)
 
 ### 🟠 HIGH: Unify Default User Settings
-- [ ] **UserSettings.kt & UserSettingsRepository.kt** - Create single source of truth for defaults
+- [x] **UserSettings.kt & UserSettingsRepository.kt** - Create single source of truth for defaults
   - Duplicated locations:
     - `UserSettings.kt:6-12` - Data class constructor default arguments
     - `UserSettingsRepository.kt:31-37` - Null-coalescing operators with duplicate default values
@@ -47,7 +47,7 @@ This document contains cleanup tasks identified through code analysis and Androi
     ```
 
 ### 🟠 HIGH: Centralize Sa Note/Frequency Mapping
-- [ ] **Create SaNotes.kt** - Single source of truth for Sa notes and frequencies
+- [x] **Create SaNotes.kt** - Single source of truth for Sa notes and frequencies
   - Currently duplicated in 3 files:
     - `TanpuraPlayer.kt:23-43` - SA_FREQUENCY_MAP
     - `SaParser.kt:47-66` - getSaOptionsInRange logic
@@ -82,8 +82,8 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 2: Error Handling & Logging
 
 ### Improve Error Handling
-- [ ] **AudioCaptureManager.kt:61** - Replace `e.printStackTrace()` with `Log.e(TAG, "message", e)`
-- [ ] **AudioCaptureManager.kt:75** - Replace `e.printStackTrace()` with `Log.e(TAG, "message", e)`
+- [x] **AudioCaptureManager.kt:61** - Replace `e.printStackTrace()` with `Log.e(TAG, "message", e)`
+- [x] **AudioCaptureManager.kt:75** - Replace `e.printStackTrace()` with `Log.e(TAG, "message", e)`
   - Add: `private const val TAG = "AudioCaptureManager"`
 
 ### Refactor Complex Business Logic
@@ -94,7 +94,7 @@ This document contains cleanup tasks identified through code analysis and Androi
   - Benefit: Improves separation of concerns and allows for more focused unit testing
 
 ### Extract Duplicated Code
-- [ ] **FindSaViewModel.kt** - Extract duplicated outlier removal logic
+- [x] **FindSaViewModel.kt** - Extract duplicated outlier removal logic
   - Issue: Outlier removal logic is duplicated in `analyzeSpeakingOnly`, `analyzeSingingOnly`, and `analyzeBothMethods`
   - Solution: Create single private helper function `private fun removeOutliers(pitches: List<Float>, percentage: Double): List<Float>`
   - Call from all three methods to reduce code duplication
@@ -104,39 +104,39 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 3: Code Quality - Remove Redundant Comments
 
 ### Comments That Restate Code
-- [ ] **MainActivity.kt:40** - Remove "Check permission status" (self-explanatory)
-- [ ] **MainScreen.kt:36** - Remove "Dropdown state for tanpura string 1 selector"
-- [ ] **PitchViewModel.kt:40** - Remove "Smoothing for needle movement"
+- [x] **MainActivity.kt:40** - Remove "Check permission status" (self-explanatory)
+- [x] **MainScreen.kt:36** - Remove "Dropdown state for tanpura string 1 selector"
+- [x] **PitchViewModel.kt:40** - Remove "Smoothing for needle movement"
 
 ### Test Comments
-- [ ] **FindSaScreenTest.kt:40** - Remove "Should display title"
-- [ ] **FindSaScreenTest.kt:43** - Remove redundant assertion comments
-- [ ] **FindSaScreenTest.kt:46** - Remove redundant assertion comments
+- [x] **FindSaScreenTest.kt:40** - Remove "Should display title"
+- [x] **FindSaScreenTest.kt:43** - Remove redundant assertion comments
+- [x] **FindSaScreenTest.kt:46** - Remove redundant assertion comments
 
 ---
 
 ## Priority 4: Extract Magic Numbers to Constants
 
 ### AudioCaptureManager.kt
-- [ ] **Line 23** - Extract `4096` to `private const val FALLBACK_BUFFER_SIZE = 4096`
+- [x] **Line 23** - Extract `4096` to `private const val FALLBACK_BUFFER_SIZE = 4096`
 
 ### PYINDetector.kt
-- [ ] **Line 12** - Extract `0.15f` to `private const val DEFAULT_YIN_THRESHOLD = 0.15f`
-- [ ] **Lines 19, 26** - Extract `2048` to `private const val YIN_BUFFER_SIZE = 2048`
-- [ ] **Line 118** - Extract `0.7f` to `private const val VALUE_CONFIDENCE_WEIGHT = 0.7f`
-- [ ] **Line 134** - Extract `0.3f` to `private const val SEPARATION_CONFIDENCE_WEIGHT = 0.3f`
+- [x] **Line 12** - Extract `0.15f` to `private const val DEFAULT_YIN_THRESHOLD = 0.15f`
+- [x] **Lines 19, 26** - Extract `2048` to `private const val YIN_BUFFER_SIZE = 2048`
+- [x] **Line 118** - Extract `0.7f` to `private const val VALUE_CONFIDENCE_WEIGHT = 0.7f`
+- [x] **Line 134** - Extract `0.3f` to `private const val SEPARATION_CONFIDENCE_WEIGHT = 0.3f`
 
 ### TanpuraPlayer.kt
-- [ ] **Line 120** - Extract `8192` to `private const val AUDIO_TRACK_BUFFER_SIZE = 8192`
-- [ ] **Lines 200, 209** - Extract `10000` to `private const val DECODE_TIMEOUT_US = 10000L`
+- [x] **Line 120** - Extract `8192` to `private const val AUDIO_TRACK_BUFFER_SIZE = 8192`
+- [x] **Lines 200, 209** - Extract `10000` to `private const val DECODE_TIMEOUT_US = 10000L`
 
 ### PitchViewModel.kt
-- [ ] **Line 41** - Move `smoothingAlpha = 0.25` to companion object as `private const val CENTS_DEVIATION_SMOOTHING_ALPHA = 0.25`
-- [ ] **Line 128** - Extract `0.5f` to `private const val PITCH_CONFIDENCE_THRESHOLD = 0.5f`
+- [x] **Line 41** - Move `smoothingAlpha = 0.25` to companion object as `private const val CENTS_DEVIATION_SMOOTHING_ALPHA = 0.25`
+- [x] **Line 128** - Extract `0.5f` to `private const val PITCH_CONFIDENCE_THRESHOLD = 0.5f`
   - Used to decide if detected pitch is reliable enough to process
 
 ### PianoKeyboardSelector.kt
-- [ ] Extract hardcoded layout values to constants
+- [x] Extract hardcoded layout values to constants
   - Issue: Contains numerous hardcoded layout values (e.g., `90.dp`, `54.dp`, `0.5.dp`) and colors (e.g., `Color(0xFF2C2C2C)` for black keys)
   - Solution: Move these values into companion object with descriptive constant names or into `Theme.kt`
   - Benefit: Makes keyboard easier to maintain and style
@@ -146,7 +146,7 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 5: Extract Magic Strings to Constants
 
 ### Navigation Routes
-- [ ] **MainActivity.kt** - Create navigation constants object
+- [x] **MainActivity.kt** - Create navigation constants object
   ```kotlin
   object AppRoutes {
       const val MAIN = "main"
@@ -154,16 +154,16 @@ This document contains cleanup tasks identified through code analysis and Androi
       const val FIND_SA = "findSa"
   }
   ```
-- [ ] **MainActivity.kt:70** - Replace `"main"` with `AppRoutes.MAIN`
-- [ ] **MainActivity.kt:76** - Replace `"settings"` with `AppRoutes.SETTINGS`
-- [ ] **MainActivity.kt:85** - Replace `"findSa"` with `AppRoutes.FIND_SA`
+- [x] **MainActivity.kt:70** - Replace `"main"` with `AppRoutes.MAIN`
+- [x] **MainActivity.kt:76** - Replace `"settings"` with `AppRoutes.SETTINGS`
+- [x] **MainActivity.kt:85** - Replace `"findSa"` with `AppRoutes.FIND_SA`
 
 ---
 
 ## Priority 6: Refactoring Opportunities
 
 ### Self-Documenting Code
-- [ ] **PitchViewModel.kt:140** - Extract smoothing logic to `private fun createSmoothedNote(...): HindustaniNoteConverter.HindustaniNote`
+- [x] **PitchViewModel.kt:140** - Extract smoothing logic to `private fun createSmoothedNote(...): HindustaniNoteConverter.HindustaniNote`
   - Replaces comment: "Recalculate isPerfect/isFlat/isSharp based on smoothed value"
   - Makes code more testable and readable
 
