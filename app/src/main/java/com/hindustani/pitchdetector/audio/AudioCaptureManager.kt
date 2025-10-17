@@ -1,5 +1,6 @@
 package com.hindustani.pitchdetector.audio
 
+import android.annotation.SuppressLint
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -33,6 +34,8 @@ class AudioCaptureManager(
      * @param onAudioData Callback function that receives audio samples as FloatArray
      * @return Job that can be used to control the capture coroutine
      */
+    @SuppressLint("MissingPermission")
+    // Permission is checked by MainActivity before calling startCapture()
     fun startCapture(onAudioData: (FloatArray) -> Unit): Job {
         // Stop any existing capture
         stop()
