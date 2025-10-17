@@ -1,0 +1,14 @@
+[*.{kt,kts}]
+# Ktlint configuration
+# Allow inline comments (disabled due to dependency with if-else-wrapping)
+ktlint_standard_discouraged-comment-location = disabled
+ktlint_standard_if-else-wrapping = disabled
+
+# Allow wildcard imports (common in Compose and test files)
+ktlint_standard_no-wildcard-imports = disabled
+
+# Allow PascalCase function names (required for Compose @Composable functions)
+ktlint_standard_function-naming = disabled
+
+# Set max line length to 140 characters
+max_line_length = 140

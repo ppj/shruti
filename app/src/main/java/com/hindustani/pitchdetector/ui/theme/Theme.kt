@@ -15,65 +15,57 @@ import androidx.compose.ui.platform.LocalContext
  * Light color scheme inspired by Shruti logo
  * Features deep blues, warm golds, and terracotta tones
  */
-private val LightColorScheme = lightColorScheme(
-    primary = DeepBlue,
-    onPrimary = Color.White,
-    primaryContainer = LightBlue,
-    onPrimaryContainer = Color.White,
-
-    secondary = WarmGold,
-    onSecondary = TextDark,
-    secondaryContainer = LightGold,
-    onSecondaryContainer = TextDark,
-
-    tertiary = Terracotta,
-    onTertiary = Color.White,
-    tertiaryContainer = WarmOrange,
-    onTertiaryContainer = TextDark,
-
-    background = WarmWhite,
-    onBackground = TextDark,
-
-    surface = OffWhite,
-    onSurface = TextDark,
-    surfaceVariant = LightGold,
-    onSurfaceVariant = TextDark,
-
-    outline = DeepBlue.copy(alpha = 0.5f),
-    outlineVariant = WarmGold.copy(alpha = 0.3f)
-)
+private val LightColorScheme =
+    lightColorScheme(
+        primary = DeepBlue,
+        onPrimary = Color.White,
+        primaryContainer = LightBlue,
+        onPrimaryContainer = Color.White,
+        secondary = WarmGold,
+        onSecondary = TextDark,
+        secondaryContainer = LightGold,
+        onSecondaryContainer = TextDark,
+        tertiary = Terracotta,
+        onTertiary = Color.White,
+        tertiaryContainer = WarmOrange,
+        onTertiaryContainer = TextDark,
+        background = WarmWhite,
+        onBackground = TextDark,
+        surface = OffWhite,
+        onSurface = TextDark,
+        surfaceVariant = LightGold,
+        onSurfaceVariant = TextDark,
+        outline = DeepBlue.copy(alpha = 0.5f),
+        outlineVariant = WarmGold.copy(alpha = 0.3f),
+    )
 
 /**
  * Dark color scheme inspired by Shruti logo
  * Inverted palette with gold accents on dark navy background
  */
-private val DarkColorScheme = darkColorScheme(
-    primary = BrightGold,
-    onPrimary = TextDark,
-    primaryContainer = DarkNavy,
-    onPrimaryContainer = TextLight,
-
-    secondary = WarmGold,
-    onSecondary = TextDark,
-    secondaryContainer = DarkGold,
-    onSecondaryContainer = TextLight,
-
-    tertiary = WarmOrange,
-    onTertiary = TextDark,
-    tertiaryContainer = Terracotta,
-    onTertiaryContainer = Color.White,
-
-    background = DarkBackground,
-    onBackground = TextLight,
-
-    surface = DarkSurface,
-    onSurface = TextLight,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = TextLight,
-
-    outline = BrightGold.copy(alpha = 0.5f),
-    outlineVariant = WarmGold.copy(alpha = 0.3f)
-)
+private val DarkColorScheme =
+    darkColorScheme(
+        primary = BrightGold,
+        onPrimary = TextDark,
+        primaryContainer = DarkNavy,
+        onPrimaryContainer = TextLight,
+        secondary = WarmGold,
+        onSecondary = TextDark,
+        secondaryContainer = DarkGold,
+        onSecondaryContainer = TextLight,
+        tertiary = WarmOrange,
+        onTertiary = TextDark,
+        tertiaryContainer = Terracotta,
+        onTertiaryContainer = Color.White,
+        background = DarkBackground,
+        onBackground = TextLight,
+        surface = DarkSurface,
+        onSurface = TextLight,
+        surfaceVariant = DarkSurfaceVariant,
+        onSurfaceVariant = TextLight,
+        outline = BrightGold.copy(alpha = 0.5f),
+        outlineVariant = WarmGold.copy(alpha = 0.3f),
+    )
 
 /**
  * Shruti theme with support for light and dark modes
@@ -86,20 +78,21 @@ private val DarkColorScheme = darkColorScheme(
 fun ShrutiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val colorScheme =
+        when {
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                val context = LocalContext.current
+                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            }
+            darkTheme -> DarkColorScheme
+            else -> LightColorScheme
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

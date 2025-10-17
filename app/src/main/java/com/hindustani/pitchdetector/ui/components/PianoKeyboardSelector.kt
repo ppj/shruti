@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,31 +28,34 @@ import com.hindustani.pitchdetector.ui.theme.WarmGold
 fun PianoKeyboardSelector(
     selectedSa: String,
     onSaSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val whiteKeys = listOf("A2", "B2", "C3", "D3", "E3", "F3", "G3", "A3")
 
-    val blackKeysWithPositions = listOf(
-        1.0f to "A#2",
-        3.0f to "C#3",
-        4.0f to "D#3",
-        6.0f to "F#3",
-        7.0f to "G#3"
-    )
+    val blackKeysWithPositions =
+        listOf(
+            1.0f to "A#2",
+            3.0f to "C#3",
+            4.0f to "D#3",
+            6.0f to "F#3",
+            7.0f to "G#3",
+        )
 
-    val edgeBlackKeys = listOf(
-        0.0f to "G#2",
-        8.0f to "A#3"
-    )
+    val edgeBlackKeys =
+        listOf(
+            0.0f to "G#2",
+            8.0f to "A#3",
+        )
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(90.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(90.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             DummyWhiteKey(modifier = Modifier.weight(0.5f))
 
@@ -62,7 +64,7 @@ fun PianoKeyboardSelector(
                     note = note,
                     isSelected = note == selectedSa,
                     onClick = { onSaSelected(note) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
 
@@ -77,30 +79,32 @@ fun PianoKeyboardSelector(
 
             blackKeysWithPositions.forEach { (position, note) ->
                 Box(
-                    modifier = Modifier
-                        .offset(x = whiteKeyWidth * (0.5f + position) - blackKeyHalfWidth)
-                        .align(Alignment.TopStart)
+                    modifier =
+                        Modifier
+                            .offset(x = whiteKeyWidth * (0.5f + position) - blackKeyHalfWidth)
+                            .align(Alignment.TopStart),
                 ) {
                     BlackKey(
                         note = note,
                         isSelected = note == selectedSa,
                         onClick = { onSaSelected(note) },
-                        width = blackKeyWidth
+                        width = blackKeyWidth,
                     )
                 }
             }
 
             edgeBlackKeys.forEach { (position, note) ->
                 Box(
-                    modifier = Modifier
-                        .offset(x = whiteKeyWidth * (0.5f + position) - blackKeyHalfWidth)
-                        .align(Alignment.TopStart)
+                    modifier =
+                        Modifier
+                            .offset(x = whiteKeyWidth * (0.5f + position) - blackKeyHalfWidth)
+                            .align(Alignment.TopStart),
                 ) {
                     BlackKey(
                         note = note,
                         isSelected = note == selectedSa,
                         onClick = { onSaSelected(note) },
-                        width = blackKeyWidth
+                        width = blackKeyWidth,
                     )
                 }
             }
@@ -113,33 +117,37 @@ private fun WhiteKey(
     note: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .padding(horizontal = 0.5.dp)
-            .shadow(
-                elevation = if (isSelected) 0.dp else 1.dp,
-                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
-            )
-            .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
-            .background(
-                if (isSelected)
-                    WarmGold
-                else
-                    Color.White
-            )
-            .border(
-                width = 0.5.dp,
-                color = if (isSelected)
-                    WarmGold.copy(alpha = 0.8f)
-                else
-                    Color(0xFFCCCCCC),
-                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.BottomCenter
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .padding(horizontal = 0.5.dp)
+                .shadow(
+                    elevation = if (isSelected) 0.dp else 1.dp,
+                    shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp),
+                )
+                .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
+                .background(
+                    if (isSelected) {
+                        WarmGold
+                    } else {
+                        Color.White
+                    },
+                )
+                .border(
+                    width = 0.5.dp,
+                    color =
+                        if (isSelected) {
+                            WarmGold.copy(alpha = 0.8f)
+                        } else {
+                            Color(0xFFCCCCCC)
+                        },
+                    shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp),
+                )
+                .clickable(onClick = onClick),
+        contentAlignment = Alignment.BottomCenter,
     ) {
         Text(
             text = note,
@@ -148,32 +156,32 @@ private fun WhiteKey(
             color = Color.Black,
             maxLines = 1,
             softWrap = false,
-            modifier = Modifier
-                .padding(bottom = 6.dp)
-                .graphicsLayer(rotationZ = 90f)
+            modifier =
+                Modifier
+                    .padding(bottom = 6.dp)
+                    .graphicsLayer(rotationZ = 90f),
         )
     }
 }
 
 @Composable
-private fun DummyWhiteKey(
-    modifier: Modifier = Modifier
-) {
+private fun DummyWhiteKey(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .padding(horizontal = 0.5.dp)
-            .shadow(
-                elevation = 1.dp,
-                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
-            )
-            .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
-            .background(Color.White)
-            .border(
-                width = 0.5.dp,
-                color = Color.Gray,
-                shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp)
-            )
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .padding(horizontal = 0.5.dp)
+                .shadow(
+                    elevation = 1.dp,
+                    shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp),
+                )
+                .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
+                .background(Color.White)
+                .border(
+                    width = 0.5.dp,
+                    color = Color.Gray,
+                    shape = RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp),
+                ),
     )
 }
 
@@ -182,42 +190,47 @@ private fun BlackKey(
     note: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    width: Dp
+    width: Dp,
 ) {
     Box(
-        modifier = Modifier
-            .width(width)
-            .height(54.dp)
-            .shadow(
-                elevation = if (isSelected) 1.dp else 3.dp,
-                shape = RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp)
-            )
-            .clip(RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp))
-            .background(
-                if (isSelected)
-                    WarmGold
-                else
-                    Color(0xFF2C2C2C)
-            )
-            .clickable(onClick = onClick)
+        modifier =
+            Modifier
+                .width(width)
+                .height(54.dp)
+                .shadow(
+                    elevation = if (isSelected) 1.dp else 3.dp,
+                    shape = RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp),
+                )
+                .clip(RoundedCornerShape(bottomStart = 2.dp, bottomEnd = 2.dp))
+                .background(
+                    if (isSelected) {
+                        WarmGold
+                    } else {
+                        Color(0xFF2C2C2C)
+                    },
+                )
+                .clickable(onClick = onClick),
     ) {
         Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 6.dp)
-                .graphicsLayer(clip = false)
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 6.dp)
+                    .graphicsLayer(clip = false),
         ) {
             Text(
                 text = note,
                 fontSize = 12.sp,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                color = if (isSelected)
-                    Color.Black
-                else
-                    Color.White,
+                color =
+                    if (isSelected) {
+                        Color.Black
+                    } else {
+                        Color.White
+                    },
                 maxLines = 1,
                 softWrap = false,
-                modifier = Modifier.graphicsLayer(rotationZ = 90f)
+                modifier = Modifier.graphicsLayer(rotationZ = 90f),
             )
         }
     }

@@ -25,7 +25,6 @@ import kotlinx.coroutines.withContext
  * ViewModel for pitch detection and state management
  */
 class PitchViewModel(application: Application) : AndroidViewModel(application) {
-
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
     private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer(application.applicationContext)
@@ -47,7 +46,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
 
     // Smoothing for needle movement
     private var smoothedCentsDeviation: Double = 0.0
-    private val smoothingAlpha = 0.25  // 0.25 = responsive but smooth, lower = smoother but slower
+    private val smoothingAlpha = 0.25 // 0.25 = responsive but smooth, lower = smoother but slower
 
     init {
         viewModelScope.launch {
@@ -60,7 +59,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                 _pitchState.update {
                     it.copy(
                         saNote = initialSettings.saNote,
-                        saFrequency = frequency
+                        saFrequency = frequency,
                     )
                 }
             }
@@ -73,7 +72,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                     it.copy(
                         saNote = userSettings.saNote,
                         saFrequency = userSettings.saFrequency,
-                        toleranceCents = userSettings.toleranceCents
+                        toleranceCents = userSettings.toleranceCents,
                     )
                 }
             }
@@ -98,11 +97,12 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         // Reset smoothing when starting new recording session
         smoothedCentsDeviation = 0.0
 
-        processingJob = audioCapture.startCapture { audioData ->
-            viewModelScope.launch(Dispatchers.Default) {
-                processAudioData(audioData)
+        processingJob =
+            audioCapture.startCapture { audioData ->
+                viewModelScope.launch(Dispatchers.Default) {
+                    processAudioData(audioData)
+                }
             }
-        }
         _isRecording.value = true
     }
 
@@ -129,26 +129,28 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             val frequency = pitchResult.frequency.toDouble()
 
             if (frequency in VocalRangeConstants.MIN_VOCAL_FREQ..VocalRangeConstants.MAX_VOCAL_FREQ) {
-                val converter = HindustaniNoteConverter(
-                    saFrequency = _settings.value.saFrequency,
-                    toleranceCents = _settings.value.toleranceCents,
-                    use22Shruti = _settings.value.use22Shruti
-                )
+                val converter =
+                    HindustaniNoteConverter(
+                        saFrequency = _settings.value.saFrequency,
+                        toleranceCents = _settings.value.toleranceCents,
+                        use22Shruti = _settings.value.use22Shruti,
+                    )
 
                 val note = converter.convertFrequency(frequency)
 
                 // Apply Exponential Moving Average smoothing to reduce needle jitter
                 smoothedCentsDeviation = smoothingAlpha * note.centsDeviation +
-                                        (1 - smoothingAlpha) * smoothedCentsDeviation
+                    (1 - smoothingAlpha) * smoothedCentsDeviation
 
                 // Create smoothed note with updated cents deviation
-                val smoothedNote = note.copy(
-                    centsDeviation = smoothedCentsDeviation,
-                    // Recalculate isPerfect/isFlat/isSharp based on smoothed value
-                    isPerfect = kotlin.math.abs(smoothedCentsDeviation) <= _settings.value.toleranceCents,
-                    isFlat = smoothedCentsDeviation < -_settings.value.toleranceCents,
-                    isSharp = smoothedCentsDeviation > _settings.value.toleranceCents
-                )
+                val smoothedNote =
+                    note.copy(
+                        centsDeviation = smoothedCentsDeviation,
+                        // Recalculate isPerfect/isFlat/isSharp based on smoothed value
+                        isPerfect = kotlin.math.abs(smoothedCentsDeviation) <= _settings.value.toleranceCents,
+                        isFlat = smoothedCentsDeviation < -_settings.value.toleranceCents,
+                        isSharp = smoothedCentsDeviation > _settings.value.toleranceCents,
+                    )
 
                 withContext(Dispatchers.Main) {
                     _pitchState.update {
@@ -158,7 +160,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                             confidence = pitchResult.confidence,
                             saNote = _settings.value.saNote,
                             saFrequency = _settings.value.saFrequency,
-                            toleranceCents = _settings.value.toleranceCents
+                            toleranceCents = _settings.value.toleranceCents,
                         )
                     }
                 }
@@ -170,7 +172,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                     it.copy(
                         currentNote = null,
                         currentFrequency = null,
-                        confidence = pitchResult.confidence
+                        confidence = pitchResult.confidence,
                     )
                 }
             }
@@ -192,7 +194,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             _pitchState.update {
                 it.copy(
                     saNote = westernNote,
-                    saFrequency = frequency
+                    saFrequency = frequency,
                 )
             }
 
@@ -201,7 +203,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                 tanpuraPlayer.updateParameters(
                     saFreq = frequency,
                     string1 = _settings.value.tanpuraString1,
-                    vol = _settings.value.tanpuraVolume
+                    vol = _settings.value.tanpuraVolume,
                 )
             }
         }
@@ -245,7 +247,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         tanpuraPlayer.start(
             saFreq = _settings.value.saFrequency,
             string1 = _settings.value.tanpuraString1,
-            vol = _settings.value.tanpuraVolume
+            vol = _settings.value.tanpuraVolume,
         )
         _isTanpuraPlaying.value = true
         // Persist to DataStore (flow collector will update _settings)
@@ -280,7 +282,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
                 string1 = swara,
-                vol = _settings.value.tanpuraVolume
+                vol = _settings.value.tanpuraVolume,
             )
         }
     }
@@ -299,7 +301,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
                 string1 = _settings.value.tanpuraString1,
-                vol = volume
+                vol = volume,
             )
         }
     }

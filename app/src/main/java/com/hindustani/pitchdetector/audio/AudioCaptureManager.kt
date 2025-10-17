@@ -13,19 +13,20 @@ import kotlinx.coroutines.launch
  * Manages real-time audio capture from device microphone
  */
 class AudioCaptureManager(
-    private val sampleRate: Int = 44100
+    private val sampleRate: Int = 44100,
 ) {
     private var audioRecord: AudioRecord? = null
     private var captureJob: Job? = null
 
-    private val bufferSize = AudioRecord.getMinBufferSize(
-        sampleRate,
-        AudioFormat.CHANNEL_IN_MONO,
-        AudioFormat.ENCODING_PCM_16BIT
-    ).let { minSize ->
-        // Use 2x minimum buffer size for better stability
-        maxOf(minSize * 2, 4096)
-    }
+    private val bufferSize =
+        AudioRecord.getMinBufferSize(
+            sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+        ).let { minSize ->
+            // Use 2x minimum buffer size for better stability
+            maxOf(minSize * 2, 4096)
+        }
 
     /**
      * Starts capturing audio and calls the callback with audio data
@@ -38,13 +39,14 @@ class AudioCaptureManager(
 
         return CoroutineScope(Dispatchers.IO).launch {
             try {
-                audioRecord = AudioRecord(
-                    MediaRecorder.AudioSource.MIC,
-                    sampleRate,
-                    AudioFormat.CHANNEL_IN_MONO,
-                    AudioFormat.ENCODING_PCM_16BIT,
-                    bufferSize
-                )
+                audioRecord =
+                    AudioRecord(
+                        MediaRecorder.AudioSource.MIC,
+                        sampleRate,
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT,
+                        bufferSize,
+                    )
 
                 if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
                     throw IllegalStateException("AudioRecord initialization failed")
@@ -58,9 +60,10 @@ class AudioCaptureManager(
 
                     if (samplesRead > 0) {
                         // Convert 16-bit PCM to normalized float (-1.0 to 1.0)
-                        val floatBuffer = FloatArray(samplesRead) { i ->
-                            buffer[i] / 32768f
-                        }
+                        val floatBuffer =
+                            FloatArray(samplesRead) { i ->
+                                buffer[i] / 32768f
+                            }
                         onAudioData(floatBuffer)
                     }
                 }

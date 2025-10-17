@@ -11,5 +11,5 @@ data class PitchState(
     val confidence: Float = 0f,
     val saNote: String = "C3",
     val saFrequency: Double = 130.81,
-    val toleranceCents: Double = 15.0
+    val toleranceCents: Double = 15.0,
 )
