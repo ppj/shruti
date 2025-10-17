@@ -74,7 +74,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.7")
@@ -84,7 +84,7 @@ dependencies {
 
     // Testing - Unit Tests
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("com.google.truth:truth:1.1.5")
