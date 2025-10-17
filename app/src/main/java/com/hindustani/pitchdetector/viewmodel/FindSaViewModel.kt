@@ -44,9 +44,9 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         private const val SPEECH_CONFIDENCE_THRESHOLD = 0.7f
         private const val SINGING_CONFIDENCE_THRESHOLD = 0.8f
 
-        // Sample requirements
-        private const val MIN_SPEECH_SAMPLES = 10
-        private const val MIN_SINGING_SAMPLES = 20
+        // Sample requirements (exposed for UI progress indicators)
+        const val MIN_SPEECH_SAMPLES = 10
+        const val MIN_SINGING_SAMPLES = 20
         private const val MIN_SAMPLES_FOR_OUTLIER_REMOVAL = 20
 
         // Outlier removal percentages
