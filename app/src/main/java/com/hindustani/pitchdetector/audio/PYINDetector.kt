@@ -9,15 +9,25 @@ import kotlin.math.min
  */
 class PYINDetector(
     private val sampleRate: Int = 44100,
-    private val threshold: Float = 0.15f,
+    private val threshold: Float = DEFAULT_THRESHOLD,
 ) {
+    companion object {
+        private const val DEFAULT_THRESHOLD = 0.15f
+        private const val MIN_AUDIO_BUFFER_SIZE = 2048
+        private const val YIN_BUFFER_SIZE_DIVISOR = 2
+        private const val MAX_YIN_BUFFER_SIZE = 2048
+        private const val SEPARATION_CONFIDENCE_SCALE_FACTOR = 2f
+        private const val VALUE_CONFIDENCE_WEIGHT = 0.7f
+        private const val SEPARATION_CONFIDENCE_WEIGHT = 0.3f
+    }
+
     data class PitchResult(
         val frequency: Float?,
         val confidence: Float,
     )
 
     fun detectPitch(audioBuffer: FloatArray): PitchResult {
-        if (audioBuffer.size < 2048) {
+        if (audioBuffer.size < MIN_AUDIO_BUFFER_SIZE) {
             return PitchResult(null, 0f)
         }
 
@@ -26,28 +36,19 @@ class PYINDetector(
         // Min period (1000 Hz) = 44.1 samples
         // Max period (80 Hz) = 551 samples
         // Use half the audio buffer size or 2048, whichever is smaller
-        val yinBuffer = FloatArray(minOf(audioBuffer.size / 2, 2048))
+        val yinBuffer = FloatArray(minOf(audioBuffer.size / YIN_BUFFER_SIZE_DIVISOR, MAX_YIN_BUFFER_SIZE))
 
-        // Step 1: Calculate difference function
         calculateDifferenceFunction(audioBuffer, yinBuffer)
-
-        // Step 2: Calculate cumulative mean normalized difference function
         calculateCumulativeMeanNormalizedDifference(yinBuffer)
 
-        // Step 3: Get multiple pitch candidates with their probabilities
         val candidates = getPitchCandidates(yinBuffer)
 
         if (candidates.isEmpty()) {
             return PitchResult(null, 0f)
         }
 
-        // Step 4: Select best candidate based on probability
         val bestCandidate = candidates.maxByOrNull { it.probability }!!
-
-        // Step 5: Calculate confidence based on probability and clarity
         val confidence = calculateConfidence(bestCandidate, candidates)
-
-        // Step 6: Parabolic interpolation for sub-sample accuracy
         val refinedTau = parabolicInterpolation(yinBuffer, bestCandidate.tau)
         val frequency = sampleRate / refinedTau
 
@@ -137,13 +138,13 @@ class PYINDetector(
         val separationConfidence =
             if (secondBest != null) {
                 val separation = abs(bestCandidate.probability - secondBest.probability)
-                min(separation * 2f, 1f) // Scale separation
+                min(separation * SEPARATION_CONFIDENCE_SCALE_FACTOR, 1f) // Scale separation
             } else {
                 1f
             }
 
         // Combine both factors
-        return (valueConfidence * 0.7f + separationConfidence * 0.3f).coerceIn(0f, 1f)
+        return (valueConfidence * VALUE_CONFIDENCE_WEIGHT + separationConfidence * SEPARATION_CONFIDENCE_WEIGHT).coerceIn(0f, 1f)
     }
 
     private fun parabolicInterpolation(

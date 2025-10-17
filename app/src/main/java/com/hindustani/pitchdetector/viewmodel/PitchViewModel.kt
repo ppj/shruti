@@ -25,6 +25,11 @@ import kotlinx.coroutines.withContext
  * ViewModel for pitch detection and state management
  */
 class PitchViewModel(application: Application) : AndroidViewModel(application) {
+    companion object {
+        private const val MIN_PITCH_CONFIDENCE = 0.5f
+        private const val SMOOTHING_ALPHA = 0.25
+    }
+
     private val audioCapture = AudioCaptureManager()
     private val pitchDetector = PYINDetector()
     private val tanpuraPlayer = com.hindustani.pitchdetector.audio.TanpuraPlayer(application.applicationContext)
@@ -46,7 +51,6 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
 
     // Smoothing for needle movement
     private var smoothedCentsDeviation: Double = 0.0
-    private val smoothingAlpha = 0.25 // 0.25 = responsive but smooth, lower = smoother but slower
 
     init {
         viewModelScope.launch {
@@ -115,7 +119,6 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
         processingJob = null
         _isRecording.value = false
 
-        // Clear current note
         _pitchState.update { it.copy(currentNote = null, currentFrequency = null, confidence = 0f) }
     }
 
@@ -125,7 +128,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun processAudioData(audioData: FloatArray) {
         val pitchResult = pitchDetector.detectPitch(audioData)
 
-        if (pitchResult.frequency != null && pitchResult.confidence > 0.5f) {
+        if (pitchResult.frequency != null && pitchResult.confidence > MIN_PITCH_CONFIDENCE) {
             val frequency = pitchResult.frequency.toDouble()
 
             if (frequency in VocalRangeConstants.MIN_VOCAL_FREQ..VocalRangeConstants.MAX_VOCAL_FREQ) {
@@ -137,20 +140,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                     )
 
                 val note = converter.convertFrequency(frequency)
-
-                // Apply Exponential Moving Average smoothing to reduce needle jitter
-                smoothedCentsDeviation = smoothingAlpha * note.centsDeviation +
-                    (1 - smoothingAlpha) * smoothedCentsDeviation
-
-                // Create smoothed note with updated cents deviation
-                val smoothedNote =
-                    note.copy(
-                        centsDeviation = smoothedCentsDeviation,
-                        // Recalculate isPerfect/isFlat/isSharp based on smoothed value
-                        isPerfect = kotlin.math.abs(smoothedCentsDeviation) <= _settings.value.toleranceCents,
-                        isFlat = smoothedCentsDeviation < -_settings.value.toleranceCents,
-                        isSharp = smoothedCentsDeviation > _settings.value.toleranceCents,
-                    )
+                val smoothedNote = createSmoothedNote(note)
 
                 withContext(Dispatchers.Main) {
                     _pitchState.update {
@@ -177,6 +167,26 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+
+    /**
+     * Create a smoothed note using Exponential Moving Average to reduce needle jitter
+     * @param note The original detected note
+     * @return Note with smoothed cents deviation and recalculated isPerfect/isFlat/isSharp flags
+     */
+    private fun createSmoothedNote(note: HindustaniNoteConverter.HindustaniNote): HindustaniNoteConverter.HindustaniNote {
+        // Apply Exponential Moving Average smoothing to reduce needle jitter
+        smoothedCentsDeviation = SMOOTHING_ALPHA * note.centsDeviation +
+            (1 - SMOOTHING_ALPHA) * smoothedCentsDeviation
+
+        // Create smoothed note with updated cents deviation
+        return note.copy(
+            centsDeviation = smoothedCentsDeviation,
+            // Recalculate isPerfect/isFlat/isSharp based on smoothed value
+            isPerfect = kotlin.math.abs(smoothedCentsDeviation) <= _settings.value.toleranceCents,
+            isFlat = smoothedCentsDeviation < -_settings.value.toleranceCents,
+            isSharp = smoothedCentsDeviation > _settings.value.toleranceCents,
+        )
     }
 
     /**

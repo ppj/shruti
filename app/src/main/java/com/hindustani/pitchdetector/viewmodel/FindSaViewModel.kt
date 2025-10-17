@@ -7,6 +7,7 @@ import com.hindustani.pitchdetector.audio.AudioCaptureManager
 import com.hindustani.pitchdetector.audio.PYINDetector
 import com.hindustani.pitchdetector.audio.TanpuraPlayer
 import com.hindustani.pitchdetector.constants.VocalRangeConstants
+import com.hindustani.pitchdetector.music.SaNotes
 import com.hindustani.pitchdetector.ui.findsa.FindSaState
 import com.hindustani.pitchdetector.ui.findsa.FindSaUiState
 import com.hindustani.pitchdetector.ui.findsa.Note
@@ -44,9 +45,9 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         private const val SPEECH_CONFIDENCE_THRESHOLD = 0.7f
         private const val SINGING_CONFIDENCE_THRESHOLD = 0.8f
 
-        // Sample requirements
-        private const val MIN_SPEECH_SAMPLES = 10
-        private const val MIN_SINGING_SAMPLES = 20
+        // Sample requirements (exposed for UI progress indicators)
+        const val MIN_SPEECH_SAMPLES = 10
+        const val MIN_SINGING_SAMPLES = 20
         private const val MIN_SAMPLES_FOR_OUTLIER_REMOVAL = 20
 
         // Outlier removal percentages
@@ -65,28 +66,6 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Playback settings
         private const val PREVIEW_VOLUME = 0.5f
     }
-
-    // Standard Sa notes with their frequencies
-    // These are the typical Sa recommendations for different voice types
-    private val standardSaNotes =
-        mapOf(
-            "G#2" to 103.83,
-            "A2" to 110.00,
-            "A#2" to 116.54,
-            "B2" to 123.47,
-            "C3" to 130.81, // Male bass/heavy
-            "C#3" to 138.59, // Male baritone
-            "D3" to 146.83, // Male tenor
-            "D#3" to 155.56,
-            "E3" to 164.81,
-            "F3" to 174.61,
-            "F#3" to 185.00,
-            "G3" to 196.00, // Female alto/contralto
-            "G#3" to 207.65, // Female mezzo-soprano
-            "A3" to 220.00, // Female soprano
-            "A#3" to 233.08,
-            "B3" to 246.94,
-        )
 
     /**
      * Set the test mode and reset to initial state
@@ -217,15 +196,12 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
      * Stop the singing test and analyze the collected data
      */
     fun stopTest() {
-        // Stop audio capture
         audioCapture.stop()
         recordingJob?.cancel()
         recordingJob = null
 
-        // Update state to Analyzing
         _uiState.update { it.copy(currentState = FindSaState.Analyzing) }
 
-        // Analyze the collected pitches
         viewModelScope.launch(Dispatchers.Default) {
             try {
                 val result = analyzePitches(collectedSpeechPitches, collectedSingingPitches)
@@ -333,14 +309,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         val recommendedSa = snapToNearestNote(saFromSpeaking)
 
         // Calculate speaking pitch note
-        val sortedSpeech = speechPitches.sorted()
-        val speechOutlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
-        val filteredSpeech =
-            if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-                sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
-            } else {
-                sortedSpeech
-            }
+        val filteredSpeech = removeOutliers(speechPitches, SPEECH_OUTLIER_PERCENTAGE)
         val speakingPitchNote = frequencyToNote(filteredSpeech.average())
 
         // For speaking only, use speaking pitch range as vocal range estimate
@@ -370,14 +339,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         // Process singing pitches
-        val sortedSingingPitches = singingPitches.sorted()
-        val outlierCutoff = (sortedSingingPitches.size * SINGING_OUTLIER_PERCENTAGE).toInt()
-        val filteredSingingPitches =
-            if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-                sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
-            } else {
-                sortedSingingPitches
-            }
+        val filteredSingingPitches = removeOutliers(singingPitches, SINGING_OUTLIER_PERCENTAGE)
 
         // Find minimum and maximum comfortable frequencies
         val lowestFreq = filteredSingingPitches.first().toDouble()
@@ -416,14 +378,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         // Process singing pitches
-        val sortedSingingPitches = singingPitches.sorted()
-        val outlierCutoff = (sortedSingingPitches.size * SINGING_OUTLIER_PERCENTAGE).toInt()
-        val filteredSingingPitches =
-            if (sortedSingingPitches.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-                sortedSingingPitches.subList(outlierCutoff, sortedSingingPitches.size - outlierCutoff)
-            } else {
-                sortedSingingPitches
-            }
+        val filteredSingingPitches = removeOutliers(singingPitches, SINGING_OUTLIER_PERCENTAGE)
 
         // Find minimum and maximum comfortable frequencies
         val lowestFreq = filteredSingingPitches.first().toDouble()
@@ -456,14 +411,7 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
         // Calculate speaking pitch note if available
         val speakingPitchNote =
             if (saFromSpeaking != null && speechPitches.size >= MIN_SPEECH_SAMPLES) {
-                val sortedSpeech = speechPitches.sorted()
-                val speechOutlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
-                val filteredSpeech =
-                    if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-                        sortedSpeech.subList(speechOutlierCutoff, sortedSpeech.size - speechOutlierCutoff)
-                    } else {
-                        sortedSpeech
-                    }
+                val filteredSpeech = removeOutliers(speechPitches, SPEECH_OUTLIER_PERCENTAGE)
                 frequencyToNote(filteredSpeech.average())
             } else {
                 null
@@ -480,20 +428,30 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Remove outliers from a list of pitch samples
+     * @param pitches List of pitch frequencies
+     * @param outlierPercentage Percentage of outliers to remove from each end (e.g., 0.05 = 5%)
+     * @return Sorted list with outliers removed, or original sorted list if too few samples
+     */
+    private fun removeOutliers(
+        pitches: List<Float>,
+        outlierPercentage: Double,
+    ): List<Float> {
+        val sorted = pitches.sorted()
+        val outlierCutoff = (sorted.size * outlierPercentage).toInt()
+        return if (sorted.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
+            sorted.subList(outlierCutoff, sorted.size - outlierCutoff)
+        } else {
+            sorted
+        }
+    }
+
+    /**
      * Calculate ideal Sa from speaking pitch
      * Speaking pitch is typically in the lower-middle of vocal range
      */
     private fun calculateSaFromSpeaking(speechPitches: List<Float>): Double {
-        val sortedSpeech = speechPitches.sorted()
-
-        val outlierCutoff = (sortedSpeech.size * SPEECH_OUTLIER_PERCENTAGE).toInt()
-        val filteredSpeech =
-            if (sortedSpeech.size > MIN_SAMPLES_FOR_OUTLIER_REMOVAL) {
-                sortedSpeech.subList(outlierCutoff, sortedSpeech.size - outlierCutoff)
-            } else {
-                sortedSpeech
-            }
-
+        val filteredSpeech = removeOutliers(speechPitches, SPEECH_OUTLIER_PERCENTAGE)
         val meanSpeakingFreq = filteredSpeech.average()
 
         return meanSpeakingFreq * 2.0.pow(SA_FROM_SPEAKING_SEMITONES.toDouble() / 12.0)
@@ -520,18 +478,8 @@ class FindSaViewModel(application: Application) : AndroidViewModel(application) 
      * Snap a frequency to the nearest standard Sa note
      */
     private fun snapToNearestNote(frequency: Double): Note {
-        var closestNote = standardSaNotes.entries.first()
-        var minDifference = abs(frequency - closestNote.value)
-
-        for (entry in standardSaNotes.entries) {
-            val difference = abs(frequency - entry.value)
-            if (difference < minDifference) {
-                minDifference = difference
-                closestNote = entry
-            }
-        }
-
-        return Note(name = closestNote.key, frequency = closestNote.value)
+        val (noteName, noteFreq) = SaNotes.findClosestNote(frequency)
+        return Note(name = noteName, frequency = noteFreq)
     }
 
     /**

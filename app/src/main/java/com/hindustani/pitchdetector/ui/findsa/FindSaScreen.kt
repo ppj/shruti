@@ -14,10 +14,6 @@ import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import kotlin.math.roundToInt
 
-// Constants for sample requirements
-private const val MIN_SPEECH_SAMPLES = 10
-private const val MIN_SINGING_SAMPLES = 20
-
 /**
  * Main screen for the Find Your Sa feature
  */
@@ -446,7 +442,7 @@ fun SpeechRecordingView(
 
                 SampleCollectionProgress(
                     samplesCount = samplesCount,
-                    requiredSamples = MIN_SPEECH_SAMPLES,
+                    requiredSamples = FindSaViewModel.MIN_SPEECH_SAMPLES,
                 )
             }
         }
@@ -473,7 +469,7 @@ fun SpeechRecordingView(
                 Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-            enabled = samplesCount >= MIN_SPEECH_SAMPLES,
+            enabled = samplesCount >= FindSaViewModel.MIN_SPEECH_SAMPLES,
             colors = buttonColors,
         ) {
             Text(
@@ -553,7 +549,7 @@ fun RecordingView(
 
                 SampleCollectionProgress(
                     samplesCount = samplesCount,
-                    requiredSamples = MIN_SINGING_SAMPLES,
+                    requiredSamples = FindSaViewModel.MIN_SINGING_SAMPLES,
                     readyText = "✓ Ready to analyze",
                 )
             }
