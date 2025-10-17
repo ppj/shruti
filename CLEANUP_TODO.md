@@ -2,9 +2,9 @@
 
 This document contains cleanup tasks identified through code analysis and Android Lint. These will be addressed in a future PR.
 
-**Analysis Date:** 2025-10-17
-**Branch Analyzed:** `fix/ktlint-violations` vs `main`
-**Files Analyzed:** 29 Kotlin files
+**Analysis Date:** 2025-10-17 (Updated with comprehensive lint analysis)
+**Branch Analyzed:** `cleanup/comprehensive-cleanup` vs `main`
+**Files Analyzed:** 30 Kotlin files + all resources + manifest + build files
 
 ---
 
@@ -24,6 +24,19 @@ This document contains cleanup tasks identified through code analysis and Androi
 - [ ] **AudioCaptureManager.kt:61** - Replace `e.printStackTrace()` with `Log.e(TAG, "message", e)`
 - [ ] **AudioCaptureManager.kt:75** - Replace `e.printStackTrace()` with `Log.e(TAG, "message", e)`
   - Add: `private const val TAG = "AudioCaptureManager"`
+
+### Refactor Complex Business Logic
+- [ ] **FindSaViewModel.kt** - Refactor pitch analysis algorithm into separate class
+  - Current: ViewModel contains complex business logic for analyzing and calculating Sa recommendation
+  - Issue: Makes ViewModel large and harder to test
+  - Solution: Extract pitch analysis logic (`analyzePitches`, `combineRecommendations`, etc.) into separate `FindSaAlgorithm.kt` class
+  - Benefit: Improves separation of concerns and allows for more focused unit testing
+
+### Extract Duplicated Code
+- [ ] **FindSaViewModel.kt** - Extract duplicated outlier removal logic
+  - Issue: Outlier removal logic is duplicated in `analyzeSpeakingOnly`, `analyzeSingingOnly`, and `analyzeBothMethods`
+  - Solution: Create single private helper function `private fun removeOutliers(pitches: List<Float>, percentage: Double): List<Float>`
+  - Call from all three methods to reduce code duplication
 
 ---
 
@@ -58,6 +71,14 @@ This document contains cleanup tasks identified through code analysis and Androi
 
 ### PitchViewModel.kt
 - [ ] **Line 41** - Move `smoothingAlpha = 0.25` to companion object as `private const val CENTS_DEVIATION_SMOOTHING_ALPHA = 0.25`
+- [ ] **Line 128** - Extract `0.5f` to `private const val PITCH_CONFIDENCE_THRESHOLD = 0.5f`
+  - Used to decide if detected pitch is reliable enough to process
+
+### PianoKeyboardSelector.kt
+- [ ] Extract hardcoded layout values to constants
+  - Issue: Contains numerous hardcoded layout values (e.g., `90.dp`, `54.dp`, `0.5.dp`) and colors (e.g., `Color(0xFF2C2C2C)` for black keys)
+  - Solution: Move these values into companion object with descriptive constant names or into `Theme.kt`
+  - Benefit: Makes keyboard easier to maintain and style
 
 ---
 
@@ -136,11 +157,31 @@ This document contains cleanup tasks identified through code analysis and Androi
 
 ## Priority 9: Android Lint - Resources
 
-### Remove Unused Resources
+### Remove Unused String Resources (18 total)
+- [ ] **res/values/strings.xml:4** - Remove `start` string
+- [ ] **res/values/strings.xml:5** - Remove `stop` string
+- [ ] **res/values/strings.xml:6** - Remove `settings` string
+- [ ] **res/values/strings.xml:7** - Remove `sa_label` string
+- [ ] **res/values/strings.xml:8** - Remove `tolerance` string (or convert to plural first, see below)
+- [ ] **res/values/strings.xml:9** - Remove `beginner` string
+- [ ] **res/values/strings.xml:10** - Remove `expert` string
+- [ ] **res/values/strings.xml:11** - Remove `tuning_system` string
+- [ ] **res/values/strings.xml:12** - Remove `just_intonation` string
+- [ ] **res/values/strings.xml:13** - Remove `shruti_22` string
+- [ ] **res/values/strings.xml:14** - Remove `cents` string (or convert to plural first, see below)
+- [ ] **res/values/strings.xml:15** - Remove `perfect` string
+- [ ] **res/values/strings.xml:16** - Remove `flat` string
+- [ ] **res/values/strings.xml:17** - Remove `sharp` string
+- [ ] **res/values/strings.xml:18** - Remove `no_pitch` string
+- [ ] **res/values/strings.xml:19** - Remove `permission_required` string
+- [ ] **res/values/strings.xml:20** - Remove `grant_permission` string
+  - Note: Codebase uses hardcoded literals instead of these resources
+  - Decision: Either start using string resources or remove them
+
+### Remove Unused Drawable/Color Resources
 - [ ] **res/values/ic_launcher_colors.xml:3** - Remove or use `ic_launcher_background` color
 - [ ] **res/drawable/ic_launcher_foreground.xml** - Remove or use `ic_launcher_foreground` drawable
-- [ ] **res/values/strings.xml:4** - Remove or use `start` string
-- [ ] **res/values/strings.xml:5** - Remove or use `stop` string
+  - Note: These may be needed for adaptive icons (see Icon Issues below)
 
 ### Fix String Pluralization
 - [ ] **res/values/strings.xml:8** - Convert "Tolerance: ±%d cents" to plural resource
@@ -157,6 +198,20 @@ This document contains cleanup tasks identified through code analysis and Androi
       <item quantity="other">%d cents</item>
   </plurals>
   ```
+
+### Fix Icon Issues
+- [ ] **App launcher icons** - Fix icon shape and duplicate issues
+  - Issue: Lint reports icon shape violations and duplicate icons
+  - Problems:
+    1. Icons fill every pixel of their square region (against design guidelines)
+    2. Round icons not actually circular
+    3. `ic_launcher.png` and `ic_launcher_round.png` are identical in all density folders
+  - Solution: Implement proper adaptive icons
+    1. Create `res/mipmap-anydpi-v26/ic_launcher.xml` with foreground/background layers
+    2. Create `res/mipmap-anydpi-v26/ic_launcher_round.xml` with foreground/background layers
+    3. Reference `@drawable/ic_launcher_foreground` and `@color/ic_launcher_background`
+    4. Remove duplicate `ic_launcher.png` and `ic_launcher_round.png` from individual density folders after verification
+  - Benefit: Proper adaptive icon support for Android 8.0+ devices
 
 ---
 
@@ -240,9 +295,9 @@ After completing cleanup tasks:
 ## Recommended PR Strategy
 
 ### Option A: Single Comprehensive PR
-- All 68 items in one PR
+- All 90+ items in one PR
 - Pros: Complete cleanup in one go
-- Cons: Large PR, harder to review
+- Cons: Very large PR, harder to review
 
 ### Option B: Multiple Focused PRs
 1. **PR 1: Critical fixes** (Priority 1-2)
