@@ -64,7 +64,9 @@ fun MainScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 HelpTooltip(
-                    text = "Select your Sa (tonic/base note) on the keyboard.\n\nNot sure which Sa is right for you? Let us help you discover your ideal starting pitch!",
+                    text =
+                        "Select your Sa (tonic/base note) on the keyboard.\n\n" +
+                            "Not sure which Sa is right for you? Let us help you discover your ideal starting pitch!",
                     actionLabel = "Find My Sa",
                     onActionClick = onNavigateToFindSa,
                 )
@@ -275,7 +277,8 @@ fun MainScreen(
             HelpTooltip(
                 text =
                     "Confidence level based on audio signal quality:\n\n" +
-                        "Higher confidence means more reliable pitch detection. A quiet environment and wired headphones with a decent mic will improve confidence level.",
+                        "Higher confidence means more reliable pitch detection. " +
+                        "A quiet environment and wired headphones with a decent mic will improve confidence level.",
             )
         }
 

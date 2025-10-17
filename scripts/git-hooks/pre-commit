@@ -1,10 +1,29 @@
 #!/bin/sh
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 echo "⏳ Checking code formatting before commit..."
+
 if ./gradlew ktlintCheck --quiet 2>&1 | tail -20; then
   echo "✓ Code formatting verified"
   exit 0
 else
-  echo "✗ Formatting issues found. Run './gradlew ktlintFormat' to auto-fix or fix manually."
-  exit 1
+  echo "⚠️  Formatting issues found. Running ktlint autofix..."
+
+  if ./gradlew ktlintFormat --quiet; then
+    echo "✓ Auto-formatting complete"
+
+    # Re-stage the auto-formatted files
+    git add -u
+
+    # Verify formatting is now correct
+    if ./gradlew ktlintCheck --quiet 2>&1 | tail -20; then
+      echo "✓ All formatting issues resolved"
+      exit 0
+    else
+      echo "✗ Some formatting issues remain after auto-fix. Please review and fix manually."
+      exit 1
+    fi
+  else
+    echo "✗ Auto-formatting failed. Please fix manually."
+    exit 1
+  fi
 fi
