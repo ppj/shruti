@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.ui.components.HelpTooltip
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import kotlin.math.roundToInt
@@ -28,10 +30,13 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.title_settings)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.content_description_back),
+                        )
                     }
                 },
             )
@@ -49,7 +54,11 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Tolerance: ±${settings.toleranceCents.roundToInt()} cents",
+                    text =
+                        stringResource(
+                            R.string.text_tolerance,
+                            settings.toleranceCents.roundToInt(),
+                        ),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -76,12 +85,12 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    "Expert (±5¢)",
+                    stringResource(R.string.text_expert_tolerance),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    "Beginner (±30¢)",
+                    stringResource(R.string.text_beginner_tolerance),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -93,7 +102,7 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Tuning System",
+                    text = stringResource(R.string.text_tuning_system),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -119,7 +128,7 @@ fun SettingsScreen(
                     onClick = { viewModel.updateTuningSystem(false) },
                 )
                 Text(
-                    text = "12 Notes (Just Intonation)",
+                    text = stringResource(R.string.text_12_notes_ji),
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
@@ -133,7 +142,7 @@ fun SettingsScreen(
                     onClick = { viewModel.updateTuningSystem(true) },
                 )
                 Text(
-                    text = "22 Shruti System",
+                    text = stringResource(R.string.text_22_shruti_system),
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
@@ -144,7 +153,11 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Tanpura Volume: ${(settings.tanpuraVolume * 100).roundToInt()}%",
+                    text =
+                        stringResource(
+                            R.string.text_tanpura_volume,
+                            (settings.tanpuraVolume * 100).roundToInt(),
+                        ),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -169,12 +182,12 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    "Silent (0%)",
+                    stringResource(R.string.text_silent_volume),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    "Full (100%)",
+                    stringResource(R.string.text_full_volume),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -191,19 +204,13 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Swar Notation",
+                        text = stringResource(R.string.title_swar_notation),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text =
-                            "• Capital letters = shuddha variants (except Ma)\n" +
-                                "• Small letters = komal variants (except Ma)\n" +
-                                "• m = shuddha Ma\n" +
-                                "• M = teevra Ma\n" +
-                                "• a . before the note = mandra saptak (lower octave)\n" +
-                                "• a ' after the note = taar saptak (higher octave)",
+                        text = stringResource(R.string.text_swar_notation_details),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
