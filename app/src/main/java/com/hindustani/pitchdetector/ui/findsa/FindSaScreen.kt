@@ -8,8 +8,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import kotlin.math.roundToInt
@@ -41,8 +43,8 @@ fun FindSaScreen(
     // Dynamic title based on state
     val topBarTitle =
         when (uiState.currentState) {
-            is FindSaState.NotStarted -> "Choose Test Method"
-            else -> "Find Your Sa"
+            is FindSaState.NotStarted -> stringResource(R.string.title_choose_test_method)
+            else -> stringResource(R.string.title_find_your_sa)
         }
 
     Scaffold(
@@ -60,7 +62,10 @@ fun FindSaScreen(
                             onNavigateBack()
                         }
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.content_description_back),
+                        )
                     }
                 },
             )
@@ -159,7 +164,7 @@ fun ModeSelectionView(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Choose Test Method",
+            text = stringResource(R.string.title_choose_test_method),
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
         )
@@ -168,9 +173,9 @@ fun ModeSelectionView(
 
         // Speaking Only Mode
         ModeCard(
-            title = "Speaking Voice",
-            duration = "~10 seconds",
-            description = "Quick test based on your natural speaking pitch. Best for finding a comfortable Sa for long practice sessions.",
+            title = stringResource(R.string.title_speaking_voice),
+            duration = stringResource(R.string.text_duration_10_seconds),
+            description = stringResource(R.string.description_speaking_voice),
             isSelected = selectedMode == TestMode.SPEAKING_ONLY,
             onClick = { onModeSelected(TestMode.SPEAKING_ONLY) },
         )
@@ -179,9 +184,9 @@ fun ModeSelectionView(
 
         // Singing Only Mode
         ModeCard(
-            title = "Singing Range",
-            duration = "~20 seconds",
-            description = "Traditional method analyzing your full vocal range. Best for performance-oriented training.",
+            title = stringResource(R.string.title_singing_range),
+            duration = stringResource(R.string.text_duration_20_seconds),
+            description = stringResource(R.string.description_singing_range),
             isSelected = selectedMode == TestMode.SINGING_ONLY,
             onClick = { onModeSelected(TestMode.SINGING_ONLY) },
         )
@@ -190,9 +195,9 @@ fun ModeSelectionView(
 
         // Both Mode
         ModeCard(
-            title = "Both (Recommended)",
-            duration = "~30 seconds",
-            description = "Combines both methods for the most accurate recommendation. Analyzes both speaking pitch and vocal range.",
+            title = stringResource(R.string.title_both_recommended),
+            duration = stringResource(R.string.text_duration_30_seconds),
+            description = stringResource(R.string.description_both_recommended),
             isSelected = selectedMode == TestMode.BOTH,
             onClick = { onModeSelected(TestMode.BOTH) },
             isRecommended = true,
@@ -258,7 +263,7 @@ private fun ModeCard(
 
             if (isRecommended) {
                 Text(
-                    text = "Recommended",
+                    text = stringResource(R.string.text_recommended),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
