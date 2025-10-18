@@ -65,10 +65,8 @@ fun MainScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 HelpTooltip(
-                    text =
-                        "Select your Sa (tonic/base note) on the keyboard.\n\n" +
-                            "Not sure which Sa is right for you? Let us help you discover your ideal starting pitch!",
-                    actionLabel = "Find My Sa",
+                    text = stringResource(R.string.tooltip_select_sa),
+                    actionLabel = stringResource(R.string.button_find_my_sa),
                     onActionClick = onNavigateToFindSa,
                 )
             }
@@ -111,11 +109,7 @@ fun MainScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             HelpTooltip(
-                text =
-                    "Detected swar/shruti (in listening mode):\n" +
-                        "• Lower octave - .S, .N, .n, .D ...\n" +
-                        "• Middle octave - S, r, R, g, G ...\n" +
-                        "• Higher octave - S', r', R', g' ...",
+                text = stringResource(R.string.tooltip_detected_swara),
             )
         }
 
@@ -206,13 +200,7 @@ fun MainScreen(
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         HelpTooltip(
-                            text =
-                                "String 1 tuning:\n\n" +
-                                    "• P: Yaman, Bhoop, Bhairav etc. (most common)\n" +
-                                    "• m: Malkauns, Lalit, Bageshree, etc.\n" +
-                                    "• N: Marva, Pooriya, Sohni, etc.\n" +
-                                    "• M: Very rare (to be removed soon)\n" +
-                                    "• S: Very rare (to be removed soon)",
+                            text = stringResource(R.string.tooltip_tanpura_tuning),
                         )
                     }
 
@@ -293,10 +281,7 @@ fun MainScreen(
             )
             Spacer(modifier = Modifier.width(4.dp))
             HelpTooltip(
-                text =
-                    "Confidence level based on audio signal quality:\n\n" +
-                        "Higher confidence means more reliable pitch detection. " +
-                        "A quiet environment and wired headphones with a decent mic will improve confidence level.",
+                text = stringResource(R.string.tooltip_confidence_level),
             )
         }
 
