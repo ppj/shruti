@@ -46,8 +46,8 @@
     <!-- SettingsScreen: Tanpura Volume -->
     <string name="text_tanpura_volume">Tanpura Volume: %d%%</string>
     <string name="tooltip_tanpura_volume">Tanpura volume:\n\nUse lower volume when not using headphones to avoid interference.</string>
-    <string name="text_silent_volume">Silent (0%%)</string>
-    <string name="text_full_volume">Full (100%%)</string>
+    <string name="text_silent_volume">Silent (0%)</string>
+    <string name="text_full_volume">Full (100%)</string>
 
     <!-- SettingsScreen: Swar Notation -->
     <string name="title_swar_notation">Swar Notation</string>

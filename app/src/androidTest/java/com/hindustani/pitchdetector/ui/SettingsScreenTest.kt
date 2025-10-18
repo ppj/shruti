@@ -67,11 +67,17 @@ class SettingsScreenTest {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
 
-        // Verify tanpura volume slider is displayed
-        composeTestRule.onNodeWithText("Tanpura Volume:", substring = true).assertIsDisplayed()
+        // Verify tanpura volume slider is displayed (scroll into view first)
+        composeTestRule.onNodeWithText("Tanpura Volume:", substring = true)
+            .performScrollTo()
+            .assertIsDisplayed()
 
-        // Verify slider labels are displayed
-        composeTestRule.onNodeWithText("Silent (0%)").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Full (100%)").assertIsDisplayed()
+        // Verify slider labels are displayed (scroll into view)
+        composeTestRule.onNodeWithText("Silent (0%)")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Full (100%)")
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 }
