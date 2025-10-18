@@ -302,7 +302,7 @@ fun NotStartedView(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Find Your Ideal Sa",
+            text = stringResource(R.string.text_find_your_ideal_sa),
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
         )
@@ -312,9 +312,9 @@ fun NotStartedView(
         // Show selected test method
         val methodText =
             when (testMode) {
-                TestMode.SPEAKING_ONLY -> "Speaking Voice Method"
-                TestMode.SINGING_ONLY -> "Singing Range Method"
-                TestMode.BOTH -> "Speaking + Singing Method"
+                TestMode.SPEAKING_ONLY -> stringResource(R.string.text_speaking_voice_method)
+                TestMode.SINGING_ONLY -> stringResource(R.string.text_singing_range_method)
+                TestMode.BOTH -> stringResource(R.string.text_speaking_singing_method)
             }
         Text(
             text = methodText,
@@ -336,7 +336,7 @@ fun NotStartedView(
                 modifier = Modifier.padding(16.dp),
             ) {
                 Text(
-                    text = "How it works:",
+                    text = stringResource(R.string.text_how_it_works),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
@@ -345,29 +345,9 @@ fun NotStartedView(
 
                 val instructions =
                     when (testMode) {
-                        TestMode.SPEAKING_ONLY ->
-                            "1. Find a quiet place\n\n" +
-                                "2. Press 'Start Test' to begin\n\n" +
-                                "3. Count upwards slowly in your natural speaking voice\n\n" +
-                                "4. Continue for about 10 seconds until the indicator shows 'Ready'\n\n" +
-                                "5. We'll analyze your speaking pitch to recommend a comfortable Sa"
-
-                        TestMode.SINGING_ONLY ->
-                            "1. Find a quiet place\n\n" +
-                                "2. Press 'Start Test' to begin\n\n" +
-                                "3. Sing 'aaaaah' and glide to your lowest comfortable note, hold it\n\n" +
-                                "4. Then glide to your highest comfortable note (avoid falsetto), hold it\n\n" +
-                                "5. We'll analyze your vocal range to recommend the ideal Sa"
-
-                        TestMode.BOTH ->
-                            "1. Find a quiet place\n\n" +
-                                "2. Press 'Start Test' to begin\n\n" +
-                                "Phase 1: Speaking Voice\n" +
-                                "• Count upwards slowly in your natural speaking voice\n\n" +
-                                "Phase 2: Singing Range\n" +
-                                "• Sing 'aaaaah' and glide to your lowest comfortable note, hold it\n" +
-                                "• Then glide to your highest comfortable note (avoid falsetto), hold it\n\n" +
-                                "3. We'll analyze both your speaking pitch and vocal range to recommend the ideal Sa for you"
+                        TestMode.SPEAKING_ONLY -> stringResource(R.string.instructions_speaking_only)
+                        TestMode.SINGING_ONLY -> stringResource(R.string.instructions_singing_only)
+                        TestMode.BOTH -> stringResource(R.string.instructions_both)
                     }
 
                 Text(
@@ -388,7 +368,7 @@ fun NotStartedView(
                     .height(56.dp),
         ) {
             Text(
-                text = "Start Test",
+                text = stringResource(R.string.button_start_test),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -414,7 +394,7 @@ fun SpeechRecordingView(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Phase 1: Speaking",
+            text = stringResource(R.string.text_phase_1_speaking),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -433,7 +413,7 @@ fun SpeechRecordingView(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Count upwards slowly and naturally",
+                    text = stringResource(R.string.text_count_upwards),
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -456,9 +436,9 @@ fun SpeechRecordingView(
 
         val buttonText =
             when (testMode) {
-                TestMode.SPEAKING_ONLY -> "Stop Test"
-                TestMode.BOTH -> "Next: Vocal Range"
-                else -> "Next"
+                TestMode.SPEAKING_ONLY -> stringResource(R.string.button_stop_test)
+                TestMode.BOTH -> stringResource(R.string.button_next_vocal_range)
+                else -> stringResource(R.string.button_next)
             }
 
         val buttonColors =
@@ -487,8 +467,8 @@ fun SpeechRecordingView(
 
         val helperText =
             when (testMode) {
-                TestMode.SPEAKING_ONLY -> "Wait for the 'Ready' indicator before stopping"
-                else -> "Keep counting until ready"
+                TestMode.SPEAKING_ONLY -> stringResource(R.string.helper_wait_for_ready_stop)
+                else -> stringResource(R.string.helper_keep_counting)
             }
 
         Text(
@@ -517,7 +497,7 @@ fun RecordingView(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Phase 2: Singing Range",
+            text = stringResource(R.string.text_phase_2_singing_range),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -536,11 +516,7 @@ fun RecordingView(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text =
-                        "1. Start singing 'aaaaah'\n" +
-                            "2. Glide to your lowest comfortable note & hold\n" +
-                            "3. Glide to your highest comfortable note (avoid falsetto) & hold\n" +
-                            "4. Keep singing until the indicator shows 'Ready'",
+                    text = stringResource(R.string.instructions_singing_range_detailed),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -555,7 +531,7 @@ fun RecordingView(
                 SampleCollectionProgress(
                     samplesCount = samplesCount,
                     requiredSamples = FindSaViewModel.MIN_SINGING_SAMPLES,
-                    readyText = "✓ Ready to analyze",
+                    readyText = stringResource(R.string.text_ready_to_analyze),
                 )
             }
         }
@@ -574,7 +550,7 @@ fun RecordingView(
                 ),
         ) {
             Text(
-                text = "Stop Test",
+                text = stringResource(R.string.button_stop_test),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -582,7 +558,7 @@ fun RecordingView(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Wait for the 'Ready' indicator before stopping",
+            text = stringResource(R.string.helper_wait_for_ready_stop),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -606,7 +582,7 @@ fun AnalyzingView() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Analyzing your voice...",
+            text = stringResource(R.string.text_analyzing_voice),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -805,7 +781,7 @@ fun ResultsView(
 private fun PitchDisplay(currentPitch: Float) {
     if (currentPitch > 0) {
         Text(
-            text = "${currentPitch.roundToInt()} Hz",
+            text = stringResource(R.string.text_pitch_hz, currentPitch.roundToInt()),
             style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -821,7 +797,7 @@ private fun PitchDisplay(currentPitch: Float) {
 private fun SampleCollectionProgress(
     samplesCount: Int,
     requiredSamples: Int,
-    readyText: String = "✓ Ready",
+    readyText: String = stringResource(R.string.text_ready),
 ) {
     val isReady = samplesCount >= requiredSamples
     val progress =
@@ -856,7 +832,7 @@ private fun SampleCollectionProgress(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Collecting samples...",
+                text = stringResource(R.string.text_collecting_samples),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
