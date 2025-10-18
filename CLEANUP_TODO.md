@@ -58,7 +58,7 @@ This document contains cleanup tasks identified through code analysis and Androi
   - Refactoring complexity: Medium
 
 ### 🟡 MEDIUM: Eliminate Test Boilerplate Duplication
-- [ ] **UI Test Files** - Create shared test utilities for ViewModel creation
+- [x] **UI Test Files** - Create shared test utilities for ViewModel creation
   - Duplicated in:
     - `MainScreenTest.kt:21-24`
     - `SettingsScreenTest.kt:19-22`
@@ -300,7 +300,7 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 11: Test Coverage
 
 ### Add Test TODOs
-- [ ] **FindSaScreenTest.kt:160** - Add TODO comment for audio mocking
+- [x] **FindSaScreenTest.kt:183** - Add TODO comment for audio mocking
   ```kotlin
   // TODO: Inject mock audio data to test results view with actual pitch detection data
   ```
