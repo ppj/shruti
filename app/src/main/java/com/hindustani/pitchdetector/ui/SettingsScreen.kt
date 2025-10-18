@@ -63,11 +63,7 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 HelpTooltip(
-                    text =
-                        "Tolerance level:\n\n" +
-                            "• Expert (±5-8¢): For advanced musicians\n" +
-                            "• Intermediate (±10-15¢): For regular practice\n" +
-                            "• Beginner (±20-30¢): For those starting out",
+                    text = stringResource(R.string.tooltip_tolerance_level),
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -107,14 +103,7 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 HelpTooltip(
-                    text =
-                        "Tuning system:\n\n" +
-                            "12 Notes (JI ratios): Standard swars with komal and teevra Ma variants.\n" +
-                            "S, r, R, g, m, M, P, d, D, n, N\n" +
-                            "Recommended for general practice.\n\n" +
-                            "22-Shruti: Shrutis with microtonal variations (ati-komal, komal, teevra & ati-teevra Ma).\n" +
-                            "S, r1, r2, R1, R2, g1, g2, G1, G2, m1, m2, M1, M2, P, d1, d2, D1, D2, n1, n2, N1, N2\n" +
-                            "Recommended for raags with stricter requirements of swars.",
+                    text = stringResource(R.string.tooltip_tuning_system),
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -162,9 +151,7 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 HelpTooltip(
-                    text =
-                        "Tanpura volume:\n\n" +
-                            "Use lower volume when not using headphones to avoid interference.",
+                    text = stringResource(R.string.tooltip_tanpura_volume),
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
