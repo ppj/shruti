@@ -608,7 +608,7 @@ fun ResultsView(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Recommended Sa: ${state.originalSa.name}",
+            text = stringResource(R.string.text_recommended_sa, state.originalSa.name),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
@@ -618,9 +618,9 @@ fun ResultsView(
         // Test mode indicator
         val testMethodText =
             when (state.testMode) {
-                TestMode.SPEAKING_ONLY -> "Based on speaking voice"
-                TestMode.SINGING_ONLY -> "Based on singing range"
-                TestMode.BOTH -> "Based on speaking & singing"
+                TestMode.SPEAKING_ONLY -> stringResource(R.string.text_based_on_speaking)
+                TestMode.SINGING_ONLY -> stringResource(R.string.text_based_on_singing)
+                TestMode.BOTH -> stringResource(R.string.text_based_on_both)
             }
         Text(
             text = testMethodText,
@@ -633,7 +633,7 @@ fun ResultsView(
 
         // Frequency display
         Text(
-            text = "${state.recommendedSa.frequency.roundToInt()} Hz",
+            text = stringResource(R.string.text_frequency_hz, state.recommendedSa.frequency.roundToInt()),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -660,7 +660,7 @@ fun ResultsView(
                 modifier = Modifier.padding(16.dp),
             ) {
                 Text(
-                    text = "Your comfortable range:",
+                    text = stringResource(R.string.text_your_comfortable_range),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -672,11 +672,11 @@ fun ResultsView(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "Lowest: ${state.lowestNote.name}",
+                        text = stringResource(R.string.text_lowest_note, state.lowestNote.name),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(
-                        text = "Highest: ${state.highestNote.name}",
+                        text = stringResource(R.string.text_highest_note, state.highestNote.name),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -701,7 +701,7 @@ fun ResultsView(
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Text("-1")
+                Text(stringResource(R.string.button_minus_1))
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -718,7 +718,13 @@ fun ResultsView(
                 },
                 modifier = Modifier.weight(2f),
             ) {
-                Text(if (isPlaying) "Stop" else "Listen")
+                Text(
+                    if (isPlaying) {
+                        stringResource(R.string.button_stop)
+                    } else {
+                        stringResource(R.string.button_listen)
+                    },
+                )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -733,7 +739,7 @@ fun ResultsView(
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Text("+1")
+                Text(stringResource(R.string.button_plus_1))
             }
         }
 
@@ -751,7 +757,7 @@ fun ResultsView(
                     .height(56.dp),
         ) {
             Text(
-                text = "Accept and Save",
+                text = stringResource(R.string.button_accept_and_save),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -769,7 +775,7 @@ fun ResultsView(
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Try Again")
+            Text(stringResource(R.string.button_try_again))
         }
     }
 }
