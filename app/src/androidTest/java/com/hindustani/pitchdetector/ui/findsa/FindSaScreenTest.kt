@@ -180,6 +180,7 @@ class FindSaScreenTest {
         viewModel.stopSpeechTest()
         composeTestRule.waitForIdle()
 
+        // TODO: Inject mock audio data to test results view with actual pitch detection data
         // In a real test, we would need to inject mock audio data
         // For now, we just verify the UI structure exists
         // The Stop Test button should be present in singing phase
