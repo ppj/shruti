@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
@@ -58,7 +59,7 @@ fun MainScreen(
                 modifier = Modifier.padding(8.dp),
             ) {
                 Text(
-                    text = "Sa: ${pitchState.saNote}",
+                    text = stringResource(R.string.text_sa_label, pitchState.saNote),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -73,7 +74,10 @@ fun MainScreen(
             }
 
             IconButton(onClick = onNavigateToSettings) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings")
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.content_description_settings),
+                )
             }
         }
 
@@ -95,7 +99,7 @@ fun MainScreen(
                     HindustaniNoteConverter.Octave.TAAR -> "${currentNote.swara}'"
                 }
             } else {
-                "—"
+                stringResource(R.string.text_no_note)
             }
 
         Row(
@@ -152,7 +156,7 @@ fun MainScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_tanpura),
-                    contentDescription = "Tanpura",
+                    contentDescription = stringResource(R.string.content_description_tanpura),
                     modifier =
                         Modifier
                             .size(60.dp)
@@ -175,7 +179,11 @@ fun MainScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "String 1: ${settings.tanpuraString1}",
+                                text =
+                                    stringResource(
+                                        R.string.text_tanpura_string_1,
+                                        settings.tanpuraString1,
+                                    ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color =
                                     if (isTanpuraPlaying) {
@@ -186,7 +194,8 @@ fun MainScreen(
                             )
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Select string 1 note",
+                                contentDescription =
+                                    stringResource(R.string.content_description_select_string_1),
                                 tint =
                                     if (isTanpuraPlaying) {
                                         MaterialTheme.colorScheme.onPrimaryContainer
@@ -256,7 +265,12 @@ fun MainScreen(
                 ),
         ) {
             Text(
-                text = if (isRecording) "Stop" else "Listen",
+                text =
+                    if (isRecording) {
+                        stringResource(R.string.button_stop)
+                    } else {
+                        stringResource(R.string.button_listen)
+                    },
                 style = MaterialTheme.typography.titleLarge,
             )
         }
@@ -269,7 +283,11 @@ fun MainScreen(
             modifier = Modifier.alpha(if (isRecording) 1f else 0f),
         ) {
             Text(
-                text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
+                text =
+                    stringResource(
+                        R.string.text_confidence,
+                        (pitchState.confidence * 100).roundToInt(),
+                    ),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
             )
