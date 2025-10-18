@@ -188,31 +188,39 @@ This document contains cleanup tasks identified through code analysis and Androi
 ## Priority 8: Android Lint - Build Configuration
 
 ### Update SDK Versions
-- [ ] **build.gradle.kts** - Update `compileSdk = 34` to `36`
-- [ ] **build.gradle.kts** - Update `targetSdk = 34` to `36`
+- [x] **build.gradle.kts** - Update `compileSdk = 34` to `36`
+- [x] **build.gradle.kts** - Update `targetSdk = 34` to `36`
+
+### Update Kotlin
+- [x] **build.gradle.kts** - Update Kotlin `1.9.20` → `2.1.0` (required for dependency compatibility)
+- [x] **build.gradle.kts** - Add `org.jetbrains.kotlin.plugin.compose` plugin (required for Kotlin 2.0+)
 
 ### Update AndroidX Dependencies
-- [ ] `androidx.core:core-ktx` - Update `1.12.0` → `1.17.0`
-- [ ] `androidx.lifecycle:lifecycle-runtime-ktx` - Update `2.6.2` → `2.9.4`
-- [ ] `androidx.lifecycle:lifecycle-viewmodel-compose` - Update `2.6.2` → `2.9.4`
-- [ ] `androidx.activity:activity-compose` - Update `1.8.1` → `1.11.0`
-- [ ] `androidx.datastore:datastore-preferences` - Update `1.0.0` → `1.1.7`
-- [ ] `androidx.navigation:navigation-compose` - Update `2.7.5` → `2.9.5`
+- [x] `androidx.core:core-ktx` - Update `1.12.0` → `1.17.0`
+- [x] `androidx.lifecycle:lifecycle-runtime-ktx` - Update `2.6.2` → `2.9.4`
+- [x] `androidx.lifecycle:lifecycle-viewmodel-compose` - Update `2.6.2` → `2.9.4`
+- [x] `androidx.activity:activity-compose` - Update `1.8.1` → `1.11.0`
+- [x] `androidx.datastore:datastore-preferences` - Update `1.0.0` → `1.1.7`
+- [x] `androidx.navigation:navigation-compose` - Update `2.7.5` → `2.9.5`
 
 ### Update Compose BOM
-- [ ] `androidx.compose:compose-bom` - Update `2023.10.01` → `2025.10.00` (2 instances)
+- [x] `androidx.compose:compose-bom` - Update `2023.10.01` → `2025.10.00` (2 instances)
 
 ### Update Test Dependencies
-- [ ] `org.jetbrains.kotlinx:kotlinx-coroutines-android` - Update `1.7.3` → `1.10.2`
-- [ ] `org.jetbrains.kotlinx:kotlinx-coroutines-test` - Update `1.7.3` → `1.10.2`
-- [ ] `io.mockk:mockk` - Update `1.13.8` → `1.14.6`
-- [ ] `io.mockk:mockk-android` - Update `1.13.8` → `1.14.6`
-- [ ] `com.google.truth:truth` - Update `1.1.5` → `1.4.5`
-- [ ] `org.robolectric:robolectric` - Update `4.11.1` → `4.16`
-- [ ] `androidx.test:core` - Update `1.5.0` → `1.7.0`
-- [ ] `androidx.test:core-ktx` - Update `1.5.0` → `1.7.0`
-- [ ] `androidx.test.ext:junit` - Update `1.1.5` → `1.3.0`
-- [ ] `androidx.test.espresso:espresso-core` - Update `3.5.1` → `3.7.0`
+- [x] `org.jetbrains.kotlinx:kotlinx-coroutines-android` - Update `1.7.3` → `1.10.2`
+- [x] `org.jetbrains.kotlinx:kotlinx-coroutines-test` - Update `1.7.3` → `1.10.2`
+- [x] `io.mockk:mockk` - Update `1.13.8` → `1.14.6`
+- [x] `io.mockk:mockk-android` - Update `1.13.8` → `1.14.6`
+- [x] `com.google.truth:truth` - Update `1.1.5` → `1.4.5`
+- [x] `org.robolectric:robolectric` - Update `4.11.1` → `4.16`
+- [x] `androidx.test:core` - Update `1.5.0` → `1.7.0`
+- [x] `androidx.test:core-ktx` - Update `1.5.0` → `1.7.0`
+- [x] `androidx.test.ext:junit` - Update `1.1.5` → `1.3.0`
+- [x] `androidx.test.espresso:espresso-core` - Update `3.5.1` → `3.7.0`
+
+### Fix Deprecation Warnings
+- [x] **SettingsScreen.kt & FindSaScreen.kt** - Replace `Icons.Filled.ArrowBack` with `Icons.AutoMirrored.Filled.ArrowBack`
+- [x] **FindSaScreen.kt** - Replace `LinearProgressIndicator(progress: Float)` with lambda overload
 
 ---
 
