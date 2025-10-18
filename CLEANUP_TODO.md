@@ -226,47 +226,30 @@ This document contains cleanup tasks identified through code analysis and Androi
 
 ## Priority 9: Android Lint - Resources
 
-### Remove Unused String Resources (18 total)
-- [ ] **res/values/strings.xml:4** - Remove `start` string
-- [ ] **res/values/strings.xml:5** - Remove `stop` string
-- [ ] **res/values/strings.xml:6** - Remove `settings` string
-- [ ] **res/values/strings.xml:7** - Remove `sa_label` string
-- [ ] **res/values/strings.xml:8** - Remove `tolerance` string (or convert to plural first, see below)
-- [ ] **res/values/strings.xml:9** - Remove `beginner` string
-- [ ] **res/values/strings.xml:10** - Remove `expert` string
-- [ ] **res/values/strings.xml:11** - Remove `tuning_system` string
-- [ ] **res/values/strings.xml:12** - Remove `just_intonation` string
-- [ ] **res/values/strings.xml:13** - Remove `shruti_22` string
-- [ ] **res/values/strings.xml:14** - Remove `cents` string (or convert to plural first, see below)
-- [ ] **res/values/strings.xml:15** - Remove `perfect` string
-- [ ] **res/values/strings.xml:16** - Remove `flat` string
-- [ ] **res/values/strings.xml:17** - Remove `sharp` string
-- [ ] **res/values/strings.xml:18** - Remove `no_pitch` string
-- [ ] **res/values/strings.xml:19** - Remove `permission_required` string
-- [ ] **res/values/strings.xml:20** - Remove `grant_permission` string
-  - Note: Codebase uses hardcoded literals instead of these resources
-  - Decision: Either start using string resources or remove them
+### ~~Remove Unused String Resources~~ → Properly Implement String Resources
+- [x] **String resource migration completed**
+  - **Decision**: Instead of removing unused strings, properly implemented string resources throughout the app for better i18n and maintainability
+  - **Implementation**: Complete migration in 9 incremental commits
+    - Commit 1: Created comprehensive strings.xml with 72+ string resources covering all UI text
+    - Commits 2-8: Systematically replaced all hardcoded strings in MainScreen, SettingsScreen, and FindSaScreen
+    - All strings now use proper format strings with placeholders (%s, %d, %%)
+    - Organized by screen and purpose with clear comments
+  - **Files modified**:
+    - `app/src/main/res/values/strings.xml` - Comprehensive resource file created
+    - `app/src/main/java/com/hindustani/pitchdetector/ui/MainScreen.kt` - All strings migrated
+    - `app/src/main/java/com/hindustani/pitchdetector/ui/SettingsScreen.kt` - All strings migrated
+    - `app/src/main/java/com/hindustani/pitchdetector/ui/findsa/FindSaScreen.kt` - All strings migrated
+  - **Benefits**:
+    - Single source of truth for all user-facing text
+    - Easy to add localization support in the future
+    - Better maintainability and consistency
+    - Follows Android best practices
+    - Properly escaped XML entities and format strings
 
 ### Remove Unused Drawable/Color Resources
 - [ ] **res/values/ic_launcher_colors.xml:3** - Remove or use `ic_launcher_background` color
 - [ ] **res/drawable/ic_launcher_foreground.xml** - Remove or use `ic_launcher_foreground` drawable
   - Note: These may be needed for adaptive icons (see Icon Issues below)
-
-### Fix String Pluralization
-- [ ] **res/values/strings.xml:8** - Convert "Tolerance: ±%d cents" to plural resource
-  ```xml
-  <plurals name="tolerance">
-      <item quantity="one">Tolerance: ±%d cent</item>
-      <item quantity="other">Tolerance: ±%d cents</item>
-  </plurals>
-  ```
-- [ ] **res/values/strings.xml:14** - Convert "%d cents" to plural resource
-  ```xml
-  <plurals name="cents">
-      <item quantity="one">%d cent</item>
-      <item quantity="other">%d cents</item>
-  </plurals>
-  ```
 
 ### Fix Icon Issues
 - [ ] **App launcher icons** - Fix icon shape and duplicate issues
