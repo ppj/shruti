@@ -1,11 +1,9 @@
 package com.hindustani.pitchdetector.ui
 
-import android.app.Application
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import com.hindustani.pitchdetector.viewmodel.PitchViewModel
+import com.hindustani.pitchdetector.testutil.TestViewModelFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,14 +13,9 @@ class SettingsScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun createViewModel(): PitchViewModel {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        return PitchViewModel(context.applicationContext as Application)
-    }
-
     @Test
     fun settingsScreen_displaysAllElements() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
@@ -39,7 +32,7 @@ class SettingsScreenTest {
 
     @Test
     fun settingsScreen_toleranceSliderDisplaysCorrectly() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
@@ -54,7 +47,7 @@ class SettingsScreenTest {
 
     @Test
     fun settingsScreen_tuningSystemOptionsDisplayed() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
@@ -69,7 +62,7 @@ class SettingsScreenTest {
 
     @Test
     fun settingsScreen_tanpuraVolumeSliderDisplaysCorrectly() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }

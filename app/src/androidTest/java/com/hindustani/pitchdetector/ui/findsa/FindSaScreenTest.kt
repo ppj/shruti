@@ -1,11 +1,9 @@
 package com.hindustani.pitchdetector.ui.findsa
 
-import android.app.Application
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
+import com.hindustani.pitchdetector.testutil.TestViewModelFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,16 +13,11 @@ class FindSaScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun createViewModel(): FindSaViewModel {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        return FindSaViewModel(context.applicationContext as Application)
-    }
-
     // Initial State Tests
 
     @Test
     fun findSaScreen_displaysInitialElements() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
         composeTestRule.setContent {
             FindSaScreen(
                 viewModel = viewModel,
@@ -47,7 +40,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_displaysInstructions() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
         composeTestRule.setContent {
             FindSaScreen(
                 viewModel = viewModel,
@@ -74,7 +67,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_startTestButton_transitionsToSpeechRecording() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
         composeTestRule.setContent {
             FindSaScreen(
                 viewModel = viewModel,
@@ -105,7 +98,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_singingPhase_showsRealTimeFeedback() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
         composeTestRule.setContent {
             FindSaScreen(
                 viewModel = viewModel,
@@ -141,7 +134,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_backButton_callsNavigateBack() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
         var backPressed = false
 
         composeTestRule.setContent {
@@ -163,7 +156,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_resultsView_displaysRecommendation() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -195,7 +188,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_tryAgainButton_resetsToInitialState() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -231,7 +224,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_stopTest_transitionsToAnalyzing() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -268,7 +261,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_insufficientData_showsError() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -306,7 +299,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_notStarted_hidesRecordingComponents() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -327,7 +320,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_recording_hidesInitialComponents() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -355,7 +348,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_hasAccessibleContentDescriptions() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -375,7 +368,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_initialState_showsModeSelection() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -398,7 +391,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_modeSelection_showsDurationEstimates() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -418,7 +411,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_modeSelection_showsRecommendedLabel() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -436,7 +429,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_selectSpeakingMode_transitionsToInstructions() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -463,7 +456,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_selectSingingMode_showsSingingInstructions() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -486,7 +479,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_selectBothMode_showsBothInstructions() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -513,7 +506,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_speakingOnlyMode_skipsSingingPhase() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -543,7 +536,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_singingOnlyMode_skipsSpeechPhase() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -570,7 +563,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_bothMode_includesBothPhases() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -608,7 +601,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_speakingOnlyMode_showsCorrectButtonText() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -638,7 +631,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_bothMode_showsNextButtonInSpeechPhase() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -668,7 +661,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_modeSelection_bothModeIsDefaultSelected() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(
@@ -687,7 +680,7 @@ class FindSaScreenTest {
 
     @Test
     fun findSaScreen_canSwitchBetweenModes() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createFindSaViewModel()
 
         composeTestRule.setContent {
             FindSaScreen(

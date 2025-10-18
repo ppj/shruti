@@ -1,11 +1,9 @@
 package com.hindustani.pitchdetector.ui
 
-import android.app.Application
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import com.hindustani.pitchdetector.viewmodel.PitchViewModel
+import com.hindustani.pitchdetector.testutil.TestViewModelFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -17,14 +15,9 @@ class MainScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun createViewModel(): PitchViewModel {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        return PitchViewModel(context.applicationContext as Application)
-    }
-
     @Test
     fun mainScreen_displaysAllElements() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
             MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
         }
@@ -39,7 +32,7 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_saCanBeChanged() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
             MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
         }
@@ -55,7 +48,7 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_saSelectionIsPersisted() {
-        val viewModel = createViewModel()
+        val viewModel = TestViewModelFactory.createPitchViewModel()
 
         composeTestRule.setContent {
             MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
