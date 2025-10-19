@@ -1,13 +1,14 @@
 package com.hindustani.pitchdetector.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.hindustani.pitchdetector.R
 
 /**
  * Info icon with tooltip that appears on tap
@@ -22,24 +23,26 @@ fun HelpTooltip(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Icon(
-        imageVector = Icons.Default.Info,
-        contentDescription = "Tip",
-        modifier =
-            modifier
-                .size(20.dp)
-                .clickable { showDialog = true },
-        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-    )
+    IconButton(
+        onClick = { showDialog = true },
+        modifier = modifier,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = stringResource(R.string.content_description_tip),
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        )
+    }
 
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Tip") },
+            title = { Text(stringResource(R.string.tooltip_title)) },
             text = { Text(text) },
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Got it")
+                    Text(stringResource(R.string.tooltip_got_it))
                 }
             },
             dismissButton =

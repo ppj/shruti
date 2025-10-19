@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
@@ -45,6 +46,7 @@ fun MainScreen(
         modifier =
             Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -55,25 +57,25 @@ fun MainScreen(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp),
             ) {
                 Text(
-                    text = "Sa: ${pitchState.saNote}",
+                    text = stringResource(R.string.text_sa_label, pitchState.saNote),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 HelpTooltip(
-                    text =
-                        "Select your Sa (tonic/base note) on the keyboard.\n\n" +
-                            "Not sure which Sa is right for you? Let us help you discover your ideal starting pitch!",
-                    actionLabel = "Find My Sa",
+                    text = stringResource(R.string.tooltip_select_sa),
+                    actionLabel = stringResource(R.string.button_find_my_sa),
                     onActionClick = onNavigateToFindSa,
                 )
             }
 
             IconButton(onClick = onNavigateToSettings) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings")
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.content_description_settings),
+                )
             }
         }
 
@@ -95,7 +97,7 @@ fun MainScreen(
                     HindustaniNoteConverter.Octave.TAAR -> "${currentNote.swara}'"
                 }
             } else {
-                "—"
+                stringResource(R.string.text_no_note)
             }
 
         Row(
@@ -107,11 +109,7 @@ fun MainScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             HelpTooltip(
-                text =
-                    "Detected swar/shruti (in listening mode):\n" +
-                        "• Lower octave - .S, .N, .n, .D ...\n" +
-                        "• Middle octave - S, r, R, g, G ...\n" +
-                        "• Higher octave - S', r', R', g' ...",
+                text = stringResource(R.string.tooltip_detected_swara),
             )
         }
 
@@ -152,7 +150,7 @@ fun MainScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_tanpura),
-                    contentDescription = "Tanpura",
+                    contentDescription = stringResource(R.string.content_description_tanpura),
                     modifier =
                         Modifier
                             .size(60.dp)
@@ -175,7 +173,11 @@ fun MainScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "String 1: ${settings.tanpuraString1}",
+                                text =
+                                    stringResource(
+                                        R.string.text_tanpura_string_1,
+                                        settings.tanpuraString1,
+                                    ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color =
                                     if (isTanpuraPlaying) {
@@ -186,7 +188,8 @@ fun MainScreen(
                             )
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Select string 1 note",
+                                contentDescription =
+                                    stringResource(R.string.content_description_select_string_1),
                                 tint =
                                     if (isTanpuraPlaying) {
                                         MaterialTheme.colorScheme.onPrimaryContainer
@@ -197,13 +200,7 @@ fun MainScreen(
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         HelpTooltip(
-                            text =
-                                "String 1 tuning:\n\n" +
-                                    "• P: Yaman, Bhoop, Bhairav etc. (most common)\n" +
-                                    "• m: Malkauns, Lalit, Bageshree, etc.\n" +
-                                    "• N: Marva, Pooriya, Sohni, etc.\n" +
-                                    "• M: Very rare (to be removed soon)\n" +
-                                    "• S: Very rare (to be removed soon)",
+                            text = stringResource(R.string.tooltip_tanpura_tuning),
                         )
                     }
 
@@ -256,7 +253,12 @@ fun MainScreen(
                 ),
         ) {
             Text(
-                text = if (isRecording) "Stop" else "Listen",
+                text =
+                    if (isRecording) {
+                        stringResource(R.string.button_stop)
+                    } else {
+                        stringResource(R.string.button_listen)
+                    },
                 style = MaterialTheme.typography.titleLarge,
             )
         }
@@ -269,16 +271,17 @@ fun MainScreen(
             modifier = Modifier.alpha(if (isRecording) 1f else 0f),
         ) {
             Text(
-                text = "Confidence: ${(pitchState.confidence * 100).roundToInt()}%",
+                text =
+                    stringResource(
+                        R.string.text_confidence,
+                        (pitchState.confidence * 100).roundToInt(),
+                    ),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
             )
             Spacer(modifier = Modifier.width(4.dp))
             HelpTooltip(
-                text =
-                    "Confidence level based on audio signal quality:\n\n" +
-                        "Higher confidence means more reliable pitch detection. " +
-                        "A quiet environment and wired headphones with a decent mic will improve confidence level.",
+                text = stringResource(R.string.tooltip_confidence_level),
             )
         }
 

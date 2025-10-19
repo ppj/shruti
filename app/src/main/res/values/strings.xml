@@ -1,21 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App name -->
     <string name="app_name">Shruti</string>
-    <string name="start">Start</string>
-    <string name="stop">Stop</string>
-    <string name="settings">Settings</string>
-    <string name="sa_label">Sa (e.g., C4, A#3, Bb4)</string>
-    <string name="tolerance">Tolerance: ±%d cents</string>
-    <string name="beginner">Beginner (±30)</string>
-    <string name="expert">Expert (±5)</string>
-    <string name="tuning_system">Tuning System</string>
-    <string name="just_intonation">12 Notes (Just Intonation)</string>
-    <string name="shruti_22">22 Shruti System</string>
-    <string name="cents">%d cents</string>
-    <string name="perfect">Perfect!</string>
-    <string name="flat">Flat ↓</string>
-    <string name="sharp">Sharp ↑</string>
-    <string name="no_pitch">—</string>
-    <string name="permission_required">Microphone permission is required for pitch detection</string>
-    <string name="grant_permission">Grant Permission</string>
+
+    <!-- Common UI elements -->
+    <string name="content_description_settings">Settings</string>
+    <string name="content_description_back">Back</string>
+    <string name="button_listen">Listen</string>
+    <string name="button_stop">Stop</string>
+
+    <!-- HelpTooltip component -->
+    <string name="tooltip_title">Tip</string>
+    <string name="tooltip_got_it">Got it</string>
+    <string name="content_description_tip">Tip</string>
+
+    <!-- MainScreen: Sa selection -->
+    <string name="text_sa_label">Sa: %s</string>
+    <string name="tooltip_select_sa">Select your Sa (tonic/base note) on the keyboard.\n\nNot sure which Sa is right for you? Let us help you discover your ideal starting pitch!</string>
+    <string name="button_find_my_sa">Find My Sa</string>
+    <string name="text_no_note">—</string>
+
+    <!-- MainScreen: Detected swara -->
+    <string name="tooltip_detected_swara">Detected swar/shruti (in listening mode):\n• Lower octave - .S, .N, .n, .D ...\n• Middle octave - S, r, R, g, G ...\n• Higher octave - S\', r\', R\', g\' ...</string>
+
+    <!-- MainScreen: Tanpura -->
+    <string name="content_description_tanpura">Tanpura</string>
+    <string name="text_tanpura_string_1">String 1: %s</string>
+    <string name="content_description_select_string_1">Select string 1 note</string>
+    <string name="tooltip_tanpura_tuning">String 1 tuning:\n\n• P: Yaman, Bhoop, Bhairav etc. (most common)\n• m: Malkauns, Lalit, Bageshree, etc.\n• N: Marva, Pooriya, Sohni, etc.\n• M: Very rare (to be removed soon)\n• S: Very rare (to be removed soon)</string>
+
+    <!-- MainScreen: Confidence -->
+    <string name="text_confidence">Confidence: %d%%</string>
+    <string name="tooltip_confidence_level">Confidence level based on audio signal quality:\n\nHigher confidence means more reliable pitch detection. A quiet environment and wired headphones with a decent mic will improve confidence level.</string>
+
+    <!-- SettingsScreen: Title -->
+    <string name="title_settings">Settings</string>
+
+    <!-- SettingsScreen: Tolerance -->
+    <string name="text_tolerance">Tolerance: ±%d cents</string>
+    <string name="tooltip_tolerance_level">Tolerance level:\n\n• Expert (±5-8¢): For advanced musicians\n• Intermediate (±10-15¢): For regular practice\n• Beginner (±20-30¢): For those starting out</string>
+    <string name="text_expert_tolerance">Expert (±5¢)</string>
+    <string name="text_beginner_tolerance">Beginner (±30¢)</string>
+
+    <!-- SettingsScreen: Tuning System -->
+    <string name="text_tuning_system">Tuning System</string>
+    <string name="tooltip_tuning_system">Tuning system:\n\n12 Notes (JI ratios): Standard swars with komal and teevra Ma variants.\nS, r, R, g, m, M, P, d, D, n, N\nRecommended for general practice.\n\n22-Shruti: Shrutis with microtonal variations (ati-komal, komal, teevra &amp; ati-teevra Ma).\nS, r1, r2, R1, R2, g1, g2, G1, G2, m1, m2, M1, M2, P, d1, d2, D1, D2, n1, n2, N1, N2\nRecommended for raags with stricter requirements of swars.</string>
+    <string name="text_12_notes_ji">12 Notes (Just Intonation)</string>
+    <string name="text_22_shruti_system">22 Shruti System</string>
+
+    <!-- SettingsScreen: Tanpura Volume -->
+    <string name="text_tanpura_volume">Tanpura Volume: %d%%</string>
+    <string name="tooltip_tanpura_volume">Tanpura volume:\n\nUse lower volume when not using headphones to avoid interference.</string>
+    <string name="text_silent_volume">Silent (0%)</string>
+    <string name="text_full_volume">Full (100%)</string>
+
+    <!-- SettingsScreen: Swar Notation -->
+    <string name="title_swar_notation">Swar Notation</string>
+    <string name="text_swar_notation_details">• Capital letters = shuddha variants (except Ma)\n• Small letters = komal variants (except Ma)\n• m = shuddha Ma\n• M = teevra Ma\n• a . before the note = mandra saptak (lower octave)\n• a \' after the note = taar saptak (higher octave)</string>
+
+    <!-- FindSaScreen: Titles -->
+    <string name="title_find_your_sa">Find Your Sa</string>
+    <string name="title_choose_test_method">Choose Test Method</string>
+    <string name="text_find_your_ideal_sa">Find Your Ideal Sa</string>
+
+    <!-- FindSaScreen: Mode selection -->
+    <string name="title_speaking_voice">Speaking Voice</string>
+    <string name="text_duration_10_seconds">~10 seconds</string>
+    <string name="description_speaking_voice">Quick test based on your natural speaking pitch. Best for finding a comfortable Sa for long practice sessions.</string>
+
+    <string name="title_singing_range">Singing Range</string>
+    <string name="text_duration_20_seconds">~20 seconds</string>
+    <string name="description_singing_range">Traditional method analyzing your full vocal range. Best for performance-oriented training.</string>
+
+    <string name="title_both_recommended">Both (Recommended)</string>
+    <string name="text_duration_30_seconds">~30 seconds</string>
+    <string name="description_both_recommended">Combines both methods for the most accurate recommendation. Analyzes both speaking pitch and vocal range.</string>
+    <string name="text_recommended">Recommended</string>
+
+    <!-- FindSaScreen: Method labels -->
+    <string name="text_speaking_voice_method">Speaking Voice Method</string>
+    <string name="text_singing_range_method">Singing Range Method</string>
+    <string name="text_speaking_singing_method">Speaking + Singing Method</string>
+
+    <!-- FindSaScreen: Instructions -->
+    <string name="text_how_it_works">How it works:</string>
+    <string name="instructions_speaking_only">1. Find a quiet place\n\n2. Press \'Start Test\' to begin\n\n3. Count upwards slowly in your natural speaking voice\n\n4. Continue for about 10 seconds until the indicator shows \'Ready\'\n\n5. We\'ll analyze your speaking pitch to recommend a comfortable Sa</string>
+    <string name="instructions_singing_only">1. Find a quiet place\n\n2. Press \'Start Test\' to begin\n\n3. Sing \'aaaaah\' and glide to your lowest comfortable note, hold it\n\n4. Then glide to your highest comfortable note (avoid falsetto), hold it\n\n5. We\'ll analyze your vocal range to recommend the ideal Sa</string>
+    <string name="instructions_both">1. Find a quiet place\n\n2. Press \'Start Test\' to begin\n\nPhase 1: Speaking Voice\n• Count upwards slowly in your natural speaking voice\n\nPhase 2: Singing Range\n• Sing \'aaaaah\' and glide to your lowest comfortable note, hold it\n• Then glide to your highest comfortable note (avoid falsetto), hold it\n\n3. We\'ll analyze both your speaking pitch and vocal range to recommend the ideal Sa for you</string>
+
+    <!-- FindSaScreen: Recording UI -->
+    <string name="button_start_test">Start Test</string>
+    <string name="button_stop_test">Stop Test</string>
+    <string name="button_next_vocal_range">Next: Vocal Range</string>
+    <string name="button_next">Next</string>
+
+    <string name="text_phase_1_speaking">Phase 1: Speaking</string>
+    <string name="text_count_upwards">Count upwards slowly and naturally</string>
+    <string name="helper_wait_for_ready_stop">Wait for the \'Ready\' indicator before stopping</string>
+    <string name="helper_keep_counting">Keep counting until ready</string>
+
+    <string name="text_phase_2_singing_range">Phase 2: Singing Range</string>
+    <string name="instructions_singing_range_detailed">1. Start singing \'aaaaah\'\n2. Glide to your lowest comfortable note &amp; hold\n3. Glide to your highest comfortable note (avoid falsetto) &amp; hold\n4. Keep singing until the indicator shows \'Ready\'</string>
+
+    <string name="text_ready_to_analyze">✓ Ready to analyze</string>
+    <string name="text_ready">✓ Ready</string>
+    <string name="text_collecting_samples">Collecting samples...</string>
+    <string name="text_analyzing_voice">Analyzing your voice...</string>
+
+    <!-- FindSaScreen: Results -->
+    <string name="text_recommended_sa">Recommended Sa: %s</string>
+    <string name="text_based_on_speaking">Based on speaking voice</string>
+    <string name="text_based_on_singing">Based on singing range</string>
+    <string name="text_based_on_both">Based on speaking &amp; singing</string>
+    <string name="text_frequency_hz">%d Hz</string>
+    <string name="text_your_comfortable_range">Your comfortable range:</string>
+    <string name="text_lowest_note">Lowest: %s</string>
+    <string name="text_highest_note">Highest: %s</string>
+    <string name="text_pitch_hz">%d Hz</string>
+
+    <!-- FindSaScreen: Actions -->
+    <string name="button_minus_1">-1</string>
+    <string name="button_plus_1">+1</string>
+    <string name="button_accept_and_save">Accept and Save</string>
+    <string name="button_try_again">Try Again</string>
 </resources>
