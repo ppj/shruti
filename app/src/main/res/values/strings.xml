@@ -9,6 +9,11 @@
     <string name="button_listen">Listen</string>
     <string name="button_stop">Stop</string>
 
+    <!-- HelpTooltip component -->
+    <string name="tooltip_title">Tip</string>
+    <string name="tooltip_got_it">Got it</string>
+    <string name="content_description_tip">Tip</string>
+
     <!-- MainScreen: Sa selection -->
     <string name="text_sa_label">Sa: %s</string>
     <string name="tooltip_select_sa">Select your Sa (tonic/base note) on the keyboard.\n\nNot sure which Sa is right for you? Let us help you discover your ideal starting pitch!</string>

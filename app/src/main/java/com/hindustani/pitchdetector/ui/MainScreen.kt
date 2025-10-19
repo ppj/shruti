@@ -46,6 +46,7 @@ fun MainScreen(
         modifier =
             Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -56,7 +57,6 @@ fun MainScreen(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp),
             ) {
                 Text(
                     text = stringResource(R.string.text_sa_label, pitchState.saNote),
