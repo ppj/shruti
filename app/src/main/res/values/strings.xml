@@ -123,4 +123,23 @@
     <string name="button_plus_1">+1</string>
     <string name="button_accept_and_save">Accept and Save</string>
     <string name="button_try_again">Try Again</string>
+
+    <!-- TrainingScreen: General -->
+    <string name="content_description_navigate_back">Navigate back</string>
+    <string name="text_training_level">Training: Level %d</string>
+
+    <!-- TrainingScreen: Countdown -->
+    <string name="text_get_ready">Get Ready</string>
+
+    <!-- TrainingScreen: Training content -->
+    <string name="text_next_note">Next: %s</string>
+    <string name="text_last_note">Last note!</string>
+    <string name="text_holding_correctly">Great! Keep holding...</string>
+    <string name="text_sing_and_hold">Sing and hold the note</string>
+
+    <!-- TrainingScreen: Completion dialog -->
+    <string name="text_congratulations">Congratulations!</string>
+    <string name="text_level_complete">You have completed Level %d successfully!</string>
+    <string name="button_back_to_main">Back to Main</string>
+    <string name="button_repeat_level">Repeat Level</string>
 </resources>
