@@ -36,53 +36,58 @@ class StringPluckPlayer {
      * @param frequency The frequency in Hz (e.g., 261.63 for middle C)
      * @param volume The playback volume (0.0 to 1.0), defaults to 1.0
      */
-    fun play(frequency: Double, volume: Float = 1.0f) {
+    fun play(
+        frequency: Double,
+        volume: Float = 1.0f,
+    ) {
         stop() // Ensure any previous sound is stopped and released
 
-        playbackJob = coroutineScope.launch {
-            try {
-                val pcmData = generateSineWaveWithDecay(frequency)
-                val bufferSizeInBytes = pcmData.size * 2 // Short is 2 bytes
+        playbackJob =
+            coroutineScope.launch {
+                try {
+                    val pcmData = generateSineWaveWithDecay(frequency)
+                    val bufferSizeInBytes = pcmData.size * 2 // Short is 2 bytes
 
-                audioTrack = AudioTrack.Builder()
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    audioTrack =
+                        AudioTrack.Builder()
+                            .setAudioAttributes(
+                                AudioAttributes.Builder()
+                                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                    .build(),
+                            )
+                            .setAudioFormat(
+                                AudioFormat.Builder()
+                                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                    .setSampleRate(SAMPLE_RATE)
+                                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                                    .build(),
+                            )
+                            .setBufferSizeInBytes(bufferSizeInBytes)
+                            .setTransferMode(AudioTrack.MODE_STATIC)
                             .build()
-                    )
-                    .setAudioFormat(
-                        AudioFormat.Builder()
-                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                            .setSampleRate(SAMPLE_RATE)
-                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                            .build()
-                    )
-                    .setBufferSizeInBytes(bufferSizeInBytes)
-                    .setTransferMode(AudioTrack.MODE_STATIC)
-                    .build()
 
-                audioTrack?.apply {
-                    // Write the entire PCM data to the buffer
-                    write(pcmData, 0, pcmData.size)
+                    audioTrack?.apply {
+                        // Write the entire PCM data to the buffer
+                        write(pcmData, 0, pcmData.size)
 
-                    // Set volume and start playback
-                    setVolume(volume.coerceIn(0f, 1f))
-                    play()
+                        // Set volume and start playback
+                        setVolume(volume.coerceIn(0f, 1f))
+                        play()
 
-                    // Wait for playback to complete naturally
-                    // In MODE_STATIC, getPlaybackHeadPosition() tracks progress
-                    while (playState == AudioTrack.PLAYSTATE_PLAYING) {
-                        kotlinx.coroutines.delay(50)
+                        // Wait for playback to complete naturally
+                        // In MODE_STATIC, getPlaybackHeadPosition() tracks progress
+                        while (playState == AudioTrack.PLAYSTATE_PLAYING) {
+                            kotlinx.coroutines.delay(50)
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error playing string pluck at $frequency Hz", e)
+                } finally {
+                    // Clean up after playback completes
+                    releaseAudioTrack()
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error playing string pluck at $frequency Hz", e)
-            } finally {
-                // Clean up after playback completes
-                releaseAudioTrack()
             }
-        }
     }
 
     /**
