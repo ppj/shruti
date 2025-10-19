@@ -156,11 +156,12 @@ private fun TrainingContent(
     ) {
         // Next note preview
         Text(
-            text = if (nextSwara != null) {
-                stringResource(R.string.text_next_note, nextSwara)
-            } else {
-                stringResource(R.string.text_last_note)
-            },
+            text =
+                if (nextSwara != null) {
+                    stringResource(R.string.text_next_note, nextSwara)
+                } else {
+                    stringResource(R.string.text_last_note)
+                },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -201,11 +202,12 @@ private fun TrainingContent(
 
         // Feedback text
         Text(
-            text = if (isHoldingCorrectly) {
-                stringResource(R.string.text_holding_correctly)
-            } else {
-                stringResource(R.string.text_sing_and_hold)
-            },
+            text =
+                if (isHoldingCorrectly) {
+                    stringResource(R.string.text_holding_correctly)
+                } else {
+                    stringResource(R.string.text_sing_and_hold)
+                },
             style = MaterialTheme.typography.titleMedium,
             color = if (isHoldingCorrectly) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = if (isHoldingCorrectly) FontWeight.Bold else FontWeight.Normal,
