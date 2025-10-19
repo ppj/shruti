@@ -7,4 +7,5 @@ object AppRoutes {
     const val MAIN = "main"
     const val SETTINGS = "settings"
     const val FIND_SA = "findSa"
+    const val TRAINING = "training"
 }
