@@ -14,14 +14,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.hindustani.pitchdetector.constants.AppRoutes
 import com.hindustani.pitchdetector.ui.findsa.FindSaScreen
 import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
+import com.hindustani.pitchdetector.ui.training.TrainingScreen
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
+import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: PitchViewModel by viewModels()
@@ -82,6 +87,9 @@ fun AppNavigation(
                 onNavigateToFindSa = {
                     navController.navigate(AppRoutes.FIND_SA)
                 },
+                onNavigateToTraining = { level ->
+                    navController.navigate("${AppRoutes.TRAINING}/$level")
+                },
             )
         }
         composable(AppRoutes.SETTINGS) {
@@ -102,6 +110,25 @@ fun AppNavigation(
                     // Update the Sa in PitchViewModel and persist it
                     viewModel.updateSa(saNote)
                 },
+            )
+        }
+        composable(
+            route = "${AppRoutes.TRAINING}/{level}",
+            arguments =
+                listOf(
+                    navArgument("level") {
+                        type = NavType.IntType
+                    },
+                ),
+        ) { backStackEntry ->
+            val level = backStackEntry.arguments?.getInt("level") ?: 1
+            val trainingViewModel: TrainingViewModel =
+                viewModel(
+                    factory = TrainingViewModel.provideFactory(level, viewModel),
+                )
+            TrainingScreen(
+                navController = navController,
+                viewModel = trainingViewModel,
             )
         }
     }

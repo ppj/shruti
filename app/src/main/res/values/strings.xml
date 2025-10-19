@@ -8,6 +8,8 @@
     <string name="content_description_back">Back</string>
     <string name="button_listen">Listen</string>
     <string name="button_stop">Stop</string>
+    <string name="button_training_level_1">Training: Level 1</string>
+    <string name="button_training_level_2">Training: Level 2</string>
 
     <!-- HelpTooltip component -->
     <string name="tooltip_title">Tip</string>

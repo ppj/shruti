@@ -32,6 +32,7 @@ fun MainScreen(
     viewModel: PitchViewModel,
     onNavigateToSettings: () -> Unit,
     onNavigateToFindSa: () -> Unit,
+    onNavigateToTraining: (Int) -> Unit,
 ) {
     val pitchState by viewModel.pitchState.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
@@ -261,6 +262,43 @@ fun MainScreen(
                     },
                 style = MaterialTheme.typography.titleLarge,
             )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Training buttons
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedButton(
+                onClick = { onNavigateToTraining(1) },
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(48.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.button_training_level_1),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
+            OutlinedButton(
+                onClick = { onNavigateToTraining(2) },
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(48.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.button_training_level_2),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
         }
 
         // Confidence indicator (subtle) - always reserve space to prevent button movement
