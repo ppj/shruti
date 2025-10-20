@@ -207,6 +207,11 @@ class TrainingViewModel(
             if (pitchViewModel.isRecording.value) {
                 pitchViewModel.toggleRecording()
             }
+
+            // Stop tanpura when session completes
+            if (pitchViewModel.isTanpuraPlaying.value) {
+                pitchViewModel.toggleTanpura()
+            }
         }
     }
 
@@ -241,7 +246,9 @@ class TrainingViewModel(
             pitchViewModel.toggleRecording()
         }
 
-        // Optionally keep tanpura playing when leaving training mode
-        // Users may want it to continue for free practice
+        // Stop tanpura when leaving training mode
+        if (pitchViewModel.isTanpuraPlaying.value) {
+            pitchViewModel.toggleTanpura()
+        }
     }
 }
