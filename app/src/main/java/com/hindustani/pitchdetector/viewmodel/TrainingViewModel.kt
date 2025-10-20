@@ -20,7 +20,11 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for training mode where users practice holding swaras accurately
  *
- * @param level Training difficulty level (1 = 7 shuddha notes, 2 = all 12 notes)
+ * @param level Training difficulty level:
+ *   - 1 = 7 shuddha notes sequential
+ *   - 2 = 7 shuddha notes randomized
+ *   - 3 = 12 notes sequential
+ *   - 4 = 12 notes randomized
  * @param pitchViewModel Main PitchViewModel instance for accessing pitch data and controlling audio
  */
 class TrainingViewModel(
@@ -68,8 +72,20 @@ class TrainingViewModel(
                 initialValue = "C3",
             )
 
-    private val noteSequence: List<String> = if (level == 1) LEVEL_1_NOTES else LEVEL_2_NOTES
+    private var noteSequence: List<String> = emptyList()
     private var holdTimerJob: Job? = null
+
+    /**
+     * Generate note sequence based on level (randomized levels get new shuffle each time)
+     */
+    private fun generateNoteSequence(): List<String> =
+        when (level) {
+            1 -> LEVEL_1_NOTES // 7 shuddha notes sequential
+            2 -> LEVEL_1_NOTES.shuffled() // 7 shuddha notes randomized (new shuffle each call)
+            3 -> LEVEL_2_NOTES // 12 notes sequential
+            4 -> LEVEL_2_NOTES.shuffled() // 12 notes randomized (new shuffle each call)
+            else -> LEVEL_1_NOTES // Default to level 1
+        }
 
     init {
         initializeSession()
@@ -81,10 +97,12 @@ class TrainingViewModel(
      * Initialize the training session with first note and start tanpura
      */
     private fun initializeSession() {
+        // Generate new note sequence (randomized levels get fresh shuffle)
+        noteSequence = generateNoteSequence()
+
         _state.update {
             it.copy(
                 currentSwara = noteSequence.first(),
-                nextSwara = noteSequence.getOrNull(1),
             )
         }
 
@@ -190,7 +208,6 @@ class TrainingViewModel(
                 it.copy(
                     currentNoteIndex = nextIndex,
                     currentSwara = noteSequence[nextIndex],
-                    nextSwara = noteSequence.getOrNull(nextIndex + 1),
                     holdProgress = 0f,
                 )
             }

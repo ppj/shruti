@@ -129,16 +129,6 @@ fun TrainingScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // Next note preview above circle
-                state.nextSwara?.let { nextNote ->
-                    Text(
-                        text = stringResource(R.string.text_next_note, nextNote),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
                 // Circular progress with target note in center
                 Box(
                     contentAlignment = Alignment.Center,

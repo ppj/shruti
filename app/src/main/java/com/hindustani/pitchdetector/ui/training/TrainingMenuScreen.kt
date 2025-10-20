@@ -117,45 +117,113 @@ private fun TrainingExerciseCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Level buttons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // Level buttons - 2x2 grid
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TextButton(
-                    onClick = { onLevelClick(1) },
-                    modifier = Modifier.weight(1f),
+                // First row: Levels 1 and 2
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    TextButton(
+                        onClick = { onLevelClick(1) },
+                        modifier = Modifier.weight(1f),
                     ) {
-                        Text(
-                            text = stringResource(R.string.text_level_1),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = stringResource(R.string.text_7_shuddha_notes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.text_level_1),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = "7 notes",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "Sequential",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    TextButton(
+                        onClick = { onLevelClick(2) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.text_level_2),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = "7 notes",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "Random",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
 
-                TextButton(
-                    onClick = { onLevelClick(2) },
-                    modifier = Modifier.weight(1f),
+                // Second row: Levels 3 and 4
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    TextButton(
+                        onClick = { onLevelClick(3) },
+                        modifier = Modifier.weight(1f),
                     ) {
-                        Text(
-                            text = stringResource(R.string.text_level_2),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = stringResource(R.string.text_12_all_notes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = "Level 3",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = "12 notes",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "Sequential",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    TextButton(
+                        onClick = { onLevelClick(4) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = "Level 4",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = "12 notes",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "Random",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }
