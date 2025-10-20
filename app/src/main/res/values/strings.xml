@@ -8,8 +8,7 @@
     <string name="content_description_back">Back</string>
     <string name="button_listen">Listen</string>
     <string name="button_stop">Stop</string>
-    <string name="button_training_level_1">Training: Level 1</string>
-    <string name="button_training_level_2">Training: Level 2</string>
+    <string name="button_training">Training</string>
 
     <!-- HelpTooltip component -->
     <string name="tooltip_title">Tip</string>
@@ -125,6 +124,15 @@
     <string name="button_plus_1">+1</string>
     <string name="button_accept_and_save">Accept and Save</string>
     <string name="button_try_again">Try Again</string>
+
+    <!-- TrainingMenuScreen -->
+    <string name="title_training">Training</string>
+    <string name="title_voice_training">Voice Training</string>
+    <string name="description_voice_training">Practice holding swaras accurately with real-time feedback</string>
+    <string name="text_level_1">Level 1</string>
+    <string name="text_level_2">Level 2</string>
+    <string name="text_7_shuddha_notes">7 shuddha notes</string>
+    <string name="text_12_all_notes">All 12 notes</string>
 
     <!-- TrainingScreen: General -->
     <string name="content_description_navigate_back">Navigate back</string>

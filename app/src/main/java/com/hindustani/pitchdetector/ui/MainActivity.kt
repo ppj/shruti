@@ -23,6 +23,7 @@ import androidx.navigation.navArgument
 import com.hindustani.pitchdetector.constants.AppRoutes
 import com.hindustani.pitchdetector.ui.findsa.FindSaScreen
 import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
+import com.hindustani.pitchdetector.ui.training.TrainingMenuScreen
 import com.hindustani.pitchdetector.ui.training.TrainingScreen
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
@@ -87,8 +88,8 @@ fun AppNavigation(
                 onNavigateToFindSa = {
                     navController.navigate(AppRoutes.FIND_SA)
                 },
-                onNavigateToTraining = { level ->
-                    navController.navigate("${AppRoutes.TRAINING}/$level")
+                onNavigateToTraining = {
+                    navController.navigate(AppRoutes.TRAINING_MENU)
                 },
             )
         }
@@ -110,6 +111,11 @@ fun AppNavigation(
                     // Update the Sa in PitchViewModel and persist it
                     viewModel.updateSa(saNote)
                 },
+            )
+        }
+        composable(AppRoutes.TRAINING_MENU) {
+            TrainingMenuScreen(
+                navController = navController,
             )
         }
         composable(
