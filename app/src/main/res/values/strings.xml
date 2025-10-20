@@ -142,10 +142,12 @@
     <string name="text_get_ready">Get Ready</string>
 
     <!-- TrainingScreen: Training content -->
+    <string name="text_hold_this_note">Hold this note:</string>
     <string name="text_next_note">Next: %s</string>
     <string name="text_last_note">Last note!</string>
     <string name="text_holding_correctly">Great! Keep holding...</string>
-    <string name="text_sing_and_hold">Sing and hold the note</string>
+    <string name="text_sing_to_start">Sing the note to start timer</string>
+    <string name="tooltip_training_target_note">Sing and hold this swara accurately for 2 seconds to advance to the next note.</string>
 
     <!-- TrainingScreen: Completion dialog -->
     <string name="text_congratulations">Congratulations!</string>

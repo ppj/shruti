@@ -7,10 +7,13 @@ import com.hindustani.pitchdetector.data.TrainingState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,9 +28,10 @@ class TrainingViewModel(
     private val pitchViewModel: PitchViewModel,
 ) : ViewModel() {
     companion object {
-        private const val HOLD_DURATION_MILLIS = 5000L
+        private const val HOLD_DURATION_MILLIS = 2000L
         private const val COUNTDOWN_START = 3
         private const val TIMER_UPDATE_INTERVAL = 16L // ~60fps
+        private const val TRAINING_TANPURA_STRING_1 = "P" // Hardcode to Pa for training
 
         private val LEVEL_1_NOTES = listOf("S", "R", "G", "m", "P", "D", "N")
         private val LEVEL_2_NOTES = listOf("S", "r", "R", "g", "G", "m", "M", "P", "d", "D", "n", "N")
@@ -53,6 +57,17 @@ class TrainingViewModel(
     private val _state = MutableStateFlow(TrainingState(level = level, countdown = COUNTDOWN_START))
     val state: StateFlow<TrainingState> = _state.asStateFlow()
 
+    // Expose tanpura playing state and user's Sa from PitchViewModel
+    val isTanpuraPlaying: StateFlow<Boolean> = pitchViewModel.isTanpuraPlaying
+    val saNote: StateFlow<String> =
+        pitchViewModel.pitchState
+            .map { it.saNote }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = "C3",
+            )
+
     private val noteSequence: List<String> = if (level == 1) LEVEL_1_NOTES else LEVEL_2_NOTES
     private var holdTimerJob: Job? = null
 
@@ -72,6 +87,9 @@ class TrainingViewModel(
                 nextSwara = noteSequence.getOrNull(1),
             )
         }
+
+        // Set tanpura String 1 to Pa (P) for training
+        pitchViewModel.updateTanpuraString1(TRAINING_TANPURA_STRING_1)
 
         // Auto-start tanpura if not already playing
         if (!pitchViewModel.isTanpuraPlaying.value) {
@@ -200,6 +218,15 @@ class TrainingViewModel(
         _state.value = TrainingState(level = level, countdown = COUNTDOWN_START)
         initializeSession()
         startCountdown()
+    }
+
+    /**
+     * Toggle tanpura on/off (String 1 is always set to Pa for training)
+     */
+    fun toggleTanpura() {
+        // Ensure String 1 is set to Pa before toggling
+        pitchViewModel.updateTanpuraString1(TRAINING_TANPURA_STRING_1)
+        pitchViewModel.toggleTanpura()
     }
 
     /**
