@@ -33,9 +33,7 @@ import com.hindustani.pitchdetector.R
  * @param navController Navigation controller for navigation
  */
 @Composable
-fun TrainingMenuScreen(
-    navController: NavController,
-) {
+fun TrainingMenuScreen(navController: NavController) {
     Column(
         modifier =
             Modifier
