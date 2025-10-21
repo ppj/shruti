@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate pre-recorded OGG Vorbis files for tanpura playback.
-Creates 75 files: 5 String 1 notes (P, ms, Mt, S, N) × 15 Sa values (G#2 to A#3)
+Creates 45 files: 3 String 1 notes (P, m, N) × 15 Sa values (G#2 to A#3)
 
 Harmonic structure extracted from real Calcutta-standard male tanpura recording
 via spectral analysis (FFT). Key finding: H7 is the dominant harmonic (1.00),
@@ -59,17 +59,7 @@ SA_FREQUENCIES = {
 }
 
 # String 1 notes to generate (most common)
-# Using "ms" for madhyam shuddha and "Mt" for madhyam tivra to avoid case conflicts on macOS
-STRING1_NOTES = ["P", "ms", "Mt", "S", "N"]
-
-# Map display names to note ratios
-NOTE_NAME_MAP = {
-    "P": "P",
-    "ms": "m",  # shuddha madhyam
-    "Mt": "M",  # tivra madhyam
-    "S": "S",
-    "N": "N",
-}
+STRING1_NOTES = ["P", "m", "N"]
 
 # Harmonic structure extracted from real tanpura recording (String 2 - tonic Sa)
 # Source: https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html
@@ -159,7 +149,7 @@ def generate_string_pluck(
 
 def generate_tanpura_cycle(sa_frequency, string1_note):
     """Generate one complete 6-beat tanpura cycle as stereo audio."""
-    ratio_note = NOTE_NAME_MAP.get(string1_note, string1_note)
+    ratio_note = string1_note  # Direct mapping: P, m, N
 
     # String frequencies: 1=variable lower octave, 2&3=tonic Sa, 4=lower Sa
     string1_freq = sa_frequency * NOTE_RATIOS[ratio_note] / 2.0
