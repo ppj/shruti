@@ -99,6 +99,95 @@ class TrainingScreenTest {
     }
 
     @Test
+    fun trainingScreen_flatFeedback_whenSingingCorrectSwaraButFlat() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        currentSwara = "G",
+                        detectedSwara = "G",
+                        isFlat = true,
+                        isSharp = false,
+                        isHoldingCorrectly = false,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should show "⬆️ Sharpen"
+        composeTestRule.onNodeWithText("⬆️ Sharpen").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_sharpFeedback_whenSingingCorrectSwaraButSharp() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        currentSwara = "P",
+                        detectedSwara = "P",
+                        isFlat = false,
+                        isSharp = true,
+                        isHoldingCorrectly = false,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should show "⬇️ Flatten"
+        composeTestRule.onNodeWithText("⬇️ Flatten").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_noFlatSharpFeedback_whenSingingWrongSwara() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        currentSwara = "S",
+                        detectedSwara = "R",
+                        isFlat = false,
+                        isSharp = false,
+                        isHoldingCorrectly = false,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should show default instruction, not flat/sharp feedback
+        composeTestRule.onNodeWithText("Sing the note to start timer").assertIsDisplayed()
+        composeTestRule.onNodeWithText("⬆️ Sharpen").assertDoesNotExist()
+        composeTestRule.onNodeWithText("⬇️ Flatten").assertDoesNotExist()
+    }
+
+    @Test
     fun trainingScreen_completionDialog_whenSessionComplete() {
         val viewModel =
             createMockViewModel(

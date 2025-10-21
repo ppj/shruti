@@ -142,10 +142,21 @@ class TrainingViewModel(
 
                 val currentTarget = _state.value.currentSwara
                 val detectedNote = pitchState.currentNote
+                val detectedSwara = detectedNote?.swara
 
-                val isCorrect = detectedNote?.swara == currentTarget && detectedNote?.isPerfect == true
+                val isSingingCorrectSwara = detectedSwara == currentTarget
+                val isCorrect = isSingingCorrectSwara && detectedNote?.isPerfect == true
+                val isFlat = isSingingCorrectSwara && detectedNote?.isFlat == true
+                val isSharp = isSingingCorrectSwara && detectedNote?.isSharp == true
 
-                _state.update { it.copy(isHoldingCorrectly = isCorrect) }
+                _state.update {
+                    it.copy(
+                        detectedSwara = detectedSwara,
+                        isHoldingCorrectly = isCorrect,
+                        isFlat = isFlat,
+                        isSharp = isSharp,
+                    )
+                }
 
                 if (isCorrect) {
                     if (holdTimerJob?.isActive != true) {
@@ -159,7 +170,7 @@ class TrainingViewModel(
     }
 
     /**
-     * Start the 5-second hold timer, updating progress at 60fps
+     * Start the 2-second hold timer, updating progress at 60fps
      */
     private fun startHoldTimer() {
         holdTimerJob?.cancel()

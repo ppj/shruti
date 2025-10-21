@@ -10,6 +10,9 @@ package com.hindustani.pitchdetector.data
  * @property isHoldingCorrectly Whether user is currently singing the correct pitch within tolerance
  * @property isSessionComplete Whether all notes in the level have been completed successfully
  * @property countdown Initial countdown before training starts (3, 2, 1, or 0 if started)
+ * @property detectedSwara The swara user is currently singing (may differ from currentSwara)
+ * @property isFlat Whether user is singing the correct swara but below tolerance (too flat)
+ * @property isSharp Whether user is singing the correct swara but above tolerance (too sharp)
  */
 data class TrainingState(
     val level: Int = 1,
@@ -19,4 +22,7 @@ data class TrainingState(
     val isHoldingCorrectly: Boolean = false,
     val isSessionComplete: Boolean = false,
     val countdown: Int = 3,
+    val detectedSwara: String? = null,
+    val isFlat: Boolean = false,
+    val isSharp: Boolean = false,
 )

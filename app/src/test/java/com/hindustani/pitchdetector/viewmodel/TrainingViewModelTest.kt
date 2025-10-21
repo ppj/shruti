@@ -22,6 +22,11 @@ class TrainingViewModelTest {
     private lateinit var trainingViewModel: TrainingViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    companion object {
+        // Time to skip countdown (3 seconds) + small buffer
+        private const val COUNTDOWN_AND_BUFFER_MS = 3100L
+    }
+
     private val mockPitchState =
         MutableStateFlow(
             PitchState(
@@ -129,7 +134,7 @@ class TrainingViewModelTest {
     fun `observePitch_correctNoteDetected_setsIsHoldingCorrectly`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
-            testScheduler.advanceTimeBy(3100) // Skip countdown
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val correctNote =
                 HindustaniNoteConverter.HindustaniNote(
@@ -150,7 +155,7 @@ class TrainingViewModelTest {
     fun `observePitch_incorrectNoteDetected_setsIsHoldingCorrectlyFalse`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
-            testScheduler.advanceTimeBy(3100)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val incorrectNote =
                 HindustaniNoteConverter.HindustaniNote(
@@ -171,7 +176,7 @@ class TrainingViewModelTest {
     fun `observePitch_noteNotPerfect_setsIsHoldingCorrectlyFalse`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
-            testScheduler.advanceTimeBy(3100)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val imperfectNote =
                 HindustaniNoteConverter.HindustaniNote(
@@ -186,6 +191,112 @@ class TrainingViewModelTest {
             testScheduler.advanceUntilIdle()
 
             assertThat(trainingViewModel.state.value.isHoldingCorrectly).isFalse()
+        }
+
+    @Test
+    fun `observePitch_correctSwaraButFlat_setsIsFlatTrue`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            val flatNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = -20.0,
+                    isPerfect = false,
+                    isFlat = true,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = flatNote)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isFlat).isTrue()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("S")
+        }
+
+    @Test
+    fun `observePitch_correctSwaraButSharp_setsIsSharpTrue`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            val sharpNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = 20.0,
+                    isPerfect = false,
+                    isFlat = false,
+                    isSharp = true,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = sharpNote)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isSharp).isTrue()
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("S")
+        }
+
+    @Test
+    fun `observePitch_wrongSwaraEvenIfFlat_doesNotSetIsFlat`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            val wrongNoteFlat =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "R",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = -20.0,
+                    isPerfect = false,
+                    isFlat = true,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = wrongNoteFlat)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("R")
+        }
+
+    @Test
+    fun `observePitch_perfectNote_setsBothFlatAndSharpFalse`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            val perfectNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = 0.0,
+                    isPerfect = true,
+                    isFlat = false,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+            assertThat(trainingViewModel.state.value.isHoldingCorrectly).isTrue()
+        }
+
+    @Test
+    fun `observePitch_nullNote_clearsDetectedSwaraAndFlatSharpFlags`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            mockPitchState.value = mockPitchState.value.copy(currentNote = null)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.detectedSwara).isNull()
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
         }
 
     // ========== RESET SESSION TESTS ==========
