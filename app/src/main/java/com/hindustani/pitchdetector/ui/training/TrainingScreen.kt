@@ -25,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +33,7 @@ import androidx.navigation.NavController
 import com.hindustani.pitchdetector.R
 import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.ui.components.TanpuraCard
+import com.hindustani.pitchdetector.ui.theme.TrainingCorrect
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
 /**
@@ -60,7 +60,6 @@ fun TrainingScreen(
                 .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Top bar with back button, Sa display, and level indicator
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -92,7 +91,6 @@ fun TrainingScreen(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Piano keyboard selector (display only, not interactive)
         PianoKeyboardSelector(
             selectedSa = saNote,
             onSaSelected = {}, // Empty lambda - display only, not clickable
@@ -100,9 +98,7 @@ fun TrainingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Countdown or instructions (replaces detected swara section)
         if (state.countdown > 0) {
-            // Show countdown
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -124,16 +120,13 @@ fun TrainingScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Circular progress indicator with target note (replaces PitchBar)
         if (state.countdown == 0 && !state.isSessionComplete) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // Circular progress with target note in center
                 Box(
                     contentAlignment = Alignment.Center,
                 ) {
-                    // Background circle
                     CircularProgressIndicator(
                         progress = { 1f },
                         modifier = Modifier.size(200.dp),
@@ -141,17 +134,15 @@ fun TrainingScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                     )
 
-                    // Progress circle
                     CircularProgressIndicator(
                         progress = { state.holdProgress },
                         modifier = Modifier.size(200.dp),
                         strokeWidth = 16.dp,
-                        color = if (state.isHoldingCorrectly) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
+                        color = if (state.isHoldingCorrectly) TrainingCorrect else MaterialTheme.colorScheme.primary,
                     )
 
-                    // Target swara in center
                     Text(
-                        text = state.currentSwara ?: "—",
+                        text = state.currentSwara ?: stringResource(R.string.text_no_note),
                         style = MaterialTheme.typography.displayLarge,
                         fontSize = 72.sp,
                         fontWeight = FontWeight.Bold,
@@ -161,7 +152,6 @@ fun TrainingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Feedback text
                 Text(
                     text =
                         if (state.isHoldingCorrectly) {
@@ -170,7 +160,7 @@ fun TrainingScreen(
                             stringResource(R.string.text_sing_to_start)
                         },
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (state.isHoldingCorrectly) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (state.isHoldingCorrectly) TrainingCorrect else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = if (state.isHoldingCorrectly) FontWeight.Bold else FontWeight.Normal,
                 )
             }
@@ -178,7 +168,6 @@ fun TrainingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tanpura control
         TanpuraCard(
             isTanpuraPlaying = isTanpuraPlaying,
             onToggleTanpura = { viewModel.toggleTanpura() },
@@ -187,7 +176,6 @@ fun TrainingScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Session complete or progress info
         if (state.isSessionComplete) {
             Box(
                 modifier = Modifier.fillMaxWidth(),

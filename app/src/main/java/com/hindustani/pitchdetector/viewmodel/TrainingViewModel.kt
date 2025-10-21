@@ -97,7 +97,6 @@ class TrainingViewModel(
      * Initialize the training session with first note and start tanpura
      */
     private fun initializeSession() {
-        // Generate new note sequence (randomized levels get fresh shuffle)
         noteSequence = generateNoteSequence()
 
         _state.update {
@@ -126,7 +125,6 @@ class TrainingViewModel(
             }
             _state.update { it.copy(countdown = 0) }
 
-            // Start recording after countdown
             if (!pitchViewModel.isRecording.value) {
                 pitchViewModel.toggleRecording()
             }
@@ -145,18 +143,15 @@ class TrainingViewModel(
                 val currentTarget = _state.value.currentSwara
                 val detectedNote = pitchState.currentNote
 
-                // Check if detected note matches target and is within tolerance
                 val isCorrect = detectedNote?.swara == currentTarget && detectedNote?.isPerfect == true
 
                 _state.update { it.copy(isHoldingCorrectly = isCorrect) }
 
                 if (isCorrect) {
-                    // Start hold timer if not already running
                     if (holdTimerJob?.isActive != true) {
                         startHoldTimer()
                     }
                 } else {
-                    // Reset timer if pitch becomes incorrect
                     resetHoldTimer()
                 }
             }
@@ -203,7 +198,6 @@ class TrainingViewModel(
         val nextIndex = currentIndex + 1
 
         if (nextIndex < noteSequence.size) {
-            // Move to next note
             _state.update {
                 it.copy(
                     currentNoteIndex = nextIndex,
@@ -212,7 +206,6 @@ class TrainingViewModel(
                 )
             }
         } else {
-            // Session complete
             _state.update {
                 it.copy(
                     isSessionComplete = true,
@@ -220,12 +213,10 @@ class TrainingViewModel(
                 )
             }
 
-            // Stop recording when session completes
             if (pitchViewModel.isRecording.value) {
                 pitchViewModel.toggleRecording()
             }
 
-            // Stop tanpura when session completes
             if (pitchViewModel.isTanpuraPlaying.value) {
                 pitchViewModel.toggleTanpura()
             }
@@ -258,12 +249,10 @@ class TrainingViewModel(
         super.onCleared()
         holdTimerJob?.cancel()
 
-        // Stop recording if active
         if (pitchViewModel.isRecording.value) {
             pitchViewModel.toggleRecording()
         }
 
-        // Stop tanpura when leaving training mode
         if (pitchViewModel.isTanpuraPlaying.value) {
             pitchViewModel.toggleTanpura()
         }

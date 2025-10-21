@@ -41,7 +41,6 @@ fun TrainingMenuScreen(navController: NavController) {
                 .statusBarsPadding()
                 .padding(16.dp),
     ) {
-        // Top bar with back button
         Row(
             modifier = Modifier.padding(bottom = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -61,7 +60,6 @@ fun TrainingMenuScreen(navController: NavController) {
             )
         }
 
-        // Exercise cards
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -73,14 +71,6 @@ fun TrainingMenuScreen(navController: NavController) {
                     navController.navigate("${com.hindustani.pitchdetector.constants.AppRoutes.TRAINING}/$level")
                 },
             )
-
-            // Placeholder for future exercises
-            // Uncomment when implementing:
-            // TrainingExerciseCard(
-            //     title = "Rhythm Training",
-            //     description = "Practice taal patterns and rhythm accuracy",
-            //     onLevelClick = { level -> /* navigate to rhythm training */ },
-            // )
         }
     }
 }
@@ -137,12 +127,12 @@ private fun TrainingExerciseCard(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = "7 notes",
+                                text = stringResource(R.string.text_7_notes),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                text = "Sequential",
+                                text = stringResource(R.string.text_sequential),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -161,12 +151,12 @@ private fun TrainingExerciseCard(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = "7 notes",
+                                text = stringResource(R.string.text_7_notes),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                text = "Random",
+                                text = stringResource(R.string.text_random),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -186,16 +176,16 @@ private fun TrainingExerciseCard(
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
-                                text = "Level 3",
+                                text = stringResource(R.string.text_level_3),
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = "12 notes",
+                                text = stringResource(R.string.text_12_notes),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                text = "Sequential",
+                                text = stringResource(R.string.text_sequential),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -210,16 +200,16 @@ private fun TrainingExerciseCard(
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
-                                text = "Level 4",
+                                text = stringResource(R.string.text_level_4),
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = "12 notes",
+                                text = stringResource(R.string.text_12_notes),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                text = "Random",
+                                text = stringResource(R.string.text_random),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

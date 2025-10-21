@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hindustani.pitchdetector.R
-import com.hindustani.pitchdetector.music.HindustaniNoteConverter
+import com.hindustani.pitchdetector.music.toDisplayString
 import com.hindustani.pitchdetector.ui.components.HelpTooltip
 import com.hindustani.pitchdetector.ui.components.NoteDisplay
 import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
@@ -84,17 +84,9 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val currentNote = pitchState.currentNote
         val displaySwara =
-            if (currentNote != null) {
-                when (currentNote.octave) {
-                    HindustaniNoteConverter.Octave.MANDRA -> ".${currentNote.swara}"
-                    HindustaniNoteConverter.Octave.MADHYA -> currentNote.swara
-                    HindustaniNoteConverter.Octave.TAAR -> "${currentNote.swara}'"
-                }
-            } else {
-                stringResource(R.string.text_no_note)
-            }
+            pitchState.currentNote?.toDisplayString()
+                ?: stringResource(R.string.text_no_note)
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -156,7 +148,6 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Training button
         OutlinedButton(
             onClick = onNavigateToTraining,
             modifier =
@@ -170,7 +161,7 @@ fun MainScreen(
             )
         }
 
-        // Confidence indicator (subtle) - always reserve space to prevent button movement
+        // Reserve space for confidence indicator to prevent button movement
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,

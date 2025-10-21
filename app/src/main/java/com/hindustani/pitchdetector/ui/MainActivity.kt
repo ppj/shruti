@@ -44,7 +44,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check permission status
         hasPermission = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.RECORD_AUDIO,
@@ -108,7 +107,6 @@ fun AppNavigation(
                     navController.popBackStack()
                 },
                 onSaSelected = { saNote ->
-                    // Update the Sa in PitchViewModel and persist it
                     viewModel.updateSa(saNote)
                 },
             )
@@ -119,15 +117,15 @@ fun AppNavigation(
             )
         }
         composable(
-            route = "${AppRoutes.TRAINING}/{level}",
+            route = "${AppRoutes.TRAINING}/{${AppRoutes.NavArgs.LEVEL}}",
             arguments =
                 listOf(
-                    navArgument("level") {
+                    navArgument(AppRoutes.NavArgs.LEVEL) {
                         type = NavType.IntType
                     },
                 ),
         ) { backStackEntry ->
-            val level = backStackEntry.arguments?.getInt("level") ?: 1
+            val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: 1
             val trainingViewModel: TrainingViewModel =
                 viewModel(
                     factory = TrainingViewModel.provideFactory(level, viewModel),

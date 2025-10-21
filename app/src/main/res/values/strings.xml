@@ -131,8 +131,14 @@
     <string name="description_voice_training">Practice holding swaras accurately with real-time feedback</string>
     <string name="text_level_1">Level 1</string>
     <string name="text_level_2">Level 2</string>
+    <string name="text_level_3">Level 3</string>
+    <string name="text_level_4">Level 4</string>
     <string name="text_7_shuddha_notes">7 shuddha notes</string>
     <string name="text_12_all_notes">All 12 notes</string>
+    <string name="text_7_notes">7 notes</string>
+    <string name="text_12_notes">12 notes</string>
+    <string name="text_sequential">Sequential</string>
+    <string name="text_random">Random</string>
 
     <!-- TrainingScreen: General -->
     <string name="content_description_navigate_back">Navigate back</string>

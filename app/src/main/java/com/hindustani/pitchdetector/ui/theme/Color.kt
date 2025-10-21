@@ -29,6 +29,9 @@ val PitchFlat = Color(0xFF3d88c4) // Cool blue for flat/low pitch
 val PitchPerfect = Color(0xFF7cb342) // Warm green for perfect pitch
 val PitchSharp = Color(0xFFe57373) // Warm red for sharp/high pitch
 
+// Training mode colors
+val TrainingCorrect = Color(0xFF4CAF50) // Material green for correct training feedback
+
 // Additional UI colors
 val TextDark = Color(0xFF1C1B1F)
 val TextLight = Color(0xFFe8e8e8)
