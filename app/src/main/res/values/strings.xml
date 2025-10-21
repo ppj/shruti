@@ -153,6 +153,8 @@
     <string name="text_last_note">Last note!</string>
     <string name="text_holding_correctly">Great! Keep holding...</string>
     <string name="text_sing_to_start">Sing the note to start timer</string>
+    <string name="text_pitch_flat">⬆️ Sharpen</string>
+    <string name="text_pitch_sharp">⬇️ Flatten</string>
 
     <!-- TrainingScreen: Completion dialog -->
     <string name="text_congratulations">Congratulations!</string>

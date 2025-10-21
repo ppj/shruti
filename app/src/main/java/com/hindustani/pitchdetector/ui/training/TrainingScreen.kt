@@ -154,14 +154,20 @@ fun TrainingScreen(
 
                 Text(
                     text =
-                        if (state.isHoldingCorrectly) {
-                            stringResource(R.string.text_holding_correctly)
-                        } else {
-                            stringResource(R.string.text_sing_to_start)
+                        when {
+                            state.isHoldingCorrectly -> stringResource(R.string.text_holding_correctly)
+                            state.isFlat -> stringResource(R.string.text_pitch_flat)
+                            state.isSharp -> stringResource(R.string.text_pitch_sharp)
+                            else -> stringResource(R.string.text_sing_to_start)
                         },
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (state.isHoldingCorrectly) TrainingCorrect else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = if (state.isHoldingCorrectly) FontWeight.Bold else FontWeight.Normal,
+                    color =
+                        when {
+                            state.isHoldingCorrectly -> TrainingCorrect
+                            state.isFlat || state.isSharp -> MaterialTheme.colorScheme.error
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    fontWeight = if (state.isHoldingCorrectly || state.isFlat || state.isSharp) FontWeight.Bold else FontWeight.Normal,
                 )
             }
         }

@@ -188,6 +188,112 @@ class TrainingViewModelTest {
             assertThat(trainingViewModel.state.value.isHoldingCorrectly).isFalse()
         }
 
+    @Test
+    fun `observePitch_correctSwaraButFlat_setsIsFlatTrue`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(3100)
+
+            val flatNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = -20.0,
+                    isPerfect = false,
+                    isFlat = true,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = flatNote)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isFlat).isTrue()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("S")
+        }
+
+    @Test
+    fun `observePitch_correctSwaraButSharp_setsIsSharpTrue`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(3100)
+
+            val sharpNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = 20.0,
+                    isPerfect = false,
+                    isFlat = false,
+                    isSharp = true,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = sharpNote)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isSharp).isTrue()
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("S")
+        }
+
+    @Test
+    fun `observePitch_wrongSwaraEvenIfFlat_doesNotSetIsFlat`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(3100)
+
+            val wrongNoteFlat =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "R",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = -20.0,
+                    isPerfect = false,
+                    isFlat = true,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = wrongNoteFlat)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("R")
+        }
+
+    @Test
+    fun `observePitch_perfectNote_setsBothFlatAndSharpFalse`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(3100)
+
+            val perfectNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swara = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = 0.0,
+                    isPerfect = true,
+                    isFlat = false,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+            assertThat(trainingViewModel.state.value.isHoldingCorrectly).isTrue()
+        }
+
+    @Test
+    fun `observePitch_nullNote_clearsDetectedSwaraAndFlatSharpFlags`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(3100)
+
+            mockPitchState.value = mockPitchState.value.copy(currentNote = null)
+            testScheduler.advanceUntilIdle()
+
+            assertThat(trainingViewModel.state.value.detectedSwara).isNull()
+            assertThat(trainingViewModel.state.value.isFlat).isFalse()
+            assertThat(trainingViewModel.state.value.isSharp).isFalse()
+        }
+
     // ========== RESET SESSION TESTS ==========
 
     @Test
