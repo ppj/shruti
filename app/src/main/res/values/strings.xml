@@ -28,7 +28,7 @@
     <string name="content_description_tanpura">Tanpura</string>
     <string name="text_tanpura_string_1">String 1: %s</string>
     <string name="content_description_select_string_1">Select string 1 note</string>
-    <string name="tooltip_tanpura_tuning">String 1 tuning:\n\n• P: Yaman, Bhoop, Bhairav etc. (most common)\n• m: Malkauns, Lalit, Bageshree, etc.\n• N: Marva, Pooriya, Sohni, etc.\n• M: Very rare (to be removed soon)\n• S: Very rare (to be removed soon)</string>
+    <string name="tooltip_tanpura_tuning">String 1 tuning:\n\n• P: Yaman, Bhoop, Bhairav etc. (most common)\n• m: Malkauns, Lalit, Bageshree, etc.\n• N: Marva, Pooriya, Sohni, etc.</string>
 
     <!-- MainScreen: Confidence -->
     <string name="text_confidence">Confidence: %d%%</string>
