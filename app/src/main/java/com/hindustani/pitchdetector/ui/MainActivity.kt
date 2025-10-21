@@ -14,14 +14,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.hindustani.pitchdetector.constants.AppRoutes
 import com.hindustani.pitchdetector.ui.findsa.FindSaScreen
 import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
+import com.hindustani.pitchdetector.ui.training.TrainingMenuScreen
+import com.hindustani.pitchdetector.ui.training.TrainingScreen
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
+import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: PitchViewModel by viewModels()
@@ -38,7 +44,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check permission status
         hasPermission = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.RECORD_AUDIO,
@@ -82,6 +87,9 @@ fun AppNavigation(
                 onNavigateToFindSa = {
                     navController.navigate(AppRoutes.FIND_SA)
                 },
+                onNavigateToTraining = {
+                    navController.navigate(AppRoutes.TRAINING_MENU)
+                },
             )
         }
         composable(AppRoutes.SETTINGS) {
@@ -99,9 +107,32 @@ fun AppNavigation(
                     navController.popBackStack()
                 },
                 onSaSelected = { saNote ->
-                    // Update the Sa in PitchViewModel and persist it
                     viewModel.updateSa(saNote)
                 },
+            )
+        }
+        composable(AppRoutes.TRAINING_MENU) {
+            TrainingMenuScreen(
+                navController = navController,
+            )
+        }
+        composable(
+            route = "${AppRoutes.TRAINING}/{${AppRoutes.NavArgs.LEVEL}}",
+            arguments =
+                listOf(
+                    navArgument(AppRoutes.NavArgs.LEVEL) {
+                        type = NavType.IntType
+                    },
+                ),
+        ) { backStackEntry ->
+            val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: 1
+            val trainingViewModel: TrainingViewModel =
+                viewModel(
+                    factory = TrainingViewModel.provideFactory(level, viewModel),
+                )
+            TrainingScreen(
+                navController = navController,
+                viewModel = trainingViewModel,
             )
         }
     }

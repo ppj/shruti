@@ -120,3 +120,16 @@ class HindustaniNoteConverter(
 
     private fun log2(value: Double): Double = ln(value) / ln(2.0)
 }
+
+/**
+ * Extension function to convert HindustaniNote to display string with octave notation
+ * - Mandra saptak (lower): .S, .R, .G
+ * - Madhya saptak (middle): S, R, G
+ * - Taar saptak (upper): S', R', G'
+ */
+fun HindustaniNoteConverter.HindustaniNote.toDisplayString(): String =
+    when (octave) {
+        HindustaniNoteConverter.Octave.MANDRA -> ".$swara"
+        HindustaniNoteConverter.Octave.MADHYA -> swara
+        HindustaniNoteConverter.Octave.TAAR -> "$swara'"
+    }
