@@ -37,14 +37,6 @@ class TanpuraPlayer(private val context: Context) {
 
         // Available String 1 notes (most common)
         private val AVAILABLE_STRING1_NOTES = listOf("P", "m", "N")
-
-        // Map user-facing note names to filename suffixes (case-insensitive for macOS)
-        private val NOTE_TO_FILENAME =
-            mapOf(
-                "P" to "P",
-                "m" to "ms", // shuddha madhyam
-                "N" to "N",
-            )
     }
 
     private var audioTrack: AudioTrack? = null
@@ -79,11 +71,8 @@ class TanpuraPlayer(private val context: Context) {
                     // Find closest Sa frequency in our map
                     val saName = findClosestSaName(saFreq)
 
-                    // Map user-facing note name to filename suffix
-                    val filenameSuffix = NOTE_TO_FILENAME[string1] ?: string1
-
-                    // Construct filename: tanpura/<sa>_<suffix>.ogg
-                    val filename = "tanpura/${saName}_$filenameSuffix.ogg"
+                    // Construct filename: tanpura/<sa>_<string1>.ogg
+                    val filename = "tanpura/${saName}_$string1.ogg"
 
                     Log.d(TAG, "Loading and decoding file: $filename")
 
