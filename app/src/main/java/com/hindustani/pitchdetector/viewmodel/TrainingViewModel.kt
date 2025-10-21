@@ -170,7 +170,7 @@ class TrainingViewModel(
     }
 
     /**
-     * Start the 5-second hold timer, updating progress at 60fps
+     * Start the 2-second hold timer, updating progress at 60fps
      */
     private fun startHoldTimer() {
         holdTimerJob?.cancel()
