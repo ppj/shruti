@@ -36,15 +36,13 @@ class TanpuraPlayer(private val context: Context) {
         private const val DECODER_TIMEOUT_US = 10000L
 
         // Available String 1 notes (most common)
-        private val AVAILABLE_STRING1_NOTES = listOf("P", "m", "M", "S", "N")
+        private val AVAILABLE_STRING1_NOTES = listOf("P", "m", "N")
 
         // Map user-facing note names to filename suffixes (case-insensitive for macOS)
         private val NOTE_TO_FILENAME =
             mapOf(
                 "P" to "P",
                 "m" to "ms", // shuddha madhyam
-                "M" to "Mt", // tivra madhyam
-                "S" to "S",
                 "N" to "N",
             )
     }
