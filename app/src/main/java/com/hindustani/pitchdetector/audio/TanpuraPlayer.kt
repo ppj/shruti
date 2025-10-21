@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  * Plays pre-recorded tanpura sound with 4 strings from OGG files
  * Uses AudioTrack with decoded PCM for truly gapless looping
  *
- * String 1: Variable (user selected note: P, M, S, or N)
+ * String 1: Variable (user selected note: P, m, or N)
  * String 2: Sa (tonic root)
  * String 3: Sa (tonic root)
  * String 4: Lower octave Sa
@@ -58,7 +58,6 @@ class TanpuraPlayer(private val context: Context) {
     ) {
         Log.d(TAG, "start() called: saFreq=$saFreq, string1=$string1, vol=$vol")
 
-        // Stop existing playback
         stop()
 
         currentSaFrequency = saFreq
@@ -68,15 +67,11 @@ class TanpuraPlayer(private val context: Context) {
         playbackJob =
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    // Find closest Sa frequency in our map
                     val saName = findClosestSaName(saFreq)
-
-                    // Construct filename: tanpura/<sa>_<string1>.ogg
                     val filename = "tanpura/${saName}_$string1.ogg"
 
                     Log.d(TAG, "Loading and decoding file: $filename")
 
-                    // Decode OGG to PCM
                     val decodedPcm = decodeOggToPcm(filename)
                     if (decodedPcm == null || decodedPcm.isEmpty()) {
                         Log.e(TAG, "Failed to decode audio file")
@@ -86,7 +81,6 @@ class TanpuraPlayer(private val context: Context) {
                     pcmData = decodedPcm
                     Log.d(TAG, "Decoded ${decodedPcm.size} samples")
 
-                    // Calculate buffer size
                     val bufferSize =
                         AudioTrack.getMinBufferSize(
                             SAMPLE_RATE,
@@ -96,7 +90,6 @@ class TanpuraPlayer(private val context: Context) {
                             maxOf(minSize * BUFFER_SIZE_MULTIPLIER, DEFAULT_BUFFER_SIZE)
                         }
 
-                    // Create AudioTrack
                     audioTrack =
                         AudioTrack.Builder()
                             .setAudioAttributes(
@@ -123,16 +116,13 @@ class TanpuraPlayer(private val context: Context) {
 
                     audioTrack?.setVolume(currentVolume)
 
-                    // Start playback
                     audioTrack?.play()
                     Log.d(TAG, "AudioTrack started, beginning gapless loop")
 
-                    // Continuous gapless looping
                     var position = 0
                     val writeSize = minOf(bufferSize / WRITE_SIZE_DIVISOR, decodedPcm.size)
 
                     while (isActive) {
-                        // Write chunk to AudioTrack
                         val written =
                             audioTrack?.write(
                                 decodedPcm,
@@ -155,7 +145,6 @@ class TanpuraPlayer(private val context: Context) {
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in tanpura playback", e)
                 } finally {
-                    // Cleanup
                     audioTrack?.apply {
                         try {
                             if (playState == AudioTrack.PLAYSTATE_PLAYING) {
@@ -179,12 +168,10 @@ class TanpuraPlayer(private val context: Context) {
         var codec: MediaCodec? = null
 
         try {
-            // Open asset file
             val afd = context.assets.openFd(filename)
             extractor.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
             afd.close()
 
-            // Find audio track
             var trackIndex = -1
             var format: MediaFormat? = null
             for (i in 0 until extractor.trackCount) {
@@ -204,7 +191,6 @@ class TanpuraPlayer(private val context: Context) {
 
             extractor.selectTrack(trackIndex)
 
-            // Create decoder
             val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
             codec = MediaCodec.createDecoderByType(mime)
             codec.configure(format, null, null, 0)
@@ -214,33 +200,27 @@ class TanpuraPlayer(private val context: Context) {
             val pcmBuffer = mutableListOf<Short>()
             var isEOS = false
 
-            // Decode loop
             while (!isEOS) {
-                // Input
-                if (!isEOS) {
-                    val inputIndex = codec.dequeueInputBuffer(DECODER_TIMEOUT_US)
-                    if (inputIndex >= 0) {
-                        val inputBuffer = codec.getInputBuffer(inputIndex)
-                        if (inputBuffer != null) {
-                            val sampleSize = extractor.readSampleData(inputBuffer, 0)
-                            if (sampleSize < 0) {
-                                codec.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-                                isEOS = true
-                            } else {
-                                val presentationTime = extractor.sampleTime
-                                codec.queueInputBuffer(inputIndex, 0, sampleSize, presentationTime, 0)
-                                extractor.advance()
-                            }
+                val inputIndex = codec.dequeueInputBuffer(DECODER_TIMEOUT_US)
+                if (inputIndex >= 0) {
+                    val inputBuffer = codec.getInputBuffer(inputIndex)
+                    if (inputBuffer != null) {
+                        val sampleSize = extractor.readSampleData(inputBuffer, 0)
+                        if (sampleSize < 0) {
+                            codec.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                            isEOS = true
+                        } else {
+                            val presentationTime = extractor.sampleTime
+                            codec.queueInputBuffer(inputIndex, 0, sampleSize, presentationTime, 0)
+                            extractor.advance()
                         }
                     }
                 }
 
-                // Output
                 val outputIndex = codec.dequeueOutputBuffer(bufferInfo, DECODER_TIMEOUT_US)
                 if (outputIndex >= 0) {
                     val outputBuffer = codec.getOutputBuffer(outputIndex)
                     if (outputBuffer != null && bufferInfo.size > 0) {
-                        // Convert to ShortArray
                         val samples = ShortArray(bufferInfo.size / 2)
                         outputBuffer.position(bufferInfo.offset)
                         outputBuffer.asShortBuffer().get(samples)
