@@ -47,11 +47,11 @@ import com.hindustani.pitchdetector.R
 fun TanpuraCard(
     isTanpuraPlaying: Boolean,
     onToggleTanpura: () -> Unit,
+    modifier: Modifier = Modifier,
     showString1Selector: Boolean = false,
     string1Options: List<String> = emptyList(),
     selectedString1: String = "",
     onString1Selected: (String) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     var showDropdown by remember { mutableStateOf(false) }
 
