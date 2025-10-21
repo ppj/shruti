@@ -3,7 +3,10 @@ package com.hindustani.pitchdetector.ui
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.hindustani.pitchdetector.data.PitchState
+import com.hindustani.pitchdetector.music.HindustaniNoteConverter
 import com.hindustani.pitchdetector.testutil.TestViewModelFactory
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -67,5 +70,152 @@ class MainScreenTest {
         assert(persistedSa == "D3") {
             "Sa should be persisted. Expected: D3, Got: $persistedSa"
         }
+    }
+
+    @Test
+    fun mainScreen_displaysSwaraWithOctaveNotation_mandraSaptak() {
+        val viewModel = TestViewModelFactory.createPitchViewModel()
+
+        // Create a note in mandra saptak (lower octave)
+        val mandraNote =
+            HindustaniNoteConverter.HindustaniNote(
+                swara = "S",
+                octave = HindustaniNoteConverter.Octave.MANDRA,
+                centsDeviation = 0.0,
+                isPerfect = true,
+                isFlat = false,
+                isSharp = false,
+            )
+
+        // Update the pitch state to include this note
+        val pitchState =
+            PitchState(
+                saNote = "C3",
+                currentNote = mandraNote,
+                confidence = 0.9,
+                toleranceCents = 15.0,
+            )
+        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        composeTestRule.setContent {
+            MainScreen(
+                viewModel = viewModel,
+                onNavigateToSettings = {},
+                onNavigateToFindSa = {},
+                onNavigateToTraining = {},
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should display with dot prefix for mandra saptak
+        composeTestRule.onNodeWithText(".S").assertIsDisplayed()
+    }
+
+    @Test
+    fun mainScreen_displaysSwaraWithOctaveNotation_madhyaSaptak() {
+        val viewModel = TestViewModelFactory.createPitchViewModel()
+
+        // Create a note in madhya saptak (middle octave)
+        val madhyaNote =
+            HindustaniNoteConverter.HindustaniNote(
+                swara = "R",
+                octave = HindustaniNoteConverter.Octave.MADHYA,
+                centsDeviation = 0.0,
+                isPerfect = true,
+                isFlat = false,
+                isSharp = false,
+            )
+
+        val pitchState =
+            PitchState(
+                saNote = "C3",
+                currentNote = madhyaNote,
+                confidence = 0.9,
+                toleranceCents = 15.0,
+            )
+        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        composeTestRule.setContent {
+            MainScreen(
+                viewModel = viewModel,
+                onNavigateToSettings = {},
+                onNavigateToFindSa = {},
+                onNavigateToTraining = {},
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should display without any prefix for madhya saptak
+        composeTestRule.onNodeWithText("R").assertIsDisplayed()
+    }
+
+    @Test
+    fun mainScreen_displaysSwaraWithOctaveNotation_taarSaptak() {
+        val viewModel = TestViewModelFactory.createPitchViewModel()
+
+        // Create a note in taar saptak (upper octave)
+        val taarNote =
+            HindustaniNoteConverter.HindustaniNote(
+                swara = "G",
+                octave = HindustaniNoteConverter.Octave.TAAR,
+                centsDeviation = 0.0,
+                isPerfect = true,
+                isFlat = false,
+                isSharp = false,
+            )
+
+        val pitchState =
+            PitchState(
+                saNote = "C3",
+                currentNote = taarNote,
+                confidence = 0.9,
+                toleranceCents = 15.0,
+            )
+        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        composeTestRule.setContent {
+            MainScreen(
+                viewModel = viewModel,
+                onNavigateToSettings = {},
+                onNavigateToFindSa = {},
+                onNavigateToTraining = {},
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should display with apostrophe suffix for taar saptak
+        composeTestRule.onNodeWithText("G'").assertIsDisplayed()
+    }
+
+    @Test
+    fun mainScreen_displaysNoNote_whenCurrentNoteIsNull() {
+        val viewModel = TestViewModelFactory.createPitchViewModel()
+
+        // Set pitch state with no current note
+        val pitchState =
+            PitchState(
+                saNote = "C3",
+                currentNote = null,
+                confidence = 0.0,
+                toleranceCents = 15.0,
+            )
+        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        composeTestRule.setContent {
+            MainScreen(
+                viewModel = viewModel,
+                onNavigateToSettings = {},
+                onNavigateToFindSa = {},
+                onNavigateToTraining = {},
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should display the "no note" placeholder (em-dash)
+        composeTestRule.onNodeWithText("—").assertIsDisplayed()
     }
 }
