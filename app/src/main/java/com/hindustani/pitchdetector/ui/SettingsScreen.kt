@@ -12,9 +12,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hindustani.pitchdetector.R
-import com.hindustani.pitchdetector.ui.components.HelpTooltip
+import com.hindustani.pitchdetector.ui.components.LabelledSlider
+import com.hindustani.pitchdetector.ui.components.SettingsSectionHeader
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import kotlin.math.roundToInt
+
+private object SettingsConstants {
+    const val TOLERANCE_MIN = 5f
+    const val TOLERANCE_MAX = 30f
+    const val TOLERANCE_STEPS = 24
+
+    const val VOLUME_MIN = 0f
+    const val VOLUME_MAX = 1f
+    const val VOLUME_STEPS = 19
+}
 
 /**
  * Settings screen for configuring pitch detection parameters
@@ -50,63 +61,30 @@ fun SettingsScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text =
-                        stringResource(
-                            R.string.text_tolerance,
-                            settings.toleranceCents.roundToInt(),
-                        ),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                HelpTooltip(
-                    text = stringResource(R.string.tooltip_tolerance_level),
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Slider(
-                value = settings.toleranceCents.toFloat(),
-                onValueChange = { viewModel.updateTolerance(it.toDouble()) },
-                valueRange = 5f..30f,
-                steps = 24,
-                modifier = Modifier.fillMaxWidth(),
+            SettingsSectionHeader(
+                title =
+                    stringResource(
+                        R.string.text_tolerance,
+                        settings.toleranceCents.roundToInt(),
+                    ),
+                tooltipText = stringResource(R.string.tooltip_tolerance_level),
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    stringResource(R.string.text_expert_tolerance),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    stringResource(R.string.text_beginner_tolerance),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            LabelledSlider(
+                value = settings.toleranceCents.toFloat(),
+                onValueChange = { viewModel.updateTolerance(it.toDouble()) },
+                valueRange = SettingsConstants.TOLERANCE_MIN..SettingsConstants.TOLERANCE_MAX,
+                steps = SettingsConstants.TOLERANCE_STEPS,
+                startLabel = stringResource(R.string.text_expert_tolerance),
+                endLabel = stringResource(R.string.text_beginner_tolerance),
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.text_tuning_system),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                HelpTooltip(
-                    text = stringResource(R.string.tooltip_tuning_system),
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            SettingsSectionHeader(
+                title = stringResource(R.string.text_tuning_system),
+                tooltipText = stringResource(R.string.tooltip_tuning_system),
+            )
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -138,47 +116,23 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text =
-                        stringResource(
-                            R.string.text_tanpura_volume,
-                            (settings.tanpuraVolume * 100).roundToInt(),
-                        ),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                HelpTooltip(
-                    text = stringResource(R.string.tooltip_tanpura_volume),
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Slider(
-                value = settings.tanpuraVolume,
-                onValueChange = { viewModel.updateTanpuraVolume(it) },
-                valueRange = 0f..1f,
-                steps = 19,
-                modifier = Modifier.fillMaxWidth(),
+            SettingsSectionHeader(
+                title =
+                    stringResource(
+                        R.string.text_tanpura_volume,
+                        (settings.tanpuraVolume * 100).roundToInt(),
+                    ),
+                tooltipText = stringResource(R.string.tooltip_tanpura_volume),
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    stringResource(R.string.text_silent_volume),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    stringResource(R.string.text_full_volume),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            LabelledSlider(
+                value = settings.tanpuraVolume,
+                onValueChange = { viewModel.updateTanpuraVolume(it) },
+                valueRange = SettingsConstants.VOLUME_MIN..SettingsConstants.VOLUME_MAX,
+                steps = SettingsConstants.VOLUME_STEPS,
+                startLabel = stringResource(R.string.text_silent_volume),
+                endLabel = stringResource(R.string.text_full_volume),
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
