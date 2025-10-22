@@ -177,7 +177,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private fun createSmoothedNote(note: HindustaniNoteConverter.HindustaniNote): HindustaniNoteConverter.HindustaniNote {
         // Apply Exponential Moving Average smoothing to reduce needle jitter
         smoothedCentsDeviation = SMOOTHING_ALPHA * note.centsDeviation +
-                (1 - SMOOTHING_ALPHA) * smoothedCentsDeviation
+            (1 - SMOOTHING_ALPHA) * smoothedCentsDeviation
 
         // Create smoothed note with updated cents deviation
         return note.copy(
