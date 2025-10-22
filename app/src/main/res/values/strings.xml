@@ -45,7 +45,7 @@
 
     <!-- SettingsScreen: Tuning System -->
     <string name="text_tuning_system">Tuning System</string>
-    <string name="tooltip_tuning_system">Tuning system:\n\n12 Notes (JI ratios): Standard swars with komal and teevra Ma variants.\nS, r, R, g, m, M, P, d, D, n, N\nRecommended for general practice.\n\n22-Shruti: Shrutis with microtonal variations (ati-komal, komal, teevra &amp; ati-teevra Ma).\nS, r1, r2, R1, R2, g1, g2, G1, G2, m1, m2, M1, M2, P, d1, d2, D1, D2, n1, n2, N1, N2\nRecommended for raags with stricter requirements of swars.</string>
+    <string name="tooltip_tuning_system">Tuning system:\n\n12 Notes (JI ratios): Standard swars with komal and teevra Ma variants.\nS, r, R, g, m, M, P, d, D, n, N\nRecommended for general practice.\n\n22-Shruti: Shrutis with microtonal variations (ati-komal, komal, teevra &amp; ati-teevra Ma).\nS, r1, r2, R1, R2, g1, g2, G1, G2, m1, m2, M1, M2, P, d1, d2, D1, D2, n1, n2, N1, N2\nRecommended for accuracy with raag riyaaz.</string>
     <string name="text_12_notes_ji">12 Notes (Just Intonation)</string>
     <string name="text_22_shruti_system">22 Shruti System</string>
 
@@ -128,7 +128,7 @@
     <!-- TrainingMenuScreen -->
     <string name="title_training">Training</string>
     <string name="title_voice_training">Voice Training</string>
-    <string name="description_voice_training">Practice holding a swar accurately with real-time feedback</string>
+    <string name="description_voice_training">Practice holding notes accurately with real-time feedback</string>
     <string name="text_level_1">Level 1</string>
     <string name="text_level_2">Level 2</string>
     <string name="text_level_3">Level 3</string>
