@@ -127,7 +127,7 @@ private fun TrainingExerciseCard(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = stringResource(R.string.text_7_notes),
+                                text = stringResource(R.string.text_7_swars),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -151,7 +151,7 @@ private fun TrainingExerciseCard(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = stringResource(R.string.text_7_notes),
+                                text = stringResource(R.string.text_7_swars),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -180,7 +180,7 @@ private fun TrainingExerciseCard(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = stringResource(R.string.text_12_notes),
+                                text = stringResource(R.string.text_12_swars),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -204,7 +204,7 @@ private fun TrainingExerciseCard(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = stringResource(R.string.text_12_notes),
+                                text = stringResource(R.string.text_12_swars),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

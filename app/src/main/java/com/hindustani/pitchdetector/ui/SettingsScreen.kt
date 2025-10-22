@@ -95,7 +95,7 @@ fun SettingsScreen(
                     onClick = { viewModel.updateTuningSystem(false) },
                 )
                 Text(
-                    text = stringResource(R.string.text_12_notes_ji),
+                    text = stringResource(R.string.text_12_swars_ji),
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
