@@ -282,14 +282,14 @@ class UserSettingsRepositoryTest {
         }
 
     @Test
-    fun `updateTanpuraString1 handles all valid swara options`() =
+    fun `updateTanpuraString1 handles all valid swar options`() =
         runTest {
-            val validSwaras = listOf("P", "m", "M", "S", "N")
+            val validSwars = listOf("P", "m", "M", "S", "N")
 
-            validSwaras.forEach { swara ->
-                repository.updateTanpuraString1(swara)
+            validSwars.forEach { swar ->
+                repository.updateTanpuraString1(swar)
                 val settings = repository.userSettings.first()
-                assertThat(settings.tanpuraString1).isEqualTo(swara)
+                assertThat(settings.tanpuraString1).isEqualTo(swar)
             }
         }
 }

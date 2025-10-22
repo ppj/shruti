@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for training mode where users practice holding swaras accurately
+ * ViewModel for training mode where users practice holding swars accurately
  *
  * @param level Training difficulty level:
  *   - 1 = 7 shuddha notes sequential
@@ -101,7 +101,7 @@ class TrainingViewModel(
 
         _state.update {
             it.copy(
-                currentSwara = noteSequence.first(),
+                currentSwar = noteSequence.first(),
             )
         }
 
@@ -140,18 +140,18 @@ class TrainingViewModel(
                 // Only track pitch after countdown finishes
                 if (_state.value.countdown > 0) return@onEach
 
-                val currentTarget = _state.value.currentSwara
+                val currentTarget = _state.value.currentSwar
                 val detectedNote = pitchState.currentNote
-                val detectedSwara = detectedNote?.swara
+                val detectedSwar = detectedNote?.swar
 
-                val isSingingCorrectSwara = detectedSwara == currentTarget
-                val isCorrect = isSingingCorrectSwara && detectedNote?.isPerfect == true
-                val isFlat = isSingingCorrectSwara && detectedNote?.isFlat == true
-                val isSharp = isSingingCorrectSwara && detectedNote?.isSharp == true
+                val isSingingCorrectSwar = detectedSwar == currentTarget
+                val isCorrect = isSingingCorrectSwar && detectedNote?.isPerfect == true
+                val isFlat = isSingingCorrectSwar && detectedNote?.isFlat == true
+                val isSharp = isSingingCorrectSwar && detectedNote?.isSharp == true
 
                 _state.update {
                     it.copy(
-                        detectedSwara = detectedSwara,
+                        detectedSwar = detectedSwar,
                         isHoldingCorrectly = isCorrect,
                         isFlat = isFlat,
                         isSharp = isSharp,
@@ -212,7 +212,7 @@ class TrainingViewModel(
             _state.update {
                 it.copy(
                     currentNoteIndex = nextIndex,
-                    currentSwara = noteSequence[nextIndex],
+                    currentSwar = noteSequence[nextIndex],
                     holdProgress = 0f,
                 )
             }

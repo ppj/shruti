@@ -49,7 +49,7 @@ class TrainingScreenTest {
                     TrainingState(
                         level = 1,
                         countdown = 0,
-                        currentSwara = "S",
+                        currentSwar = "S",
                         holdProgress = 0.5f,
                         isHoldingCorrectly = false,
                     ),
@@ -64,7 +64,7 @@ class TrainingScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Target swara should be displayed
+        // Target swar should be displayed
         composeTestRule.onNodeWithText("S").assertIsDisplayed()
 
         // Instruction text should be displayed
@@ -79,7 +79,7 @@ class TrainingScreenTest {
                     TrainingState(
                         level = 1,
                         countdown = 0,
-                        currentSwara = "R",
+                        currentSwar = "R",
                         holdProgress = 0.7f,
                         isHoldingCorrectly = true,
                     ),
@@ -99,15 +99,15 @@ class TrainingScreenTest {
     }
 
     @Test
-    fun trainingScreen_flatFeedback_whenSingingCorrectSwaraButFlat() {
+    fun trainingScreen_flatFeedback_whenSingingCorrectSwarButFlat() {
         val viewModel =
             createMockViewModel(
                 state =
                     TrainingState(
                         level = 1,
                         countdown = 0,
-                        currentSwara = "G",
-                        detectedSwara = "G",
+                        currentSwar = "G",
+                        detectedSwar = "G",
                         isFlat = true,
                         isSharp = false,
                         isHoldingCorrectly = false,
@@ -128,15 +128,15 @@ class TrainingScreenTest {
     }
 
     @Test
-    fun trainingScreen_sharpFeedback_whenSingingCorrectSwaraButSharp() {
+    fun trainingScreen_sharpFeedback_whenSingingCorrectSwarButSharp() {
         val viewModel =
             createMockViewModel(
                 state =
                     TrainingState(
                         level = 1,
                         countdown = 0,
-                        currentSwara = "P",
-                        detectedSwara = "P",
+                        currentSwar = "P",
+                        detectedSwar = "P",
                         isFlat = false,
                         isSharp = true,
                         isHoldingCorrectly = false,
@@ -157,15 +157,15 @@ class TrainingScreenTest {
     }
 
     @Test
-    fun trainingScreen_noFlatSharpFeedback_whenSingingWrongSwara() {
+    fun trainingScreen_noFlatSharpFeedback_whenSingingWrongSwar() {
         val viewModel =
             createMockViewModel(
                 state =
                     TrainingState(
                         level = 1,
                         countdown = 0,
-                        currentSwara = "S",
-                        detectedSwara = "R",
+                        currentSwar = "S",
+                        detectedSwar = "R",
                         isFlat = false,
                         isSharp = false,
                         isHoldingCorrectly = false,
@@ -195,7 +195,7 @@ class TrainingScreenTest {
                     TrainingState(
                         level = 1,
                         countdown = 0,
-                        currentSwara = "N",
+                        currentSwar = "N",
                         isSessionComplete = true,
                     ),
             )

@@ -84,7 +84,7 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val displaySwara =
+        val displaySwar =
             pitchState.currentNote?.toDisplayString()
                 ?: stringResource(R.string.text_no_note)
 
@@ -93,11 +93,11 @@ fun MainScreen(
             horizontalArrangement = Arrangement.Center,
         ) {
             NoteDisplay(
-                swara = displaySwara,
+                swar = displaySwar,
             )
             Spacer(modifier = Modifier.width(8.dp))
             HelpTooltip(
-                text = stringResource(R.string.tooltip_detected_swara),
+                text = stringResource(R.string.tooltip_detected_swar),
             )
         }
 

@@ -21,8 +21,8 @@
     <string name="button_find_my_sa">Find My Sa</string>
     <string name="text_no_note">—</string>
 
-    <!-- MainScreen: Detected swara -->
-    <string name="tooltip_detected_swara">Detected swar/shruti (in listening mode):\n• Lower octave - .S, .N, .n, .D ...\n• Middle octave - S, r, R, g, G ...\n• Higher octave - S\', r\', R\', g\' ...</string>
+    <!-- MainScreen: Detected swar -->
+    <string name="tooltip_detected_swar">Detected swar/shruti (in listening mode):\n• Lower octave - .S, .N, .n, .D ...\n• Middle octave - S, r, R, g, G ...\n• Higher octave - S\', r\', R\', g\' ...</string>
 
     <!-- MainScreen: Tanpura -->
     <string name="content_description_tanpura">Tanpura</string>
@@ -45,8 +45,8 @@
 
     <!-- SettingsScreen: Tuning System -->
     <string name="text_tuning_system">Tuning System</string>
-    <string name="tooltip_tuning_system">Tuning system:\n\n12 Notes (JI ratios): Standard swars with komal and teevra Ma variants.\nS, r, R, g, m, M, P, d, D, n, N\nRecommended for general practice.\n\n22-Shruti: Shrutis with microtonal variations (ati-komal, komal, teevra &amp; ati-teevra Ma).\nS, r1, r2, R1, R2, g1, g2, G1, G2, m1, m2, M1, M2, P, d1, d2, D1, D2, n1, n2, N1, N2\nRecommended for raags with stricter requirements of swars.</string>
-    <string name="text_12_notes_ji">12 Notes (Just Intonation)</string>
+    <string name="tooltip_tuning_system">Tuning system:\n\n12 Swars (JI ratios): Standard swars with komal and teevra Ma variants.\nS, r, R, g, m, M, P, d, D, n, N\nRecommended for general practice.\n\n22-Shruti: Shrutis with microtonal variations (ati-komal, komal, teevra &amp; ati-teevra Ma).\nS, r1, r2, R1, R2, g1, g2, G1, G2, m1, m2, M1, M2, P, d1, d2, D1, D2, n1, n2, N1, N2\nRecommended for accuracy with raag riyaaz.</string>
+    <string name="text_12_swars_ji">12 Swars (Just Intonation)</string>
     <string name="text_22_shruti_system">22 Shruti System</string>
 
     <!-- SettingsScreen: Tanpura Volume -->
@@ -128,15 +128,13 @@
     <!-- TrainingMenuScreen -->
     <string name="title_training">Training</string>
     <string name="title_voice_training">Voice Training</string>
-    <string name="description_voice_training">Practice holding swaras accurately with real-time feedback</string>
+    <string name="description_voice_training">Practice swar-singing accuracy with real-time feedback</string>
     <string name="text_level_1">Level 1</string>
     <string name="text_level_2">Level 2</string>
     <string name="text_level_3">Level 3</string>
     <string name="text_level_4">Level 4</string>
-    <string name="text_7_shuddha_notes">7 shuddha notes</string>
-    <string name="text_12_all_notes">All 12 notes</string>
-    <string name="text_7_notes">7 notes</string>
-    <string name="text_12_notes">12 notes</string>
+    <string name="text_7_swars">7 swars</string>
+    <string name="text_12_swars">12 swars</string>
     <string name="text_sequential">Sequential</string>
     <string name="text_random">Random</string>
 
