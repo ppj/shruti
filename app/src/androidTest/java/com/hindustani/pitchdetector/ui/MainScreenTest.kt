@@ -73,13 +73,13 @@ class MainScreenTest {
     }
 
     @Test
-    fun mainScreen_displaysSwaraWithOctaveNotation_mandraSaptak() {
+    fun mainScreen_displaysSwarWithOctaveNotation_mandraSaptak() {
         val viewModel = TestViewModelFactory.createPitchViewModel()
 
         // Create a note in mandra saptak (lower octave)
         val mandraNote =
             HindustaniNoteConverter.HindustaniNote(
-                swara = "S",
+                swar = "S",
                 octave = HindustaniNoteConverter.Octave.MANDRA,
                 centsDeviation = 0.0,
                 isPerfect = true,
@@ -113,13 +113,13 @@ class MainScreenTest {
     }
 
     @Test
-    fun mainScreen_displaysSwaraWithOctaveNotation_madhyaSaptak() {
+    fun mainScreen_displaysSwarWithOctaveNotation_madhyaSaptak() {
         val viewModel = TestViewModelFactory.createPitchViewModel()
 
         // Create a note in madhya saptak (middle octave)
         val madhyaNote =
             HindustaniNoteConverter.HindustaniNote(
-                swara = "R",
+                swar = "R",
                 octave = HindustaniNoteConverter.Octave.MADHYA,
                 centsDeviation = 0.0,
                 isPerfect = true,
@@ -152,13 +152,13 @@ class MainScreenTest {
     }
 
     @Test
-    fun mainScreen_displaysSwaraWithOctaveNotation_taarSaptak() {
+    fun mainScreen_displaysSwarWithOctaveNotation_taarSaptak() {
         val viewModel = TestViewModelFactory.createPitchViewModel()
 
         // Create a note in taar saptak (upper octave)
         val taarNote =
             HindustaniNoteConverter.HindustaniNote(
-                swara = "G",
+                swar = "G",
                 octave = HindustaniNoteConverter.Octave.TAAR,
                 centsDeviation = 0.0,
                 isPerfect = true,

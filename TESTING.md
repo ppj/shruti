@@ -31,7 +31,7 @@ This document provides an overview of the test suite for the Shruti app.
   - Sharp/flat (enharmonic) equivalence
   - Equal temperament validation
 
-- **HindustaniNoteConverter** (Frequency to swara conversion)
+- **HindustaniNoteConverter** (Frequency to swar conversion)
   - All 12 basic notes identification
   - Komal vs shuddha note detection
   - Flat/sharp/perfect pitch detection
@@ -238,7 +238,7 @@ fun `methodName_stateUnderTest_expectedBehavior`() {
 ### Example
 ```kotlin
 @Test
-fun `convertFrequency_withValidFrequency_returnsCorrectSwara`() {
+fun `convertFrequency_withValidFrequency_returnsCorrectSwar`() {
     // Arrange
     val converter = HindustaniNoteConverter(261.63, 15.0, false)
 
@@ -246,7 +246,7 @@ fun `convertFrequency_withValidFrequency_returnsCorrectSwara`() {
     val result = converter.convertFrequency(392.0)
 
     // Assert
-    assertThat(result.swara).isEqualTo("P")
+    assertThat(result.swar).isEqualTo("P")
 }
 ```
 

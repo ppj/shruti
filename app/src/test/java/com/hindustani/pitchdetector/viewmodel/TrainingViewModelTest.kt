@@ -62,7 +62,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(1)
-            assertThat(trainingViewModel.state.value.currentSwara).isEqualTo("S")
+            assertThat(trainingViewModel.state.value.currentSwar).isEqualTo("S")
         }
 
     @Test
@@ -71,7 +71,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 2, pitchViewModel = pitchViewModel)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(2)
-            assertThat(trainingViewModel.state.value.currentSwara).isNotNull()
+            assertThat(trainingViewModel.state.value.currentSwar).isNotNull()
         }
 
     @Test
@@ -80,7 +80,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 3, pitchViewModel = pitchViewModel)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(3)
-            assertThat(trainingViewModel.state.value.currentSwara).isEqualTo("S")
+            assertThat(trainingViewModel.state.value.currentSwar).isEqualTo("S")
         }
 
     @Test
@@ -89,7 +89,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 4, pitchViewModel = pitchViewModel)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(4)
-            assertThat(trainingViewModel.state.value.currentSwara).isNotNull()
+            assertThat(trainingViewModel.state.value.currentSwar).isNotNull()
         }
 
     @Test
@@ -138,7 +138,7 @@ class TrainingViewModelTest {
 
             val correctNote =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "S",
+                    swar = "S",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = 0.0,
                     isPerfect = true,
@@ -159,7 +159,7 @@ class TrainingViewModelTest {
 
             val incorrectNote =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "R",
+                    swar = "R",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = 0.0,
                     isPerfect = true,
@@ -180,7 +180,7 @@ class TrainingViewModelTest {
 
             val imperfectNote =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "S",
+                    swar = "S",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = 20.0,
                     isPerfect = false,
@@ -194,14 +194,14 @@ class TrainingViewModelTest {
         }
 
     @Test
-    fun `observePitch_correctSwaraButFlat_setsIsFlatTrue`() =
+    fun `observePitch_correctSwarButFlat_setsIsFlatTrue`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val flatNote =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "S",
+                    swar = "S",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = -20.0,
                     isPerfect = false,
@@ -213,18 +213,18 @@ class TrainingViewModelTest {
 
             assertThat(trainingViewModel.state.value.isFlat).isTrue()
             assertThat(trainingViewModel.state.value.isSharp).isFalse()
-            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("S")
+            assertThat(trainingViewModel.state.value.detectedSwar).isEqualTo("S")
         }
 
     @Test
-    fun `observePitch_correctSwaraButSharp_setsIsSharpTrue`() =
+    fun `observePitch_correctSwarButSharp_setsIsSharpTrue`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val sharpNote =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "S",
+                    swar = "S",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = 20.0,
                     isPerfect = false,
@@ -236,18 +236,18 @@ class TrainingViewModelTest {
 
             assertThat(trainingViewModel.state.value.isSharp).isTrue()
             assertThat(trainingViewModel.state.value.isFlat).isFalse()
-            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("S")
+            assertThat(trainingViewModel.state.value.detectedSwar).isEqualTo("S")
         }
 
     @Test
-    fun `observePitch_wrongSwaraEvenIfFlat_doesNotSetIsFlat`() =
+    fun `observePitch_wrongSwarEvenIfFlat_doesNotSetIsFlat`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val wrongNoteFlat =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "R",
+                    swar = "R",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = -20.0,
                     isPerfect = false,
@@ -259,7 +259,7 @@ class TrainingViewModelTest {
 
             assertThat(trainingViewModel.state.value.isFlat).isFalse()
             assertThat(trainingViewModel.state.value.isSharp).isFalse()
-            assertThat(trainingViewModel.state.value.detectedSwara).isEqualTo("R")
+            assertThat(trainingViewModel.state.value.detectedSwar).isEqualTo("R")
         }
 
     @Test
@@ -270,7 +270,7 @@ class TrainingViewModelTest {
 
             val perfectNote =
                 HindustaniNoteConverter.HindustaniNote(
-                    swara = "S",
+                    swar = "S",
                     octave = HindustaniNoteConverter.Octave.MADHYA,
                     centsDeviation = 0.0,
                     isPerfect = true,
@@ -286,7 +286,7 @@ class TrainingViewModelTest {
         }
 
     @Test
-    fun `observePitch_nullNote_clearsDetectedSwaraAndFlatSharpFlags`() =
+    fun `observePitch_nullNote_clearsDetectedSwarAndFlatSharpFlags`() =
         runTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
@@ -294,7 +294,7 @@ class TrainingViewModelTest {
             mockPitchState.value = mockPitchState.value.copy(currentNote = null)
             testScheduler.advanceUntilIdle()
 
-            assertThat(trainingViewModel.state.value.detectedSwara).isNull()
+            assertThat(trainingViewModel.state.value.detectedSwar).isNull()
             assertThat(trainingViewModel.state.value.isFlat).isFalse()
             assertThat(trainingViewModel.state.value.isSharp).isFalse()
         }

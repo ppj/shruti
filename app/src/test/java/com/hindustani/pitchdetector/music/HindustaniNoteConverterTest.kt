@@ -23,7 +23,7 @@ class HindustaniNoteConverterTest {
     fun `convertFrequency correctly identifies Sa`() {
         val result = converter.convertFrequency(saFrequency)
 
-        assertThat(result.swara).isEqualTo("S")
+        assertThat(result.swar).isEqualTo("S")
         assertThat(result.octave).isEqualTo(HindustaniNoteConverter.Octave.MADHYA)
         assertThat(abs(result.centsDeviation)).isWithin(1.0).of(0.0)
         assertThat(result.isPerfect).isTrue()
@@ -37,7 +37,7 @@ class HindustaniNoteConverterTest {
         val pFrequency = saFrequency * (3.0 / 2.0)
         val result = converter.convertFrequency(pFrequency)
 
-        assertThat(result.swara).isEqualTo("P")
+        assertThat(result.swar).isEqualTo("P")
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
         assertThat(result.isPerfect).isTrue()
     }
@@ -48,7 +48,7 @@ class HindustaniNoteConverterTest {
         val rFrequency = saFrequency * (9.0 / 8.0)
         val result = converter.convertFrequency(rFrequency)
 
-        assertThat(result.swara).isEqualTo("R")
+        assertThat(result.swar).isEqualTo("R")
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
 
@@ -58,7 +58,7 @@ class HindustaniNoteConverterTest {
         val rFrequency = saFrequency * (16.0 / 15.0)
         val result = converter.convertFrequency(rFrequency)
 
-        assertThat(result.swara).isEqualTo("r")
+        assertThat(result.swar).isEqualTo("r")
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
 
@@ -128,7 +128,7 @@ class HindustaniNoteConverterTest {
             val frequency = saFrequency * ratios[index]
             val result = converter.convertFrequency(frequency)
 
-            assertThat(result.swara).isEqualTo(expectedNote)
+            assertThat(result.swar).isEqualTo(expectedNote)
             assertThat(result.isPerfect).isTrue()
         }
     }
@@ -151,7 +151,7 @@ class HindustaniNoteConverterTest {
         val result = converter.convertFrequency(lowerN)
 
         // Should still identify as N (or closest note)
-        assertThat(result.swara).isNotEmpty()
+        assertThat(result.swar).isNotEmpty()
         assertThat(result.centsDeviation).isNotNull()
     }
 
@@ -162,7 +162,7 @@ class HindustaniNoteConverterTest {
         val result = converter.convertFrequency(upperR)
 
         // Should still identify correctly
-        assertThat(result.swara).isNotEmpty()
+        assertThat(result.swar).isNotEmpty()
     }
 
     @Test
@@ -176,12 +176,12 @@ class HindustaniNoteConverterTest {
             )
 
         val result = converterA4.convertFrequency(differentSa)
-        assertThat(result.swara).isEqualTo("S")
+        assertThat(result.swar).isEqualTo("S")
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
 
         // P should be 3/2 of the new Sa
         val pResult = converterA4.convertFrequency(differentSa * 3.0 / 2.0)
-        assertThat(pResult.swara).isEqualTo("P")
+        assertThat(pResult.swar).isEqualTo("P")
     }
 
     @Test
@@ -202,7 +202,7 @@ class HindustaniNoteConverterTest {
         val lowerSa = saFrequency / 2.0
         val result = converter.convertFrequency(lowerSa)
 
-        assertThat(result.swara).isEqualTo("S")
+        assertThat(result.swar).isEqualTo("S")
         assertThat(result.octave).isEqualTo(HindustaniNoteConverter.Octave.MANDRA)
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
@@ -213,7 +213,7 @@ class HindustaniNoteConverterTest {
         val upperSa = saFrequency * 2.0
         val result = converter.convertFrequency(upperSa)
 
-        assertThat(result.swara).isEqualTo("S")
+        assertThat(result.swar).isEqualTo("S")
         assertThat(result.octave).isEqualTo(HindustaniNoteConverter.Octave.TAAR)
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
@@ -224,7 +224,7 @@ class HindustaniNoteConverterTest {
         val lowerP = saFrequency * (3.0 / 2.0) / 2.0
         val result = converter.convertFrequency(lowerP)
 
-        assertThat(result.swara).isEqualTo("P")
+        assertThat(result.swar).isEqualTo("P")
         assertThat(result.octave).isEqualTo(HindustaniNoteConverter.Octave.MANDRA)
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }
@@ -235,7 +235,7 @@ class HindustaniNoteConverterTest {
         val upperP = saFrequency * (3.0 / 2.0) * 2.0
         val result = converter.convertFrequency(upperP)
 
-        assertThat(result.swara).isEqualTo("P")
+        assertThat(result.swar).isEqualTo("P")
         assertThat(result.octave).isEqualTo(HindustaniNoteConverter.Octave.TAAR)
         assertThat(abs(result.centsDeviation)).isLessThan(1.0)
     }

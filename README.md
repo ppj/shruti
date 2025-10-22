@@ -6,7 +6,7 @@ A real-time pitch detection Android app for Hindustani classical music students.
 
 ### Core Functionality
 - **Real-time Pitch Detection**: Uses PYIN (Probabilistic YIN) algorithm for accurate vocal pitch detection
-- **Hindustani Notation**: Displays notes in traditional Hindustani swaras (S r R g G m M P d D n N)
+- **Hindustani Notation**: Displays notes in traditional Hindustani swars (S r R g G m M P d D n N)
 - **Visual Feedback**: Needle-style pitch indicator with color-coded accuracy (Green = Perfect, Blue = Flat, Red = Sharp)
 - **Customizable Tolerance**: Adjustable accuracy tolerance from ±5 cents (expert) to ±30 cents (beginner)
 - **Dual Tuning Systems**:
@@ -57,7 +57,7 @@ A real-time pitch detection Android app for Hindustani classical music students.
   - Source: [Calcutta Standard Male Tanpura](https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html)
 
 #### Music Theory Engine
-- **HindustaniNoteConverter**: Frequency to swara conversion
+- **HindustaniNoteConverter**: Frequency to swar conversion
   - Just Intonation ratios for 12 basic notes
   - 22-shruti system support with microtonal variations
   - Accurate cents deviation calculation
@@ -136,7 +136,7 @@ After cloning the repository, run the setup script to configure the git hooks:
 ### Practicing
 1. **Start Detection**: Tap the green "Start" button
 2. **Sing a Note**: The app will display:
-   - Current swara (S, R, G, etc.)
+   - Current swar (S, R, G, etc.)
    - Cents deviation from perfect pitch
    - Visual needle indicator
    - Color-coded status (Perfect/Flat/Sharp)
@@ -154,7 +154,7 @@ After cloning the repository, run the setup script to configure the git hooks:
   - 🔴 Red: Sharp (above tolerance)
 
 #### Note Display
-- **Large Swara**: Current detected note in Hindustani notation with octave
+- **Large Swar**: Current detected note in Hindustani notation with octave
   - **Mandra Saptak** (lower octave): `.S` `.R` `.G` `.P` (dot prefix)
   - **Madhya Saptak** (middle octave): `S` `R` `G` `P` (plain)
   - **Taar Saptak** (upper octave): `S'` `R'` `G'` `P'` (apostrophe suffix)
@@ -231,7 +231,7 @@ app/src/main/java/com/hindustani/pitchdetector/
 │   ├── PYINDetector.kt              # PYIN pitch detection algorithm
 │   └── TanpuraPlayer.kt             # Tanpura playback engine
 ├── music/
-│   ├── HindustaniNoteConverter.kt   # Frequency to swara conversion
+│   ├── HindustaniNoteConverter.kt   # Frequency to swar conversion
 │   └── SaParser.kt                  # Western notation parser
 ├── ui/
 │   ├── MainActivity.kt              # Main activity with navigation
@@ -253,7 +253,7 @@ app/src/main/java/com/hindustani/pitchdetector/
 ## Music Theory Reference
 
 ### Just Intonation Ratios
-| Swara | Ratio | Cents from Sa | Western Equivalent |
+| Swar  | Ratio | Cents from Sa | Western Equivalent |
 |-------|-------|---------------|-------------------|
 | S     | 1/1   | 0             | Do (C)            |
 | r     | 16/15 | 112           | Re♭ (D♭)          |

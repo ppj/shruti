@@ -13,7 +13,7 @@ class HindustaniNoteConverter(
     private val use22Shruti: Boolean = false,
 ) {
     data class HindustaniNote(
-        val swara: String, // S, r, R, g, G, m, M, P, d, D, n, N (or with shruti numbers)
+        val swar: String, // S, r, R, g, G, m, M, P, d, D, n, N (or with shruti numbers)
         val octave: Octave, // Which saptak (octave)
         val centsDeviation: Double, // How far from perfect pitch
         val isPerfect: Boolean, // Within tolerance?
@@ -77,7 +77,7 @@ class HindustaniNoteConverter(
         val ratios = if (use22Shruti) shruti22Ratios else justIntonationRatios
 
         // Find closest note across all octaves
-        var closestSwara = "S"
+        var closestSwar = "S"
         var closestOctave = Octave.MADHYA
         var minCentsDiff = Double.MAX_VALUE
         var bestTargetFreq = saFrequency
@@ -90,15 +90,15 @@ class HindustaniNoteConverter(
                 2.0 to Octave.TAAR, // Upper octave
             )
 
-        for ((swara, swaraRatio) in ratios) {
+        for ((swar, swarRatio) in ratios) {
             for ((multiplier, octave) in octaveMultipliers) {
-                val targetFreq = saFrequency * swaraRatio * multiplier
+                val targetFreq = saFrequency * swarRatio * multiplier
                 val cents = 1200 * log2(frequency / targetFreq)
                 val absCents = abs(cents)
 
                 if (absCents < minCentsDiff) {
                     minCentsDiff = absCents
-                    closestSwara = swara
+                    closestSwar = swar
                     closestOctave = octave
                     bestTargetFreq = targetFreq
                 }
@@ -109,7 +109,7 @@ class HindustaniNoteConverter(
         val centsDeviation = 1200 * log2(frequency / bestTargetFreq)
 
         return HindustaniNote(
-            swara = closestSwara,
+            swar = closestSwar,
             octave = closestOctave,
             centsDeviation = centsDeviation,
             isPerfect = abs(centsDeviation) <= toleranceCents,
@@ -129,7 +129,7 @@ class HindustaniNoteConverter(
  */
 fun HindustaniNoteConverter.HindustaniNote.toDisplayString(): String =
     when (octave) {
-        HindustaniNoteConverter.Octave.MANDRA -> ".$swara"
-        HindustaniNoteConverter.Octave.MADHYA -> swara
-        HindustaniNoteConverter.Octave.TAAR -> "$swara'"
+        HindustaniNoteConverter.Octave.MANDRA -> ".$swar"
+        HindustaniNoteConverter.Octave.MADHYA -> swar
+        HindustaniNoteConverter.Octave.TAAR -> "$swar'"
     }

@@ -177,7 +177,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private fun createSmoothedNote(note: HindustaniNoteConverter.HindustaniNote): HindustaniNoteConverter.HindustaniNote {
         // Apply Exponential Moving Average smoothing to reduce needle jitter
         smoothedCentsDeviation = SMOOTHING_ALPHA * note.centsDeviation +
-            (1 - SMOOTHING_ALPHA) * smoothedCentsDeviation
+                (1 - SMOOTHING_ALPHA) * smoothedCentsDeviation
 
         // Create smoothed note with updated cents deviation
         return note.copy(
@@ -281,17 +281,17 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Update tanpura string 1 note
      */
-    fun updateTanpuraString1(swara: String) {
+    fun updateTanpuraString1(swar: String) {
         // Persist to DataStore (flow collector will update _settings)
         viewModelScope.launch {
-            userSettingsRepository.updateTanpuraString1(swara)
+            userSettingsRepository.updateTanpuraString1(swar)
         }
 
         // Update tanpura immediately if it's currently playing
         if (_isTanpuraPlaying.value) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
-                string1 = swara,
+                string1 = swar,
                 vol = _settings.value.tanpuraVolume,
             )
         }

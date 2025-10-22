@@ -12,7 +12,7 @@ This is a real-time pitch detection Android app for Hindustani classical music s
 
 **Key Features:**
 
-*   Real-time pitch detection and display in Hindustani swaras.
+*   Real-time pitch detection and display in Hindustani swars.
 *   Customizable pitch accuracy tolerance.
 *   Supports both 12-note Just Intonation and 22-shruti tuning systems.
 *   Built-in tanpura/drone with configurable settings.

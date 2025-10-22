@@ -11,12 +11,12 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun NoteDisplay(
-    swara: String,
+    swar: String,
     modifier: Modifier = Modifier,
 ) {
-    // Compact note display - just the swara text
+    // Compact note display - just the swar text
     Text(
-        text = swara,
+        text = swar,
         style = MaterialTheme.typography.displayLarge,
         fontSize = 64.sp,
         color = MaterialTheme.colorScheme.primary,

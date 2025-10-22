@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Shruti** is a real-time pitch detection Android app for Hindustani classical music students. It uses the PYIN (Probabilistic YIN) algorithm to detect vocal pitch and displays notes in traditional Hindustani swaras (S, R, G, P, etc.) with visual feedback on accuracy.
+**Shruti** is a real-time pitch detection Android app for Hindustani classical music students. It uses the PYIN (Probabilistic YIN) algorithm to detect vocal pitch and displays notes in traditional Hindustani swars (S, R, G, P, etc.) with visual feedback on accuracy.
 
 **Tech Stack:**
 - Language: Kotlin
@@ -61,7 +61,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Audio Processing Pipeline:**
 1. `AudioCaptureManager` - Captures real-time microphone audio (44.1 kHz, mono, PCM 16-bit)
 2. `PYINDetector` - Detects pitch using Probabilistic YIN algorithm (~10-15ms latency)
-3. `HindustaniNoteConverter` - Converts frequency to Hindustani swara notation
+3. `HindustaniNoteConverter` - Converts frequency to Hindustani swar notation
 4. `PitchViewModel` - Manages state and coordinates the pipeline
 
 **Music Theory Engine:**
@@ -88,7 +88,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `MainScreen` - Primary pitch detection interface
 - `SettingsScreen` - Configuration interface
 - `PitchBar` - Horizontal pitch bar with emoji feedback (Canvas-based)
-- `NoteDisplay` - Large swara display with cents deviation
+- `NoteDisplay` - Large swar display with cents deviation
 
 ### Key Design Patterns
 
@@ -176,7 +176,7 @@ The app uses pure frequency ratios (not equal temperament):
 
 ## Common Development Tasks
 
-### Adding a New Swara/Note
+### Adding a New Swar/Note
 1. Update `HindustaniNoteConverter.kt` - Add ratio to `noteRatios` or `shruti22Ratios`
 2. Update tests in `HindustaniNoteConverterTest.kt`
 3. Update documentation if needed
@@ -209,7 +209,7 @@ app/src/main/java/com/hindustani/pitchdetector/
 │   ├── PYINDetector.kt           # Pitch detection algorithm
 │   └── TanpuraPlayer.kt          # Tanpura playback
 ├── music/
-│   ├── HindustaniNoteConverter.kt # Frequency → swara conversion
+│   ├── HindustaniNoteConverter.kt # Frequency → swar conversion
 │   └── SaParser.kt                # Western notation parser
 ├── ui/
 │   ├── MainActivity.kt            # Single activity + navigation

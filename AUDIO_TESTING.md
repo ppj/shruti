@@ -89,7 +89,7 @@ When testing on a real device, verify:
 
 - [ ] **Microphone Permission**: App requests and receives permission
 - [ ] **Pitch Detection**: Detects your singing/humming
-- [ ] **Note Display**: Shows correct swara (S, R, G, P, etc.)
+- [ ] **Note Display**: Shows correct swar (S, R, G, P, etc.)
 - [ ] **Pitch Indicator**: Needle moves based on pitch
 - [ ] **Color Feedback**: Green (perfect), Blue (flat), Red (sharp)
 - [ ] **Tolerance Settings**: Adjusting tolerance affects perfect/flat/sharp

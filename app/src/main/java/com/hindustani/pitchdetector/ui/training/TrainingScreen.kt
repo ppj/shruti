@@ -37,7 +37,7 @@ import com.hindustani.pitchdetector.ui.theme.TrainingCorrect
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
 /**
- * Training screen where users practice holding swaras accurately
+ * Training screen where users practice holding swars accurately
  * Layout matches MainScreen for consistency
  *
  * @param navController Navigation controller for back navigation
@@ -142,7 +142,7 @@ fun TrainingScreen(
                     )
 
                     Text(
-                        text = state.currentSwara ?: stringResource(R.string.text_no_note),
+                        text = state.currentSwar ?: stringResource(R.string.text_no_note),
                         style = MaterialTheme.typography.displayLarge,
                         fontSize = 72.sp,
                         fontWeight = FontWeight.Bold,
