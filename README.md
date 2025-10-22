@@ -6,7 +6,7 @@ A real-time pitch detection Android app for Hindustani classical music students.
 
 ### Core Functionality
 - **Real-time Pitch Detection**: Uses PYIN (Probabilistic YIN) algorithm for accurate vocal pitch detection
-- **Hindustani Notation**: Displays notes in traditional Hindustani swars (S r R g G m M P d D n N)
+- **Hindustani Notation**: Displays notes as traditional Hindustani swars (S r R g G m M P d D n N)
 - **Visual Feedback**: Needle-style pitch indicator with color-coded accuracy (Green = Perfect, Blue = Flat, Red = Sharp)
 - **Customizable Tolerance**: Adjustable accuracy tolerance from ±5 cents (expert) to ±30 cents (beginner)
 - **Dual Tuning Systems**:
@@ -258,15 +258,15 @@ app/src/main/java/com/hindustani/pitchdetector/
 | S     | 1/1   | 0             | Do (C)            |
 | r     | 16/15 | 112           | Re♭ (D♭)          |
 | R     | 9/8   | 204           | Re (D)            |
-| g     | 6/5   | 316           | Ga♭ (E♭)          |
-| G     | 5/4   | 386           | Ga (E)            |
-| m     | 4/3   | 498           | Ma (F)            |
-| M     | 45/32 | 590           | Ma♯ (F♯)          |
-| P     | 3/2   | 702           | Pa (G)            |
-| d     | 8/5   | 814           | Dha♭ (A♭)         |
-| D     | 5/3   | 884           | Dha (A)           |
-| n     | 16/9  | 996           | Ni♭ (B♭)          |
-| N     | 15/8  | 1088          | Ni (B)            |
+| g     | 6/5   | 316           | Mi♭ (E♭)          |
+| G     | 5/4   | 386           | Mi (E)            |
+| m     | 4/3   | 498           | Fa (F)            |
+| M     | 45/32 | 590           | Fa♯ (F♯)          |
+| P     | 3/2   | 702           | So (G)            |
+| d     | 8/5   | 814           | La♭ (A♭)          |
+| D     | 5/3   | 884           | La (A)            |
+| n     | 16/9  | 996           | Ti♭ (B♭)          |
+| N     | 15/8  | 1088          | Ti (B)            |
 
 ### Cents Measurement
 - 100 cents = 1 semitone
