@@ -21,8 +21,8 @@
     <string name="button_find_my_sa">Find My Sa</string>
     <string name="text_no_note">—</string>
 
-    <!-- MainScreen: Detected swara -->
-    <string name="tooltip_detected_swara">Detected swar/shruti (in listening mode):\n• Lower octave - .S, .N, .n, .D ...\n• Middle octave - S, r, R, g, G ...\n• Higher octave - S\', r\', R\', g\' ...</string>
+    <!-- MainScreen: Detected swar -->
+    <string name="tooltip_detected_swar">Detected swar/shruti (in listening mode):\n• Lower octave - .S, .N, .n, .D ...\n• Middle octave - S, r, R, g, G ...\n• Higher octave - S\', r\', R\', g\' ...</string>
 
     <!-- MainScreen: Tanpura -->
     <string name="content_description_tanpura">Tanpura</string>
@@ -128,7 +128,7 @@
     <!-- TrainingMenuScreen -->
     <string name="title_training">Training</string>
     <string name="title_voice_training">Voice Training</string>
-    <string name="description_voice_training">Practice holding swaras accurately with real-time feedback</string>
+    <string name="description_voice_training">Practice holding a swar accurately with real-time feedback</string>
     <string name="text_level_1">Level 1</string>
     <string name="text_level_2">Level 2</string>
     <string name="text_level_3">Level 3</string>
