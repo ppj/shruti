@@ -81,6 +81,7 @@ class TrainingViewModel(
     private var noteSequence: List<String> = emptyList()
     private var holdTimerJob: Job? = null
     private var wasPerfectThroughout: Boolean = true
+    private var currentNoteEverImperfect: Boolean = false
 
     /**
      * Generate note sequence based on level (randomized levels get new shuffle each time)
@@ -200,6 +201,7 @@ class TrainingViewModel(
                 } else {
                     if (holdTimerJob?.isActive == true) {
                         wasPerfectThroughout = false
+                        currentNoteEverImperfect = true
                     }
                     resetHoldTimer()
                 }
@@ -246,12 +248,15 @@ class TrainingViewModel(
         var newScore = currentState.currentScore + BASE_POINTS
         var newCombo = currentState.comboCount
 
-        if (wasPerfectThroughout) {
+        val wasNotePerfect = !currentNoteEverImperfect
+        if (wasNotePerfect) {
             newCombo++
             newScore += ACCURACY_BONUS_BASE * newCombo
         } else {
             newCombo = 0
         }
+
+        currentNoteEverImperfect = false
 
         resetHoldTimer()
         val currentIndex = currentState.currentNoteIndex
@@ -265,7 +270,7 @@ class TrainingViewModel(
                     holdProgress = 0f,
                     currentScore = newScore,
                     comboCount = newCombo,
-                    wasLastNotePerfect = wasPerfectThroughout,
+                    wasLastNotePerfect = wasNotePerfect,
                 )
             }
         } else {
@@ -281,7 +286,7 @@ class TrainingViewModel(
                     comboCount = newCombo,
                     earnedStars = stars,
                     sessionBestScore = newSessionBest,
-                    wasLastNotePerfect = wasPerfectThroughout,
+                    wasLastNotePerfect = wasNotePerfect,
                 )
             }
 
