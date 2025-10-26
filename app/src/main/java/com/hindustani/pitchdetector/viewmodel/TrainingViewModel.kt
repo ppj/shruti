@@ -211,6 +211,7 @@ class TrainingViewModel(
      */
     private fun startHoldTimer() {
         holdTimerJob?.cancel()
+        wasPerfectThroughout = true
         holdTimerJob =
             viewModelScope.launch {
                 val startTime = System.currentTimeMillis()
@@ -232,7 +233,6 @@ class TrainingViewModel(
     private fun resetHoldTimer() {
         holdTimerJob?.cancel()
         holdTimerJob = null
-        wasPerfectThroughout = true
         if (_state.value.holdProgress > 0f) {
             _state.update { it.copy(holdProgress = 0f) }
         }
