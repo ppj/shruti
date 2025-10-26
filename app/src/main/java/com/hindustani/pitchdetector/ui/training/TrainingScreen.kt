@@ -92,7 +92,7 @@ fun TrainingScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                if (state.countdown == 0) {
+                if (state.countdown == 0 && !state.isSessionComplete) {
                     Text(
                         text = stringResource(R.string.text_score, state.currentScore),
                         style = MaterialTheme.typography.bodyMedium,
