@@ -42,7 +42,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.hindustani.pitchdetector.ui.MainScreenTest
 ```
 
-**Test Suite:** 69 unit tests + 26 UI tests = 95 total tests
+**Test Suite:** 74 unit tests + 26 UI tests = 100 total tests
 
 ### Running the App
 ```bash
@@ -86,6 +86,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **UI Layer (Jetpack Compose):**
 - `MainActivity` - Single activity with Navigation Compose
 - `MainScreen` - Primary pitch detection interface
+- `TrainingScreen` - Interactive swar practice mode with gamification (scoring, combos, star ratings)
 - `SettingsScreen` - Configuration interface
 - `PitchBar` - Horizontal pitch bar with emoji feedback (Canvas-based)
 - `NoteDisplay` - Large swar display with cents deviation
@@ -124,6 +125,13 @@ AudioCaptureManager (main thread)
 - Confidence threshold: >0.5 (below this, no note displayed)
 - Buffer size: Minimum 2048 samples for PYIN
 - YIN buffer: Up to 2048 or half audio buffer size
+
+**Training Mode Gamification:**
+- Scoring system: 100 base points + accuracy bonus (50 × combo multiplier)
+- Combo multiplier increases for consecutive perfect notes (held perfectly throughout duration)
+- Star ratings: 1 star (baseline), 2 stars (≥60%), 3 stars (≥85%)
+- Session best score persists across replays within same session
+- Max scores: Level 1 (7 notes) = 2,100 points, Level 2/3 (12 notes) = 5,100 points
 
 **Just Intonation Ratios:**
 The app uses pure frequency ratios (not equal temperament):
@@ -215,16 +223,21 @@ app/src/main/java/com/hindustani/pitchdetector/
 │   ├── MainActivity.kt            # Single activity + navigation
 │   ├── MainScreen.kt              # Pitch detection UI
 │   ├── SettingsScreen.kt          # Settings UI
+│   ├── training/
+│   │   ├── TrainingScreen.kt      # Training mode with gamification
+│   │   └── TrainingMenuScreen.kt  # Level selection
 │   ├── components/
 │   │   ├── PitchBar.kt            # Horizontal pitch bar (Canvas)
 │   │   └── NoteDisplay.kt         # Note display component
 │   └── theme/
 ├── viewmodel/
-│   └── PitchViewModel.kt          # State management
+│   ├── PitchViewModel.kt          # Main state management
+│   └── TrainingViewModel.kt       # Training mode state & scoring
 └── data/
     ├── UserSettings.kt            # Settings model
     ├── UserSettingsRepository.kt  # DataStore persistence
-    └── PitchState.kt              # Pitch state model
+    ├── PitchState.kt              # Pitch state model
+    └── TrainingState.kt           # Training session state with scoring
 ```
 
 ## Testing Notes
