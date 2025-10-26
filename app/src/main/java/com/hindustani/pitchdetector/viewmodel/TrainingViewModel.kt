@@ -195,7 +195,7 @@ class TrainingViewModel(
                 }
 
                 if (isCorrect) {
-                    if (holdTimerJob?.isActive != true) {
+                    if (holdTimerJob?.isActive != true && !_state.value.isSessionComplete) {
                         startHoldTimer()
                     }
                 } else {
