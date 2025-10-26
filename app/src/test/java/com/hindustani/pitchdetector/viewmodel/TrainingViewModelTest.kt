@@ -386,4 +386,62 @@ class TrainingViewModelTest {
 
             assertThat(trainingViewModel.isTanpuraPlaying.value).isTrue()
         }
+
+    // ========== SCORING TESTS ==========
+
+    @Test
+    fun `scoring_basePoints_awardedForCompletingNote`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            val perfectNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swar = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = 0.0,
+                    isPerfect = true,
+                    isFlat = false,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
+            testScheduler.advanceUntilIdle()
+            testScheduler.advanceTimeBy(2100L)
+
+            assertThat(trainingViewModel.state.value.currentScore).isEqualTo(150)
+        }
+
+    @Test
+    fun `scoring_accuracyBonus_addedForPerfectNote`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+            testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
+
+            val perfectNote =
+                HindustaniNoteConverter.HindustaniNote(
+                    swar = "S",
+                    octave = HindustaniNoteConverter.Octave.MADHYA,
+                    centsDeviation = 0.0,
+                    isPerfect = true,
+                    isFlat = false,
+                    isSharp = false,
+                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
+            testScheduler.advanceUntilIdle()
+            testScheduler.advanceTimeBy(2100L)
+
+            assertThat(trainingViewModel.state.value.currentScore).isEqualTo(150)
+            assertThat(trainingViewModel.state.value.comboCount).isEqualTo(1)
+        }
+
+    @Test
+    fun `scoring_initialState_hasZeroScore`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel)
+
+            assertThat(trainingViewModel.state.value.currentScore).isEqualTo(0)
+            assertThat(trainingViewModel.state.value.comboCount).isEqualTo(0)
+            assertThat(trainingViewModel.state.value.sessionBestScore).isEqualTo(0)
+            assertThat(trainingViewModel.state.value.earnedStars).isEqualTo(0)
+        }
 }

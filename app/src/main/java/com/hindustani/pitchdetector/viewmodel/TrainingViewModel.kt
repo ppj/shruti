@@ -40,6 +40,12 @@ class TrainingViewModel(
         private val LEVEL_1_NOTES = listOf("S", "R", "G", "m", "P", "D", "N")
         private val LEVEL_2_NOTES = listOf("S", "r", "R", "g", "G", "m", "M", "P", "d", "D", "n", "N")
 
+        private const val BASE_POINTS = 100
+        private const val ACCURACY_BONUS_BASE = 50
+
+        private const val STAR_THRESHOLD_THREE = 0.85f
+        private const val STAR_THRESHOLD_TWO = 0.60f
+
         /**
          * Factory for creating TrainingViewModel with dependencies
          */
@@ -74,6 +80,7 @@ class TrainingViewModel(
 
     private var noteSequence: List<String> = emptyList()
     private var holdTimerJob: Job? = null
+    private var wasPerfectThroughout: Boolean = true
 
     /**
      * Generate note sequence based on level (randomized levels get new shuffle each time)
@@ -86,6 +93,34 @@ class TrainingViewModel(
             4 -> LEVEL_2_NOTES.shuffled() // 12 notes randomized (new shuffle each call)
             else -> LEVEL_1_NOTES // Default to level 1
         }
+
+    /**
+     * Calculate maximum possible score for the current level
+     * Max score assumes all notes are perfect with maximum combo multiplier
+     */
+    private fun calculateMaxScore(noteCount: Int): Int {
+        var total = 0
+        for (i in 1..noteCount) {
+            total += BASE_POINTS + (ACCURACY_BONUS_BASE * i)
+        }
+        return total
+    }
+
+    /**
+     * Calculate number of stars based on score percentage
+     */
+    private fun calculateStars(
+        score: Int,
+        maxScore: Int,
+    ): Int {
+        if (maxScore == 0) return 1
+        val percentage = score.toFloat() / maxScore
+        return when {
+            percentage >= STAR_THRESHOLD_THREE -> 3
+            percentage >= STAR_THRESHOLD_TWO -> 2
+            else -> 1
+        }
+    }
 
     init {
         initializeSession()
@@ -163,10 +198,12 @@ class TrainingViewModel(
                         startHoldTimer()
                     }
                 } else {
+                    if (holdTimerJob?.isActive == true) {
+                        wasPerfectThroughout = false
+                    }
                     resetHoldTimer()
                 }
-            }
-            .launchIn(viewModelScope)
+            }.launchIn(viewModelScope)
     }
 
     /**
@@ -195,6 +232,7 @@ class TrainingViewModel(
     private fun resetHoldTimer() {
         holdTimerJob?.cancel()
         holdTimerJob = null
+        wasPerfectThroughout = true
         if (_state.value.holdProgress > 0f) {
             _state.update { it.copy(holdProgress = 0f) }
         }
@@ -204,8 +242,19 @@ class TrainingViewModel(
      * Advance to the next note in the sequence, or complete the session
      */
     private fun advanceToNextNote() {
+        val currentState = _state.value
+        var newScore = currentState.currentScore + BASE_POINTS
+        var newCombo = currentState.comboCount
+
+        if (wasPerfectThroughout) {
+            newCombo++
+            newScore += ACCURACY_BONUS_BASE * newCombo
+        } else {
+            newCombo = 0
+        }
+
         resetHoldTimer()
-        val currentIndex = _state.value.currentNoteIndex
+        val currentIndex = currentState.currentNoteIndex
         val nextIndex = currentIndex + 1
 
         if (nextIndex < noteSequence.size) {
@@ -214,13 +263,25 @@ class TrainingViewModel(
                     currentNoteIndex = nextIndex,
                     currentSwar = noteSequence[nextIndex],
                     holdProgress = 0f,
+                    currentScore = newScore,
+                    comboCount = newCombo,
+                    wasLastNotePerfect = wasPerfectThroughout,
                 )
             }
         } else {
+            val maxScore = calculateMaxScore(noteSequence.size)
+            val stars = calculateStars(newScore, maxScore)
+            val newSessionBest = maxOf(newScore, currentState.sessionBestScore)
+
             _state.update {
                 it.copy(
                     isSessionComplete = true,
                     holdProgress = 0f,
+                    currentScore = newScore,
+                    comboCount = newCombo,
+                    earnedStars = stars,
+                    sessionBestScore = newSessionBest,
+                    wasLastNotePerfect = wasPerfectThroughout,
                 )
             }
 
@@ -239,7 +300,13 @@ class TrainingViewModel(
      */
     fun resetSession() {
         resetHoldTimer()
-        _state.value = TrainingState(level = level, countdown = COUNTDOWN_START)
+        val currentSessionBest = _state.value.sessionBestScore
+        _state.value =
+            TrainingState(
+                level = level,
+                countdown = COUNTDOWN_START,
+                sessionBestScore = currentSessionBest,
+            )
         initializeSession()
         startCountdown()
     }

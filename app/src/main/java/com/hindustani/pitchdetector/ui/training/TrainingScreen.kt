@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -82,11 +84,22 @@ fun TrainingScreen(
                 )
             }
 
-            Text(
-                text = stringResource(R.string.text_training_level, state.level),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Column(
+                horizontalAlignment = Alignment.End,
+            ) {
+                Text(
+                    text = stringResource(R.string.text_training_level, state.level),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                if (state.countdown == 0) {
+                    Text(
+                        text = stringResource(R.string.text_score, state.currentScore),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -152,6 +165,16 @@ fun TrainingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                if (state.comboCount >= 2) {
+                    Text(
+                        text = stringResource(R.string.text_combo, state.comboCount),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = TrainingCorrect,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 Text(
                     text =
                         when {
@@ -189,6 +212,9 @@ fun TrainingScreen(
             ) {
                 CompletionDialog(
                     level = state.level,
+                    earnedStars = state.earnedStars,
+                    finalScore = state.currentScore,
+                    sessionBestScore = state.sessionBestScore,
                     onDismiss = { navController.popBackStack() },
                     onRepeat = { viewModel.resetSession() },
                 )
@@ -205,9 +231,14 @@ fun TrainingScreen(
 @Composable
 private fun CompletionDialog(
     level: Int,
+    earnedStars: Int,
+    finalScore: Int,
+    sessionBestScore: Int,
     onDismiss: () -> Unit,
     onRepeat: () -> Unit,
 ) {
+    val isNewBest = finalScore == sessionBestScore && finalScore > 0
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -217,10 +248,60 @@ private fun CompletionDialog(
             )
         },
         text = {
-            Text(
-                text = stringResource(R.string.text_level_complete, level),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    repeat(3) { index ->
+                        Icon(
+                            imageVector = if (index < earnedStars) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                            contentDescription =
+                                if (index < earnedStars) {
+                                    stringResource(R.string.content_description_star_filled)
+                                } else {
+                                    stringResource(R.string.content_description_star_outlined)
+                                },
+                            tint = if (index < earnedStars) TrainingCorrect else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(R.string.text_level_complete, level),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.text_final_score, finalScore),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                if (isNewBest) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.text_new_session_best, sessionBestScore),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TrainingCorrect,
+                        fontWeight = FontWeight.Bold,
+                    )
+                } else if (sessionBestScore > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.text_session_best, sessionBestScore),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {

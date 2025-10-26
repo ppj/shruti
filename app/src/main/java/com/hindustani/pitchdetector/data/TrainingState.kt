@@ -13,6 +13,11 @@ package com.hindustani.pitchdetector.data
  * @property detectedSwar The swar user is currently singing (may differ from currentSwar)
  * @property isFlat Whether user is singing the correct swar but below tolerance (too flat)
  * @property isSharp Whether user is singing the correct swar but above tolerance (too sharp)
+ * @property currentScore Current score for this session
+ * @property comboCount Current streak of consecutive perfect notes
+ * @property sessionBestScore Best score achieved in this session (resets on navigation away)
+ * @property earnedStars Number of stars earned (1-3) based on score percentage
+ * @property wasLastNotePerfect Whether the previous note was completed with perfect accuracy throughout
  */
 data class TrainingState(
     val level: Int = 1,
@@ -25,4 +30,9 @@ data class TrainingState(
     val detectedSwar: String? = null,
     val isFlat: Boolean = false,
     val isSharp: Boolean = false,
+    val currentScore: Int = 0,
+    val comboCount: Int = 0,
+    val sessionBestScore: Int = 0,
+    val earnedStars: Int = 0,
+    val wasLastNotePerfect: Boolean = false,
 )

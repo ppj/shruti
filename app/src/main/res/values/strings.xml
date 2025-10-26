@@ -159,4 +159,13 @@
     <string name="text_level_complete">You have completed Level %d successfully!</string>
     <string name="button_back_to_main">Back to Main</string>
     <string name="button_repeat_level">Repeat Level</string>
+
+    <!-- TrainingScreen: Scoring -->
+    <string name="text_score">Score: %d</string>
+    <string name="text_combo">×%d Combo!</string>
+    <string name="text_final_score">Final Score: %d</string>
+    <string name="text_session_best">Session Best: %d</string>
+    <string name="text_new_session_best">New Session Best: %d</string>
+    <string name="content_description_star_filled">Star filled</string>
+    <string name="content_description_star_outlined">Star outlined</string>
 </resources>
