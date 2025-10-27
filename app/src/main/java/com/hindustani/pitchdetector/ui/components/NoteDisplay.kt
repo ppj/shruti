@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 
 /**
@@ -20,6 +21,6 @@ fun NoteDisplay(
         style = MaterialTheme.typography.displayLarge,
         fontSize = 64.sp,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier,
+        modifier = modifier.testTag("NoteDisplay"),
     )
 }
