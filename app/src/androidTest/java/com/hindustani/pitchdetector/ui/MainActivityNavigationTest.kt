@@ -1,8 +1,10 @@
 package com.hindustani.pitchdetector.ui
 
+import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,6 +17,9 @@ import org.junit.runner.RunWith
 class MainActivityNavigationTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.RECORD_AUDIO)
 
     @Test
     fun navigation_mainToTrainingMenu_navigatesSuccessfully() {
@@ -105,9 +110,23 @@ class MainActivityNavigationTest {
     fun navigation_trainingScreenBackButton_returnsToTrainingMenu() {
         composeTestRule.waitForIdle()
 
-        // Navigate to training screen
+        // Handle custom permission screen if it appears
+        // (GrantPermissionRule grants system permission but app may show custom screen)
+        try {
+            composeTestRule.onNodeWithText("Grant Permission").assertExists()
+            composeTestRule.onNodeWithText("Grant Permission").performClick()
+            composeTestRule.waitForIdle()
+            // Wait for system permission dialog and grant it
+            Thread.sleep(1000)
+        } catch (e: AssertionError) {
+            // Permission already granted or not needed, continue
+        }
+
+        // Navigate to training menu
         composeTestRule.onNodeWithText("Training").performClick()
         composeTestRule.waitForIdle()
+
+        // Navigate to Level 1
         composeTestRule.onNodeWithText("Level 1").performClick()
         composeTestRule.waitForIdle()
 

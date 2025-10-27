@@ -1,9 +1,11 @@
 package com.hindustani.pitchdetector.ui.training
 
+import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.hindustani.pitchdetector.data.TrainingState
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 import io.mockk.every
@@ -22,6 +24,9 @@ import org.junit.runner.RunWith
 class TrainingScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.RECORD_AUDIO)
 
     @Test
     fun trainingScreen_countdownDisplayed_whenCountdownGreaterThanZero() {
@@ -261,7 +266,7 @@ class TrainingScreenTest {
         composeTestRule.waitForIdle()
 
         // Find and click the tanpura switch
-        composeTestRule.onNodeWithContentDescription("Tanpura").performClick()
+        composeTestRule.onNodeWithTag("TanpuraToggle").performClick()
         composeTestRule.waitForIdle()
 
         verify { viewModel.toggleTanpura() }
