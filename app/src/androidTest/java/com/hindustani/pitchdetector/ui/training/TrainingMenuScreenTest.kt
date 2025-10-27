@@ -123,4 +123,96 @@ class TrainingMenuScreenTest {
             "Expected back navigation"
         }
     }
+
+    @Test
+    fun trainingMenuScreen_level1Button_navigatesToLevel1() {
+        var navigatedToTraining1 = false
+
+        composeTestRule.setContent {
+            val navController = rememberNavController()
+
+            NavHost(navController = navController, startDestination = AppRoutes.TRAINING_MENU) {
+                composable(AppRoutes.TRAINING_MENU) {
+                    TrainingMenuScreen(navController = navController)
+                }
+                composable("${AppRoutes.TRAINING}/1") {
+                    navigatedToTraining1 = true
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText("Level 1").performClick()
+        composeTestRule.waitForIdle()
+
+        assert(navigatedToTraining1) { "Expected navigation to training level 1" }
+    }
+
+    @Test
+    fun trainingMenuScreen_level2Button_navigatesToLevel2() {
+        var navigatedToTraining2 = false
+
+        composeTestRule.setContent {
+            val navController = rememberNavController()
+
+            NavHost(navController = navController, startDestination = AppRoutes.TRAINING_MENU) {
+                composable(AppRoutes.TRAINING_MENU) {
+                    TrainingMenuScreen(navController = navController)
+                }
+                composable("${AppRoutes.TRAINING}/2") {
+                    navigatedToTraining2 = true
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText("Level 2").performClick()
+        composeTestRule.waitForIdle()
+
+        assert(navigatedToTraining2) { "Expected navigation to training level 2" }
+    }
+
+    @Test
+    fun trainingMenuScreen_level3Button_navigatesToLevel3() {
+        var navigatedToTraining3 = false
+
+        composeTestRule.setContent {
+            val navController = rememberNavController()
+
+            NavHost(navController = navController, startDestination = AppRoutes.TRAINING_MENU) {
+                composable(AppRoutes.TRAINING_MENU) {
+                    TrainingMenuScreen(navController = navController)
+                }
+                composable("${AppRoutes.TRAINING}/3") {
+                    navigatedToTraining3 = true
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText("Level 3").performClick()
+        composeTestRule.waitForIdle()
+
+        assert(navigatedToTraining3) { "Expected navigation to training level 3" }
+    }
+
+    @Test
+    fun trainingMenuScreen_level4Button_navigatesToLevel4() {
+        var navigatedToTraining4 = false
+
+        composeTestRule.setContent {
+            val navController = rememberNavController()
+
+            NavHost(navController = navController, startDestination = AppRoutes.TRAINING_MENU) {
+                composable(AppRoutes.TRAINING_MENU) {
+                    TrainingMenuScreen(navController = navController)
+                }
+                composable("${AppRoutes.TRAINING}/4") {
+                    navigatedToTraining4 = true
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText("Level 4").performClick()
+        composeTestRule.waitForIdle()
+
+        assert(navigatedToTraining4) { "Expected navigation to training level 4" }
+    }
 }
