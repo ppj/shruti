@@ -39,6 +39,7 @@ import com.hindustani.pitchdetector.ui.theme.TrainingCorrect
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
 private const val FULL_PROGRESS = 1f
+private val PROGRESS_INDICATOR_SIZE = 200.dp
 private val PROGRESS_INDICATOR_STROKE_WIDTH = 16.dp
 private val TARGET_NOTE_FONT_SIZE = 72.sp
 private const val MIN_COMBO_TO_DISPLAY = 2
@@ -147,14 +148,14 @@ fun TrainingScreen(
                 ) {
                     CircularProgressIndicator(
                         progress = { FULL_PROGRESS },
-                        modifier = Modifier.size(200.dp),
+                        modifier = Modifier.size(PROGRESS_INDICATOR_SIZE),
                         strokeWidth = PROGRESS_INDICATOR_STROKE_WIDTH,
                         color = MaterialTheme.colorScheme.surfaceVariant,
                     )
 
                     CircularProgressIndicator(
                         progress = { state.holdProgress },
-                        modifier = Modifier.size(200.dp),
+                        modifier = Modifier.size(PROGRESS_INDICATOR_SIZE),
                         strokeWidth = PROGRESS_INDICATOR_STROKE_WIDTH,
                         color = if (state.isHoldingCorrectly) TrainingCorrect else MaterialTheme.colorScheme.primary,
                     )
