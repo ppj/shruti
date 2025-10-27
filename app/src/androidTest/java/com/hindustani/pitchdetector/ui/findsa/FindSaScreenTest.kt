@@ -1,8 +1,10 @@
 package com.hindustani.pitchdetector.ui.findsa
 
+import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.hindustani.pitchdetector.testutil.TestViewModelFactory
 import org.junit.Rule
 import org.junit.Test
@@ -12,6 +14,9 @@ import org.junit.runner.RunWith
 class FindSaScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.RECORD_AUDIO)
 
     // Initial State Tests
 

@@ -1,9 +1,11 @@
 package com.hindustani.pitchdetector.ui.training
 
+import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.hindustani.pitchdetector.data.TrainingState
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 import io.mockk.every
@@ -22,6 +24,9 @@ import org.junit.runner.RunWith
 class TrainingScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.RECORD_AUDIO)
 
     @Test
     fun trainingScreen_countdownDisplayed_whenCountdownGreaterThanZero() {
@@ -94,7 +99,6 @@ class TrainingScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Should show "Great! Keep holding..."
         composeTestRule.onNodeWithText("Great! Keep holding...").assertIsDisplayed()
     }
 
@@ -123,7 +127,6 @@ class TrainingScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Should show "⬆️ Sharpen"
         composeTestRule.onNodeWithText("⬆️ Sharpen").assertIsDisplayed()
     }
 
@@ -261,7 +264,7 @@ class TrainingScreenTest {
         composeTestRule.waitForIdle()
 
         // Find and click the tanpura switch
-        composeTestRule.onNodeWithContentDescription("Tanpura").performClick()
+        composeTestRule.onNodeWithTag("TanpuraToggle").performClick()
         composeTestRule.waitForIdle()
 
         verify { viewModel.toggleTanpura() }
@@ -304,6 +307,183 @@ class TrainingScreenTest {
         composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText("Training: Level 3").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_displaysScore_duringTraining() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        currentScore = 350,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Score: 350").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_displaysCombo_whenComboIsTwo() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        comboCount = 2,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("×2 Combo!").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_hidesCombo_whenComboIsOne() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        comboCount = 1,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("×1 Combo!").assertDoesNotExist()
+    }
+
+    @Test
+    fun trainingScreen_displaysStars_inCompletionDialog() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        isSessionComplete = true,
+                        earnedStars = 2,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Should show 2 filled stars and 1 outlined star
+        composeTestRule.onAllNodesWithContentDescription("Star filled").assertCountEquals(2)
+        composeTestRule.onAllNodesWithContentDescription("Star outlined").assertCountEquals(1)
+    }
+
+    @Test
+    fun trainingScreen_displaysFinalScore_inCompletionDialog() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        isSessionComplete = true,
+                        currentScore = 1500,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Final Score: 1500").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_displaysNewSessionBest_whenBestScoreAchieved() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        isSessionComplete = true,
+                        currentScore = 2000,
+                        sessionBestScore = 2000,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("New Session Best: 2000").assertIsDisplayed()
+    }
+
+    @Test
+    fun trainingScreen_displaysSessionBest_whenNotBeatingPrevious() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        isSessionComplete = true,
+                        currentScore = 1500,
+                        sessionBestScore = 2000,
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Session Best: 2000").assertIsDisplayed()
+        composeTestRule.onNodeWithText("New Session Best: 2000").assertDoesNotExist()
     }
 
     // Helper function to create a mock ViewModel

@@ -1,11 +1,17 @@
 package com.hindustani.pitchdetector.ui
 
+import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.hindustani.pitchdetector.data.PitchState
+import com.hindustani.pitchdetector.data.UserSettings
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
 import com.hindustani.pitchdetector.testutil.TestViewModelFactory
+import com.hindustani.pitchdetector.viewmodel.PitchViewModel
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -18,11 +24,14 @@ class MainScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.RECORD_AUDIO)
+
     @Test
     fun mainScreen_displaysAllElements() {
         val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
-            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
+            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {}, onNavigateToTraining = {})
         }
 
         composeTestRule.waitForIdle()
@@ -37,7 +46,7 @@ class MainScreenTest {
     fun mainScreen_saCanBeChanged() {
         val viewModel = TestViewModelFactory.createPitchViewModel()
         composeTestRule.setContent {
-            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
+            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {}, onNavigateToTraining = {})
         }
 
         composeTestRule.waitForIdle()
@@ -54,7 +63,7 @@ class MainScreenTest {
         val viewModel = TestViewModelFactory.createPitchViewModel()
 
         composeTestRule.setContent {
-            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {})
+            MainScreen(viewModel = viewModel, onNavigateToSettings = {}, onNavigateToFindSa = {}, onNavigateToTraining = {})
         }
 
         composeTestRule.waitForIdle()
@@ -74,9 +83,6 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_displaysSwarWithOctaveNotation_mandraSaptak() {
-        val viewModel = TestViewModelFactory.createPitchViewModel()
-
-        // Create a note in mandra saptak (lower octave)
         val mandraNote =
             HindustaniNoteConverter.HindustaniNote(
                 swar = "S",
@@ -87,15 +93,15 @@ class MainScreenTest {
                 isSharp = false,
             )
 
-        // Update the pitch state to include this note
         val pitchState =
             PitchState(
                 saNote = "C3",
                 currentNote = mandraNote,
-                confidence = 0.9,
+                confidence = 0.9f,
                 toleranceCents = 15.0,
             )
-        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        val viewModel = createMockViewModel(pitchState)
 
         composeTestRule.setContent {
             MainScreen(
@@ -114,9 +120,6 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_displaysSwarWithOctaveNotation_madhyaSaptak() {
-        val viewModel = TestViewModelFactory.createPitchViewModel()
-
-        // Create a note in madhya saptak (middle octave)
         val madhyaNote =
             HindustaniNoteConverter.HindustaniNote(
                 swar = "R",
@@ -131,10 +134,11 @@ class MainScreenTest {
             PitchState(
                 saNote = "C3",
                 currentNote = madhyaNote,
-                confidence = 0.9,
+                confidence = 0.9f,
                 toleranceCents = 15.0,
             )
-        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        val viewModel = createMockViewModel(pitchState)
 
         composeTestRule.setContent {
             MainScreen(
@@ -153,8 +157,6 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_displaysSwarWithOctaveNotation_taarSaptak() {
-        val viewModel = TestViewModelFactory.createPitchViewModel()
-
         // Create a note in taar saptak (upper octave)
         val taarNote =
             HindustaniNoteConverter.HindustaniNote(
@@ -170,10 +172,11 @@ class MainScreenTest {
             PitchState(
                 saNote = "C3",
                 currentNote = taarNote,
-                confidence = 0.9,
+                confidence = 0.9f,
                 toleranceCents = 15.0,
             )
-        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        val viewModel = createMockViewModel(pitchState)
 
         composeTestRule.setContent {
             MainScreen(
@@ -192,17 +195,16 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_displaysNoNote_whenCurrentNoteIsNull() {
-        val viewModel = TestViewModelFactory.createPitchViewModel()
-
         // Set pitch state with no current note
         val pitchState =
             PitchState(
                 saNote = "C3",
                 currentNote = null,
-                confidence = 0.0,
+                confidence = 0.0f,
                 toleranceCents = 15.0,
             )
-        (viewModel.pitchState as MutableStateFlow).value = pitchState
+
+        val viewModel = createMockViewModel(pitchState)
 
         composeTestRule.setContent {
             MainScreen(
@@ -215,7 +217,19 @@ class MainScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Should display the "no note" placeholder (em-dash)
-        composeTestRule.onNodeWithText("—").assertIsDisplayed()
+        // Should display the "no note" placeholder (em-dash) in NoteDisplay
+        composeTestRule.onNodeWithTag("NoteDisplay").assertTextEquals("—")
+    }
+
+    // Helper function to create a mocked ViewModel with controllable pitch state
+    private fun createMockViewModel(pitchState: PitchState): PitchViewModel {
+        val pitchStateFlow = MutableStateFlow(pitchState)
+        val settingsFlow = MutableStateFlow(UserSettings())
+        val viewModel = mockk<PitchViewModel>(relaxed = true)
+        every { viewModel.pitchState } returns pitchStateFlow
+        every { viewModel.settings } returns settingsFlow
+        every { viewModel.isRecording } returns MutableStateFlow(false)
+        every { viewModel.isTanpuraPlaying } returns MutableStateFlow(false)
+        return viewModel
     }
 }

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -35,6 +37,12 @@ import com.hindustani.pitchdetector.ui.components.PianoKeyboardSelector
 import com.hindustani.pitchdetector.ui.components.TanpuraCard
 import com.hindustani.pitchdetector.ui.theme.TrainingCorrect
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
+
+private const val FULL_PROGRESS = 1f
+private val PROGRESS_INDICATOR_SIZE = 200.dp
+private val PROGRESS_INDICATOR_STROKE_WIDTH = 16.dp
+private val TARGET_NOTE_FONT_SIZE = 72.sp
+private const val MIN_COMBO_TO_DISPLAY = 2
 
 /**
  * Training screen where users practice holding swars accurately
@@ -82,18 +90,29 @@ fun TrainingScreen(
                 )
             }
 
-            Text(
-                text = stringResource(R.string.text_training_level, state.level),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Column(
+                horizontalAlignment = Alignment.End,
+            ) {
+                Text(
+                    text = stringResource(R.string.text_training_level, state.level),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                if (state.countdown == 0 && !state.isSessionComplete) {
+                    Text(
+                        text = stringResource(R.string.text_score, state.currentScore),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
 
         PianoKeyboardSelector(
             selectedSa = saNote,
-            onSaSelected = {}, // Empty lambda - display only, not clickable
+            onSaSelected = {}, // Display only, not clickable
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -128,29 +147,39 @@ fun TrainingScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
-                        progress = { 1f },
-                        modifier = Modifier.size(200.dp),
-                        strokeWidth = 16.dp,
+                        progress = { FULL_PROGRESS },
+                        modifier = Modifier.size(PROGRESS_INDICATOR_SIZE),
+                        strokeWidth = PROGRESS_INDICATOR_STROKE_WIDTH,
                         color = MaterialTheme.colorScheme.surfaceVariant,
                     )
 
                     CircularProgressIndicator(
                         progress = { state.holdProgress },
-                        modifier = Modifier.size(200.dp),
-                        strokeWidth = 16.dp,
+                        modifier = Modifier.size(PROGRESS_INDICATOR_SIZE),
+                        strokeWidth = PROGRESS_INDICATOR_STROKE_WIDTH,
                         color = if (state.isHoldingCorrectly) TrainingCorrect else MaterialTheme.colorScheme.primary,
                     )
 
                     Text(
                         text = state.currentSwar ?: stringResource(R.string.text_no_note),
                         style = MaterialTheme.typography.displayLarge,
-                        fontSize = 72.sp,
+                        fontSize = TARGET_NOTE_FONT_SIZE,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                if (state.comboCount >= MIN_COMBO_TO_DISPLAY) {
+                    Text(
+                        text = stringResource(R.string.text_combo, state.comboCount),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = TrainingCorrect,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 Text(
                     text =
@@ -189,6 +218,9 @@ fun TrainingScreen(
             ) {
                 CompletionDialog(
                     level = state.level,
+                    earnedStars = state.earnedStars,
+                    finalScore = state.currentScore,
+                    sessionBestScore = state.sessionBestScore,
                     onDismiss = { navController.popBackStack() },
                     onRepeat = { viewModel.resetSession() },
                 )
@@ -199,15 +231,17 @@ fun TrainingScreen(
     }
 }
 
-/**
- * Completion dialog shown when all notes are completed
- */
 @Composable
 private fun CompletionDialog(
     level: Int,
+    earnedStars: Int,
+    finalScore: Int,
+    sessionBestScore: Int,
     onDismiss: () -> Unit,
     onRepeat: () -> Unit,
 ) {
+    val isNewBest = finalScore == sessionBestScore && finalScore > 0
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -217,10 +251,60 @@ private fun CompletionDialog(
             )
         },
         text = {
-            Text(
-                text = stringResource(R.string.text_level_complete, level),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    repeat(3) { index ->
+                        Icon(
+                            imageVector = if (index < earnedStars) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                            contentDescription =
+                                if (index < earnedStars) {
+                                    stringResource(R.string.content_description_star_filled)
+                                } else {
+                                    stringResource(R.string.content_description_star_outlined)
+                                },
+                            tint = if (index < earnedStars) TrainingCorrect else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(R.string.text_level_complete, level),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.text_final_score, finalScore),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                if (isNewBest) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.text_new_session_best, sessionBestScore),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TrainingCorrect,
+                        fontWeight = FontWeight.Bold,
+                    )
+                } else if (sessionBestScore > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.text_session_best, sessionBestScore),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
