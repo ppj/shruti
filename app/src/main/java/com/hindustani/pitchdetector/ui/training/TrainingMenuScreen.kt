@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -50,7 +50,7 @@ fun TrainingMenuScreen(navController: NavController) {
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.content_description_navigate_back),
                 )
             }
@@ -138,11 +138,9 @@ private fun TrainingExerciseCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Level buttons - 2x2 grid
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                // First row: Levels 1 and 2
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -195,7 +193,6 @@ private fun TrainingExerciseCard(
                     }
                 }
 
-                // Second row: Levels 3 and 4
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
