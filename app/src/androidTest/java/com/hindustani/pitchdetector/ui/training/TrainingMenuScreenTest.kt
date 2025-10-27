@@ -96,4 +96,31 @@ class TrainingMenuScreenTest {
         composeTestRule.onNodeWithText("Level 3").assertIsDisplayed()
         composeTestRule.onNodeWithText("Level 4").assertIsDisplayed()
     }
+
+    @Test
+    fun trainingMenuScreen_backButton_navigatesBack() {
+        var popBackStackCalled = false
+
+        composeTestRule.setContent {
+            val navController = rememberNavController()
+            navController.addOnDestinationChangedListener { _, destination, _ ->
+                if (destination.route == null) {
+                    popBackStackCalled = true
+                }
+            }
+
+            NavHost(navController = navController, startDestination = AppRoutes.TRAINING_MENU) {
+                composable(AppRoutes.TRAINING_MENU) {
+                    TrainingMenuScreen(navController = navController)
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithContentDescription("Navigate back").performClick()
+        composeTestRule.waitForIdle()
+
+        assert(popBackStackCalled || composeTestRule.activity.isFinishing) {
+            "Expected back navigation"
+        }
+    }
 }
