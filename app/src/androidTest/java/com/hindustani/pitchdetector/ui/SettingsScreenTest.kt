@@ -42,7 +42,6 @@ class SettingsScreenTest {
             SettingsScreen(viewModel = viewModel, onNavigateBack = {})
         }
 
-        // Verify tolerance slider is displayed with default value
         composeTestRule.onNodeWithText("Tolerance: ±15 cents", substring = true).assertIsDisplayed()
 
         // Verify slider labels are displayed

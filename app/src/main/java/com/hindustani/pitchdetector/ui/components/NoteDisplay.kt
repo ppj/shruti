@@ -15,7 +15,6 @@ fun NoteDisplay(
     swar: String,
     modifier: Modifier = Modifier,
 ) {
-    // Compact note display - just the swar text
     Text(
         text = swar,
         style = MaterialTheme.typography.displayLarge,

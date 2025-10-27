@@ -83,7 +83,6 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_displaysSwarWithOctaveNotation_mandraSaptak() {
-        // Create a note in mandra saptak (lower octave)
         val mandraNote =
             HindustaniNoteConverter.HindustaniNote(
                 swar = "S",
@@ -121,7 +120,6 @@ class MainScreenTest {
 
     @Test
     fun mainScreen_displaysSwarWithOctaveNotation_madhyaSaptak() {
-        // Create a note in madhya saptak (middle octave)
         val madhyaNote =
             HindustaniNoteConverter.HindustaniNote(
                 swar = "R",

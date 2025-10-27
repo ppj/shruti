@@ -89,7 +89,6 @@ fun TanpuraCard(
             )
 
             if (showString1Selector) {
-                // Main screen mode: show String 1 selector with dropdown
                 Box(
                     modifier = Modifier.weight(1f),
                 ) {
@@ -159,7 +158,6 @@ fun TanpuraCard(
                     }
                 }
             } else {
-                // Training mode: no text display, just spacing
                 Spacer(modifier = Modifier.weight(1f))
             }
 

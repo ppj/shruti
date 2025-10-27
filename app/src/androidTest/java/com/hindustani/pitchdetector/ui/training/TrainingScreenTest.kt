@@ -99,7 +99,6 @@ class TrainingScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Should show "Great! Keep holding..."
         composeTestRule.onNodeWithText("Great! Keep holding...").assertIsDisplayed()
     }
 
@@ -128,7 +127,6 @@ class TrainingScreenTest {
 
         composeTestRule.waitForIdle()
 
-        // Should show "⬆️ Sharpen"
         composeTestRule.onNodeWithText("⬆️ Sharpen").assertIsDisplayed()
     }
 
