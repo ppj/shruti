@@ -17,7 +17,6 @@ package com.hindustani.pitchdetector.data
  * @property comboCount Current streak of consecutive perfect notes
  * @property sessionBestScore Best score achieved in this session (resets on navigation away)
  * @property earnedStars Number of stars earned (1-3) based on score percentage
- * @property wasLastNotePerfect Whether the previous note was completed with perfect accuracy throughout
  */
 data class TrainingState(
     val level: Int = 1,
@@ -34,5 +33,4 @@ data class TrainingState(
     val comboCount: Int = 0,
     val sessionBestScore: Int = 0,
     val earnedStars: Int = 0,
-    val wasLastNotePerfect: Boolean = false,
 )

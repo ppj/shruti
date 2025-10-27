@@ -38,6 +38,11 @@ import com.hindustani.pitchdetector.ui.components.TanpuraCard
 import com.hindustani.pitchdetector.ui.theme.TrainingCorrect
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
+private const val FULL_PROGRESS = 1f
+private val PROGRESS_INDICATOR_STROKE_WIDTH = 16.dp
+private val TARGET_NOTE_FONT_SIZE = 72.sp
+private const val MIN_COMBO_TO_DISPLAY = 2
+
 /**
  * Training screen where users practice holding swars accurately
  * Layout matches MainScreen for consistency
@@ -106,7 +111,7 @@ fun TrainingScreen(
 
         PianoKeyboardSelector(
             selectedSa = saNote,
-            onSaSelected = {}, // Empty lambda - display only, not clickable
+            onSaSelected = {}, // Display only, not clickable
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -141,23 +146,23 @@ fun TrainingScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
-                        progress = { 1f },
+                        progress = { FULL_PROGRESS },
                         modifier = Modifier.size(200.dp),
-                        strokeWidth = 16.dp,
+                        strokeWidth = PROGRESS_INDICATOR_STROKE_WIDTH,
                         color = MaterialTheme.colorScheme.surfaceVariant,
                     )
 
                     CircularProgressIndicator(
                         progress = { state.holdProgress },
                         modifier = Modifier.size(200.dp),
-                        strokeWidth = 16.dp,
+                        strokeWidth = PROGRESS_INDICATOR_STROKE_WIDTH,
                         color = if (state.isHoldingCorrectly) TrainingCorrect else MaterialTheme.colorScheme.primary,
                     )
 
                     Text(
                         text = state.currentSwar ?: stringResource(R.string.text_no_note),
                         style = MaterialTheme.typography.displayLarge,
-                        fontSize = 72.sp,
+                        fontSize = TARGET_NOTE_FONT_SIZE,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -165,7 +170,7 @@ fun TrainingScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (state.comboCount >= 2) {
+                if (state.comboCount >= MIN_COMBO_TO_DISPLAY) {
                     Text(
                         text = stringResource(R.string.text_combo, state.comboCount),
                         style = MaterialTheme.typography.titleLarge,
@@ -225,9 +230,6 @@ fun TrainingScreen(
     }
 }
 
-/**
- * Completion dialog shown when all notes are completed
- */
 @Composable
 private fun CompletionDialog(
     level: Int,
