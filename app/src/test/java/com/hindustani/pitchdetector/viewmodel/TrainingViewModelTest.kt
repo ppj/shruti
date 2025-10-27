@@ -25,6 +25,15 @@ class TrainingViewModelTest {
     companion object {
         // Time to skip countdown (3 seconds) + small buffer
         private const val COUNTDOWN_AND_BUFFER_MS = 3100L
+
+        // Time to hold note (2 seconds) + small buffer
+        private const val HOLD_DURATION_AND_BUFFER_MS = 2100L
+
+        // Max score for Level 1 (7 notes with perfect combo)
+        private const val LEVEL_1_MAX_SCORE = 2100
+
+        // Invalid level number for testing error cases
+        private const val INVALID_LEVEL_NUMBER = 99
     }
 
     private val mockPitchState =
@@ -394,7 +403,7 @@ class TrainingViewModelTest {
                 )
             mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
             testScheduler.advanceUntilIdle()
-            testScheduler.advanceTimeBy(2100L)
+            testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
 
             // Score: 100 base points + (50 bonus * 1 combo) = 150
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(150)
@@ -431,7 +440,7 @@ class TrainingViewModelTest {
             // First note (S) - combo should be 1, score = 100 + 50*1 = 150
             mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
             testScheduler.advanceUntilIdle()
-            testScheduler.advanceTimeBy(2100L)
+            testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(150)
             assertThat(trainingViewModel.state.value.comboCount).isEqualTo(1)
 
@@ -441,7 +450,7 @@ class TrainingViewModelTest {
                     currentNote = perfectNote.copy(swar = "R"),
                 )
             testScheduler.advanceUntilIdle()
-            testScheduler.advanceTimeBy(2100L)
+            testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(350)
             assertThat(trainingViewModel.state.value.comboCount).isEqualTo(2)
 
@@ -451,7 +460,7 @@ class TrainingViewModelTest {
                     currentNote = perfectNote.copy(swar = "G"),
                 )
             testScheduler.advanceUntilIdle()
-            testScheduler.advanceTimeBy(2100L)
+            testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(600)
             assertThat(trainingViewModel.state.value.comboCount).isEqualTo(3)
         }
@@ -480,7 +489,7 @@ class TrainingViewModelTest {
                         currentNote = perfectNote.copy(swar = expectedSwar!!),
                     )
                 testScheduler.advanceUntilIdle()
-                testScheduler.advanceTimeBy(2100L)
+                testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
             }
 
@@ -514,7 +523,7 @@ class TrainingViewModelTest {
                         currentNote = perfectNote.copy(swar = expectedSwar!!),
                     )
                 testScheduler.advanceUntilIdle()
-                testScheduler.advanceTimeBy(2100L)
+                testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
             }
 
@@ -549,14 +558,14 @@ class TrainingViewModelTest {
                         currentNote = perfectNote.copy(swar = expectedSwar!!),
                     )
                 testScheduler.advanceUntilIdle()
-                testScheduler.advanceTimeBy(2100L)
+                testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
             }
 
             val firstSessionScore = trainingViewModel.state.value.currentScore
             val bestScore = trainingViewModel.state.value.sessionBestScore
             assertThat(firstSessionScore).isEqualTo(bestScore)
-            assertThat(bestScore).isEqualTo(2100) // 7 perfect notes max score
+            assertThat(bestScore).isEqualTo(LEVEL_1_MAX_SCORE) // 7 perfect notes max score
 
             // Reset - session best score should persist
             trainingViewModel.resetSession()
@@ -589,7 +598,7 @@ class TrainingViewModelTest {
                         currentNote = perfectNote.copy(swar = expectedSwar!!),
                     )
                 testScheduler.advanceUntilIdle()
-                testScheduler.advanceTimeBy(2100L)
+                testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
             }
             val partialScore = trainingViewModel.state.value.currentScore
@@ -603,19 +612,19 @@ class TrainingViewModelTest {
                         currentNote = perfectNote.copy(swar = expectedSwar!!),
                     )
                 testScheduler.advanceUntilIdle()
-                testScheduler.advanceTimeBy(2100L)
+                testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
             }
 
             val finalScore = trainingViewModel.state.value.currentScore
-            assertThat(finalScore).isEqualTo(2100) // All 7 notes perfect
-            assertThat(trainingViewModel.state.value.sessionBestScore).isEqualTo(2100)
+            assertThat(finalScore).isEqualTo(LEVEL_1_MAX_SCORE) // All 7 notes perfect
+            assertThat(trainingViewModel.state.value.sessionBestScore).isEqualTo(LEVEL_1_MAX_SCORE)
         }
 
     @Test
     fun `TrainingLevel_fromInt_invalidLevel_defaultsToLevel1`() =
         runTest {
-            val invalidLevel = TrainingLevel.fromInt(99)
+            val invalidLevel = TrainingLevel.fromInt(INVALID_LEVEL_NUMBER)
             assertThat(invalidLevel).isEqualTo(TrainingLevel.LEVEL_1)
             assertThat(invalidLevel.levelNumber).isEqualTo(1)
             assertThat(invalidLevel.randomized).isFalse()
