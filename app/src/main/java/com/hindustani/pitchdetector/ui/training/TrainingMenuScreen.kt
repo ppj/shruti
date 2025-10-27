@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hindustani.pitchdetector.R
+import com.hindustani.pitchdetector.constants.AppRoutes
+import com.hindustani.pitchdetector.ui.components.HelpTooltip
 
 /**
  * Training menu screen showing available training exercises
@@ -60,18 +63,46 @@ fun TrainingMenuScreen(navController: NavController) {
             )
         }
 
+        FindSaReminderSection(
+            onFindSaClick = {
+                navController.navigate(AppRoutes.FIND_SA)
+            },
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Voice training exercise
             TrainingExerciseCard(
                 title = stringResource(R.string.title_voice_training),
                 description = stringResource(R.string.description_voice_training),
                 onLevelClick = { level ->
-                    navController.navigate("${com.hindustani.pitchdetector.constants.AppRoutes.TRAINING}/$level")
+                    navController.navigate("${AppRoutes.TRAINING}/$level")
                 },
             )
         }
+    }
+}
+
+/**
+ * Section with text and tooltip to help users discover the Find Sa feature
+ */
+@Composable
+private fun FindSaReminderSection(onFindSaClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.text_have_you_found_sa),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        HelpTooltip(
+            text = stringResource(R.string.tooltip_find_sa_reminder),
+            actionLabel = stringResource(R.string.button_find_my_sa),
+            onActionClick = onFindSaClick,
+        )
     }
 }
 
