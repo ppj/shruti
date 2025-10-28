@@ -27,12 +27,12 @@ class TrainingMenuScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Have you found your Sa?").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Find My Sa").assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Tip").assertIsDisplayed()
     }
 
     @Test
-    fun trainingMenuScreen_tooltipActionButton_navigatesToFindSaScreen() {
+    fun trainingMenuScreen_findSaButton_navigatesToFindSaScreen() {
         var navigatedToFindSa = false
 
         composeTestRule.setContent {
@@ -48,10 +48,6 @@ class TrainingMenuScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithContentDescription("Tip").performClick()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Find My Sa").assertIsDisplayed()
         composeTestRule.onNodeWithText("Find My Sa").performClick()
         composeTestRule.waitForIdle()
 

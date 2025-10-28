@@ -129,7 +129,6 @@
     <string name="title_training">Training</string>
     <string name="title_voice_training">Voice Training</string>
     <string name="description_voice_training">Practice swar-singing accuracy with real-time feedback</string>
-    <string name="text_have_you_found_sa">Have you found your Sa?</string>
     <string name="tooltip_find_sa_reminder">Not sure which Sa is right for you? Use Find My Sa to discover your ideal starting pitch before training.</string>
     <string name="text_level_1">Level 1</string>
     <string name="text_level_2">Level 2</string>

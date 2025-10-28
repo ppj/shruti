@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -93,15 +94,12 @@ private fun FindSaReminderSection(onFindSaClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = stringResource(R.string.text_have_you_found_sa),
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Button(onClick = onFindSaClick) {
+            Text(text = stringResource(R.string.button_find_my_sa))
+        }
         Spacer(modifier = Modifier.width(8.dp))
         HelpTooltip(
             text = stringResource(R.string.tooltip_find_sa_reminder),
-            actionLabel = stringResource(R.string.button_find_my_sa),
-            onActionClick = onFindSaClick,
         )
     }
 }
