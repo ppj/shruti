@@ -170,17 +170,6 @@ When testing on a real device, verify:
 - **Low Latency**: Physical devices have ~10-15ms latency (imperceptible)
 - **Best Results**: Quiet room, clear sustained notes, proper Sa selection
 
-## Development Testing Without Device
-
-If you're developing and don't have a device available:
-
-1. **Unit Tests**: Run `./gradlew test` - 69 tests verify core logic
-2. **Algorithm Tests**: PYINDetectorTest uses synthetic audio signals
-3. **Music Theory Tests**: Verify note conversion without audio
-4. **UI Tests**: Test interface without microphone
-
-But **real audio testing requires a physical device**.
-
 ---
 
 **Recommendation**: For the best experience testing this app, **use a real Android phone**. The pitch detection is accurate and responsive on hardware!

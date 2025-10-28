@@ -42,7 +42,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.hindustani.pitchdetector.ui.MainScreenTest
 ```
 
-**Test Suite:** 74 unit tests + 26 UI tests = 100 total tests
+**Test Suite:** 107 unit tests + 72 UI tests = 179 total tests
 
 ### Running the App
 ```bash
@@ -304,7 +304,6 @@ app/src/main/java/com/hindustani/pitchdetector/
 ## Reference Documentation
 
 - `README.md` - Comprehensive app documentation and usage guide
-- `TESTING.md` - Detailed test suite documentation
 - `AUDIO_TESTING.md` - Audio testing troubleshooting guide
 - `GEMINI.md` - Additional project context
 
