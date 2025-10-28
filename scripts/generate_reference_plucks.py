@@ -3,7 +3,22 @@
 Generate reference note plucks for training mode using Karplus-Strong algorithm.
 This script creates guitar-like pluck sounds to help users match target notes.
 
-Initial version: Generate 3 test samples (G#2, D3, A#3) for audio quality validation.
+DESIGN NOTE: Asset Generation Strategy
+--------------------------------------
+Currently, generated assets (180 OGG files, ~2.1MB) are committed to git.
+
+Tradeoffs:
+✅ Fast builds - no generation overhead
+✅ Simple setup - no Python dependency for contributors/CI
+✅ Guaranteed consistency across all builds
+❌ 2.1MB in git history (acceptable for now)
+❌ Re-tweaking audio params requires re-committing all files
+
+Alternative (future consideration):
+- Move to Gradle build task that generates assets at build-time
+- Only commit this script, not the generated assets
+- Would require Python venv setup in CI/CD and for all contributors
+- Consider if synthesis params change frequently or repo size becomes problematic
 """
 
 import numpy as np
