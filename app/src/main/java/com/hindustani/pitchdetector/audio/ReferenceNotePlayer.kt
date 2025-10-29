@@ -61,13 +61,13 @@ class ReferenceNotePlayer(private val context: Context) {
         try {
             val afd = context.assets.openFd(fileName)
 
-            // Use USAGE_ASSISTANCE_SONIFICATION to prevent audio ducking of background music (tanpura)
-            // This tells Android that reference notes are short feedback sounds that should mix with
-            // other media rather than ducking or pausing it
+            // Use USAGE_GAME to prevent audio ducking of background music (tanpura)
+            // USAGE_GAME is designed for interactive audio that should mix with background music
+            // and works reliably across all devices (including Samsung One UI)
             val audioAttributes =
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
 
             mediaPlayer =
