@@ -156,7 +156,6 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         } else {
-            // Low confidence or no pitch detected
             withContext(Dispatchers.Main) {
                 _pitchState.update {
                     it.copy(
@@ -195,12 +194,10 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSa(westernNote: String) {
         val frequency = SaParser.parseToFrequency(westernNote)
         if (frequency != null) {
-            // Persist to DataStore (flow collector will update _settings)
             viewModelScope.launch {
                 userSettingsRepository.updateSaNote(westernNote)
             }
 
-            // Update pitch state immediately for UI feedback
             _pitchState.update {
                 it.copy(
                     saNote = westernNote,

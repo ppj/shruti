@@ -50,7 +50,7 @@ class ReferenceNotePlayer(private val context: Context) {
         swar: String,
         saFrequency: Double,
     ) {
-        stop() // Stop any previous playback
+        stop()
 
         val fileName = getNoteFilename(swar, saFrequency)
         if (fileName == null) {
@@ -83,7 +83,7 @@ class ReferenceNotePlayer(private val context: Context) {
                     setOnErrorListener { mp, what, extra ->
                         Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
                         release()
-                        true // Error handled
+                        true
                     }
                     prepareAsync()
                 }
@@ -94,9 +94,6 @@ class ReferenceNotePlayer(private val context: Context) {
         }
     }
 
-    /**
-     * Stop playback immediately
-     */
     fun stop() {
         try {
             mediaPlayer?.stop()
@@ -106,17 +103,11 @@ class ReferenceNotePlayer(private val context: Context) {
         release()
     }
 
-    /**
-     * Release MediaPlayer resources
-     */
     fun release() {
         mediaPlayer?.release()
         mediaPlayer = null
     }
 
-    /**
-     * Check if a note is currently playing
-     */
     fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
 
     /**
