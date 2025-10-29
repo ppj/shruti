@@ -30,6 +30,8 @@ import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
 
+private const val DEFAULT_TRAINING_LEVEL = 1
+
 class MainActivity : ComponentActivity() {
     private val viewModel: PitchViewModel by viewModels()
     private val findSaViewModel: FindSaViewModel by viewModels()
@@ -126,7 +128,7 @@ fun AppNavigation(
                     },
                 ),
         ) { backStackEntry ->
-            val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: 1
+            val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: DEFAULT_TRAINING_LEVEL
             val context = LocalContext.current
             val trainingViewModel: TrainingViewModel =
                 viewModel(

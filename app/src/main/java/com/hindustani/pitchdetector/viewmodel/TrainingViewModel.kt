@@ -73,6 +73,8 @@ class TrainingViewModel(
         private const val STAR_THRESHOLD_THREE = 0.85f
         private const val STAR_THRESHOLD_TWO = 0.60f
 
+        private const val DEFAULT_SA_NOTE = "C3"
+
         /**
          * Factory for creating TrainingViewModel with dependencies
          */
@@ -103,7 +105,7 @@ class TrainingViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = "C3",
+                initialValue = DEFAULT_SA_NOTE,
             )
 
     private var noteSequence: List<String> = emptyList()

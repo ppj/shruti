@@ -40,6 +40,9 @@ class TrainingViewModelTest {
 
         // Invalid level number for testing error cases
         private const val INVALID_LEVEL_NUMBER = 99
+
+        // C3 frequency in Hz
+        private const val C3_FREQUENCY = 130.81
     }
 
     private val mockPitchState =
@@ -63,7 +66,7 @@ class TrainingViewModelTest {
         every { pitchViewModel.pitchState } returns mockPitchState
         every { pitchViewModel.isTanpuraPlaying } returns mockIsTanpuraPlaying
         every { pitchViewModel.isRecording } returns mockIsRecording
-        every { pitchViewModel.getSaFrequency() } returns 130.81 // C3 frequency
+        every { pitchViewModel.getSaFrequency() } returns C3_FREQUENCY
     }
 
     @After
@@ -645,5 +648,19 @@ class TrainingViewModelTest {
             assertThat(TrainingLevel.fromInt(2)).isEqualTo(TrainingLevel.LEVEL_2)
             assertThat(TrainingLevel.fromInt(3)).isEqualTo(TrainingLevel.LEVEL_3)
             assertThat(TrainingLevel.fromInt(4)).isEqualTo(TrainingLevel.LEVEL_4)
+        }
+
+    @Test
+    fun `playReferenceNote_withCurrentSwar_doesNotCrash`() =
+        runTest {
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
+
+            // Call playReferenceNote - should not crash
+            // Note: ReferenceNotePlayer is created inside TrainingViewModel and can't be mocked
+            // This is a smoke test to ensure the method executes without errors
+            trainingViewModel.playReferenceNote()
+
+            // Method should complete without throwing
+            assertThat(trainingViewModel.state.value.currentSwar).isNotNull()
         }
 }

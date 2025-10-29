@@ -44,6 +44,8 @@ private val PROGRESS_INDICATOR_SIZE = 200.dp
 private val PROGRESS_INDICATOR_STROKE_WIDTH = 16.dp
 private val TARGET_NOTE_FONT_SIZE = 72.sp
 private const val MIN_COMBO_TO_DISPLAY = 2
+private val COUNTDOWN_FONT_SIZE = 96.sp
+private const val MAX_STARS = 3
 
 /**
  * Training screen where users practice holding swars accurately
@@ -131,7 +133,7 @@ fun TrainingScreen(
                 Text(
                     text = state.countdown.toString(),
                     style = MaterialTheme.typography.displayLarge,
-                    fontSize = 96.sp,
+                    fontSize = COUNTDOWN_FONT_SIZE,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -268,7 +270,7 @@ private fun CompletionDialog(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    repeat(3) { index ->
+                    repeat(MAX_STARS) { index ->
                         Icon(
                             imageVector = if (index < earnedStars) Icons.Filled.Star else Icons.Outlined.StarOutline,
                             contentDescription =
