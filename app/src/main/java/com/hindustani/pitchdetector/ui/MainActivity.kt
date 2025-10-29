@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,6 +29,8 @@ import com.hindustani.pitchdetector.ui.training.TrainingScreen
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
+
+private const val DEFAULT_TRAINING_LEVEL = 1
 
 class MainActivity : ComponentActivity() {
     private val viewModel: PitchViewModel by viewModels()
@@ -125,10 +128,11 @@ fun AppNavigation(
                     },
                 ),
         ) { backStackEntry ->
-            val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: 1
+            val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: DEFAULT_TRAINING_LEVEL
+            val context = LocalContext.current
             val trainingViewModel: TrainingViewModel =
                 viewModel(
-                    factory = TrainingViewModel.provideFactory(level, viewModel),
+                    factory = TrainingViewModel.provideFactory(level, viewModel, context),
                 )
             TrainingScreen(
                 navController = navController,

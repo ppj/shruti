@@ -486,6 +486,34 @@ class TrainingScreenTest {
         composeTestRule.onNodeWithText("New Session Best: 2000").assertDoesNotExist()
     }
 
+    @Test
+    fun trainingScreen_playReferenceNoteButton_callsViewModelPlayReferenceNote() {
+        val viewModel =
+            createMockViewModel(
+                state =
+                    TrainingState(
+                        level = 1,
+                        countdown = 0,
+                        currentSwar = "S",
+                    ),
+            )
+
+        composeTestRule.setContent {
+            TrainingScreen(
+                navController = rememberNavController(),
+                viewModel = viewModel,
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // Find and click the play reference note button by its text
+        composeTestRule.onNodeWithText("🔊 Play Note").performClick()
+        composeTestRule.waitForIdle()
+
+        verify { viewModel.playReferenceNote() }
+    }
+
     // Helper function to create a mock ViewModel
     private fun createMockViewModel(
         state: TrainingState = TrainingState(level = 1),

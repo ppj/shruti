@@ -1,8 +1,10 @@
 package com.hindustani.pitchdetector.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.hindustani.pitchdetector.audio.ReferenceNotePlayer
 import com.hindustani.pitchdetector.data.TrainingState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,12 +51,15 @@ enum class TrainingLevel(val levelNumber: Int, val baseNotes: List<String>, val 
  *
  * @param level Training difficulty level (1-4, see TrainingLevel enum)
  * @param pitchViewModel Main PitchViewModel instance for accessing pitch data and controlling audio
+ * @param context Application context for accessing audio resources
  */
 class TrainingViewModel(
     level: Int,
     private val pitchViewModel: PitchViewModel,
+    context: Context,
 ) : ViewModel() {
     private val trainingLevel: TrainingLevel = TrainingLevel.fromInt(level)
+    private val referenceNotePlayer = ReferenceNotePlayer(context)
 
     companion object {
         private const val HOLD_DURATION_MILLIS = 2000L
@@ -68,18 +73,21 @@ class TrainingViewModel(
         private const val STAR_THRESHOLD_THREE = 0.85f
         private const val STAR_THRESHOLD_TWO = 0.60f
 
+        private const val DEFAULT_SA_NOTE = "C3"
+
         /**
          * Factory for creating TrainingViewModel with dependencies
          */
         fun provideFactory(
             level: Int,
             pitchViewModel: PitchViewModel,
+            context: Context,
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(TrainingViewModel::class.java)) {
-                        return TrainingViewModel(level, pitchViewModel) as T
+                        return TrainingViewModel(level, pitchViewModel, context) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class")
                 }
@@ -97,7 +105,7 @@ class TrainingViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = "C3",
+                initialValue = DEFAULT_SA_NOTE,
             )
 
     private var noteSequence: List<String> = emptyList()
@@ -246,6 +254,18 @@ class TrainingViewModel(
     }
 
     /**
+     * Stop audio recording and tanpura playback if active
+     */
+    private fun stopAudio() {
+        if (pitchViewModel.isRecording.value) {
+            pitchViewModel.toggleRecording()
+        }
+        if (pitchViewModel.isTanpuraPlaying.value) {
+            pitchViewModel.toggleTanpura()
+        }
+    }
+
+    /**
      * Advance to the next note in the sequence, or complete the session
      */
     private fun advanceToNextNote() {
@@ -268,10 +288,11 @@ class TrainingViewModel(
         val nextIndex = currentIndex + 1
 
         if (nextIndex < noteSequence.size) {
+            val nextSwar = noteSequence[nextIndex]
             _state.update {
                 it.copy(
                     currentNoteIndex = nextIndex,
-                    currentSwar = noteSequence[nextIndex],
+                    currentSwar = nextSwar,
                     holdProgress = 0f,
                     currentScore = newScore,
                     comboCount = newCombo,
@@ -293,13 +314,7 @@ class TrainingViewModel(
                 )
             }
 
-            if (pitchViewModel.isRecording.value) {
-                pitchViewModel.toggleRecording()
-            }
-
-            if (pitchViewModel.isTanpuraPlaying.value) {
-                pitchViewModel.toggleTanpura()
-            }
+            stopAudio()
         }
     }
 
@@ -328,18 +343,24 @@ class TrainingViewModel(
     }
 
     /**
+     * Play reference note for the current target swar
+     * User can call this when they need to hear the target pitch
+     */
+    fun playReferenceNote() {
+        val currentSwar = _state.value.currentSwar
+        if (currentSwar != null) {
+            val saFrequency = pitchViewModel.getSaFrequency()
+            referenceNotePlayer.play(currentSwar, saFrequency)
+        }
+    }
+
+    /**
      * Clean up resources when ViewModel is destroyed
      */
     override fun onCleared() {
         super.onCleared()
         holdTimerJob?.cancel()
-
-        if (pitchViewModel.isRecording.value) {
-            pitchViewModel.toggleRecording()
-        }
-
-        if (pitchViewModel.isTanpuraPlaying.value) {
-            pitchViewModel.toggleTanpura()
-        }
+        referenceNotePlayer.release()
+        stopAudio()
     }
 }

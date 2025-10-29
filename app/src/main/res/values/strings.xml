@@ -154,6 +154,7 @@
     <string name="text_sing_to_start">Sing the note to start timer</string>
     <string name="text_pitch_flat">⬆️ Sharpen</string>
     <string name="text_pitch_sharp">⬇️ Flatten</string>
+    <string name="text_play_reference">🔊 Play Note</string>
 
     <!-- TrainingScreen: Completion dialog -->
     <string name="text_congratulations">Congratulations!</string>

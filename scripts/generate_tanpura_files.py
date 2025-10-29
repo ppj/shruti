@@ -10,6 +10,23 @@ representing the authentic jawari effect, not H4/H11/H17 as commonly assumed.
 Source: https://www.india-instruments.com/tanpura-details/calcutta-standard-male-tanpura.html
 Analysis: Extracted String 2 (mid Sa - tonic) harmonics from stable 1-2s segment
 Validation: C3 frequency detected at 131.25 Hz (0.3% deviation from 130.81 Hz)
+
+DESIGN NOTE: Asset Generation Strategy
+--------------------------------------
+Currently, generated assets (45 OGG files, ~6MB) are committed to git.
+
+Tradeoffs:
+✅ Fast builds - no generation overhead
+✅ Simple setup - no Python dependency for contributors/CI
+✅ Guaranteed consistency across all builds
+❌ ~6MB in git history (acceptable for now)
+❌ Re-tweaking audio params requires re-committing all files
+
+Alternative (future consideration):
+- Move to Gradle build task that generates assets at build-time
+- Only commit this script, not the generated assets
+- Would require Python venv setup in CI/CD and for all contributors
+- Consider if synthesis params change frequently or repo size becomes problematic
 """
 
 import numpy as np
