@@ -1,6 +1,7 @@
 package com.hindustani.pitchdetector.audio
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.util.Log
 import com.hindustani.pitchdetector.music.SaNotes
@@ -13,7 +14,6 @@ import com.hindustani.pitchdetector.music.SaNotes
  * [sa_note_name][octave]_[swar_index]_[swar_name].ogg (e.g., c3_5_G.ogg)
  */
 class ReferenceNotePlayer(private val context: Context) {
-
     private var mediaPlayer: MediaPlayer? = null
 
     companion object {
@@ -23,20 +23,21 @@ class ReferenceNotePlayer(private val context: Context) {
          * Map swar names to their file name representation
          * Format: [index]_[swar] (e.g., "1_S", "5_G")
          */
-        private val swarFileMap = mapOf(
-            "S" to "1_S",
-            "r" to "2_r",
-            "R" to "3_R",
-            "g" to "4_g",
-            "G" to "5_G",
-            "m" to "6_m",
-            "M" to "7_M",
-            "P" to "8_P",
-            "d" to "9_d",
-            "D" to "10_D",
-            "n" to "11_n",
-            "N" to "12_N"
-        )
+        private val swarFileMap =
+            mapOf(
+                "S" to "1_S",
+                "r" to "2_r",
+                "R" to "3_R",
+                "g" to "4_g",
+                "G" to "5_G",
+                "m" to "6_m",
+                "M" to "7_M",
+                "P" to "8_P",
+                "d" to "9_d",
+                "D" to "10_D",
+                "n" to "11_n",
+                "N" to "12_N",
+            )
     }
 
     /**
@@ -45,7 +46,10 @@ class ReferenceNotePlayer(private val context: Context) {
      * @param swar The target swar to play (e.g., "S", "R", "G")
      * @param saFrequency The base Sa frequency in Hz (determines which audio file to use)
      */
-    fun play(swar: String, saFrequency: Double) {
+    fun play(
+        swar: String,
+        saFrequency: Double,
+    ) {
         stop() // Stop any previous playback
 
         val fileName = getNoteFilename(swar, saFrequency)
@@ -56,21 +60,33 @@ class ReferenceNotePlayer(private val context: Context) {
 
         try {
             val afd = context.assets.openFd(fileName)
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                setOnCompletionListener {
-                    release()
+
+            // Use USAGE_ASSISTANCE_SONIFICATION to prevent audio ducking of background music (tanpura)
+            // This tells Android that reference notes are short feedback sounds that should mix with
+            // other media rather than ducking or pausing it
+            val audioAttributes =
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+
+            mediaPlayer =
+                MediaPlayer().apply {
+                    setAudioAttributes(audioAttributes)
+                    setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                    setOnCompletionListener {
+                        release()
+                    }
+                    setOnPreparedListener {
+                        start()
+                    }
+                    setOnErrorListener { mp, what, extra ->
+                        Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
+                        release()
+                        true // Error handled
+                    }
+                    prepareAsync()
                 }
-                setOnPreparedListener {
-                    start()
-                }
-                setOnErrorListener { mp, what, extra ->
-                    Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
-                    release()
-                    true // Error handled
-                }
-                prepareAsync()
-            }
             afd.close()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to play reference note: $fileName", e)
@@ -110,7 +126,10 @@ class ReferenceNotePlayer(private val context: Context) {
      * @param saFrequency The base Sa frequency in Hz
      * @return The asset path (e.g., "plucks/c3_5_G.ogg") or null if invalid
      */
-    private fun getNoteFilename(swar: String, saFrequency: Double): String? {
+    private fun getNoteFilename(
+        swar: String,
+        saFrequency: Double,
+    ): String? {
         val saName = SaNotes.findClosestSaName(saFrequency)
         val swarFilePart = swarFileMap[swar]
 
@@ -119,6 +138,6 @@ class ReferenceNotePlayer(private val context: Context) {
             return null
         }
 
-        return "plucks/${saName}_${swarFilePart}.ogg"
+        return "plucks/${saName}_$swarFilePart.ogg"
     }
 }
