@@ -220,6 +220,13 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Get the current Sa frequency in Hz
+     */
+    fun getSaFrequency(): Double {
+        return _pitchState.value.saFrequency
+    }
+
+    /**
      * Update tolerance in cents
      */
     fun updateTolerance(cents: Double) {

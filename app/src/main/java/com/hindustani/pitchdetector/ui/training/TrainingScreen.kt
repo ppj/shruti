@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -198,6 +199,15 @@ fun TrainingScreen(
                         },
                     fontWeight = if (state.isHoldingCorrectly || state.isFlat || state.isSharp) FontWeight.Bold else FontWeight.Normal,
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { viewModel.playReferenceNote() },
+                    modifier = Modifier.fillMaxWidth(0.6f),
+                ) {
+                    Text(text = stringResource(R.string.text_play_reference))
+                }
             }
         }
 
