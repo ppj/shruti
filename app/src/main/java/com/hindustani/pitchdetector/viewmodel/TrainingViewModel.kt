@@ -254,6 +254,18 @@ class TrainingViewModel(
     }
 
     /**
+     * Stop audio recording and tanpura playback if active
+     */
+    private fun stopAudio() {
+        if (pitchViewModel.isRecording.value) {
+            pitchViewModel.toggleRecording()
+        }
+        if (pitchViewModel.isTanpuraPlaying.value) {
+            pitchViewModel.toggleTanpura()
+        }
+    }
+
+    /**
      * Advance to the next note in the sequence, or complete the session
      */
     private fun advanceToNextNote() {
@@ -302,13 +314,7 @@ class TrainingViewModel(
                 )
             }
 
-            if (pitchViewModel.isRecording.value) {
-                pitchViewModel.toggleRecording()
-            }
-
-            if (pitchViewModel.isTanpuraPlaying.value) {
-                pitchViewModel.toggleTanpura()
-            }
+            stopAudio()
         }
     }
 
@@ -355,13 +361,6 @@ class TrainingViewModel(
         super.onCleared()
         holdTimerJob?.cancel()
         referenceNotePlayer.release()
-
-        if (pitchViewModel.isRecording.value) {
-            pitchViewModel.toggleRecording()
-        }
-
-        if (pitchViewModel.isTanpuraPlaying.value) {
-            pitchViewModel.toggleTanpura()
-        }
+        stopAudio()
     }
 }

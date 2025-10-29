@@ -224,23 +224,26 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Helper to persist settings changes via coroutine
+     */
+    private fun persistSetting(updateAction: suspend UserSettingsRepository.() -> Unit) {
+        viewModelScope.launch {
+            userSettingsRepository.updateAction()
+        }
+    }
+
+    /**
      * Update tolerance in cents
      */
     fun updateTolerance(cents: Double) {
-        // Persist to DataStore (flow collector will update _settings)
-        viewModelScope.launch {
-            userSettingsRepository.updateTolerance(cents)
-        }
+        persistSetting { updateTolerance(cents) }
     }
 
     /**
      * Update tuning system (12-note vs 22-shruti)
      */
     fun updateTuningSystem(use22Shruti: Boolean) {
-        // Persist to DataStore (flow collector will update _settings)
-        viewModelScope.launch {
-            userSettingsRepository.updateTuningSystem(use22Shruti)
-        }
+        persistSetting { updateTuningSystem(use22Shruti) }
     }
 
     /**
@@ -264,10 +267,7 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
             vol = _settings.value.tanpuraVolume,
         )
         _isTanpuraPlaying.value = true
-        // Persist to DataStore (flow collector will update _settings)
-        viewModelScope.launch {
-            userSettingsRepository.updateTanpuraEnabled(true)
-        }
+        persistSetting { updateTanpuraEnabled(true) }
     }
 
     /**
@@ -276,22 +276,15 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
     private fun stopTanpura() {
         tanpuraPlayer.stop()
         _isTanpuraPlaying.value = false
-        // Persist to DataStore (flow collector will update _settings)
-        viewModelScope.launch {
-            userSettingsRepository.updateTanpuraEnabled(false)
-        }
+        persistSetting { updateTanpuraEnabled(false) }
     }
 
     /**
      * Update tanpura string 1 note
      */
     fun updateTanpuraString1(swar: String) {
-        // Persist to DataStore (flow collector will update _settings)
-        viewModelScope.launch {
-            userSettingsRepository.updateTanpuraString1(swar)
-        }
+        persistSetting { updateTanpuraString1(swar) }
 
-        // Update tanpura immediately if it's currently playing
         if (_isTanpuraPlaying.value) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,
@@ -305,12 +298,8 @@ class PitchViewModel(application: Application) : AndroidViewModel(application) {
      * Update tanpura volume
      */
     fun updateTanpuraVolume(volume: Float) {
-        // Persist to DataStore (flow collector will update _settings)
-        viewModelScope.launch {
-            userSettingsRepository.updateTanpuraVolume(volume)
-        }
+        persistSetting { updateTanpuraVolume(volume) }
 
-        // Update tanpura immediately if it's currently playing
         if (_isTanpuraPlaying.value) {
             tanpuraPlayer.updateParameters(
                 saFreq = _settings.value.saFrequency,

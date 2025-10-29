@@ -74,6 +74,24 @@ class TrainingViewModelTest {
         Dispatchers.resetMain()
     }
 
+    /**
+     * Helper to create test notes with computed isPerfect/isFlat/isSharp flags
+     */
+    private fun createTestNote(
+        swar: String,
+        centsDeviation: Double,
+    ): HindustaniNoteConverter.HindustaniNote {
+        val tolerance = mockPitchState.value.toleranceCents
+        return HindustaniNoteConverter.HindustaniNote(
+            swar = swar,
+            octave = HindustaniNoteConverter.Octave.MADHYA,
+            centsDeviation = centsDeviation,
+            isPerfect = kotlin.math.abs(centsDeviation) <= tolerance,
+            isFlat = centsDeviation < -tolerance,
+            isSharp = centsDeviation > tolerance,
+        )
+    }
+
     @Test
     fun `initialization_level1_startsWithCorrectLevel`() =
         runTest {
@@ -152,15 +170,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val correctNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
+            val correctNote = createTestNote(swar = "S", centsDeviation = 0.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = correctNote)
             testScheduler.advanceUntilIdle()
 
@@ -173,15 +183,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val incorrectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "R",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
+            val incorrectNote = createTestNote(swar = "R", centsDeviation = 0.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = incorrectNote)
             testScheduler.advanceUntilIdle()
 
@@ -194,15 +196,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val imperfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 20.0,
-                    isPerfect = false,
-                    isFlat = false,
-                    isSharp = true,
-                )
+            val imperfectNote = createTestNote(swar = "S", centsDeviation = 20.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = imperfectNote)
             testScheduler.advanceUntilIdle()
 
@@ -215,15 +209,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val flatNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = -20.0,
-                    isPerfect = false,
-                    isFlat = true,
-                    isSharp = false,
-                )
+            val flatNote = createTestNote(swar = "S", centsDeviation = -20.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = flatNote)
             testScheduler.advanceUntilIdle()
 
@@ -238,15 +224,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val sharpNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 20.0,
-                    isPerfect = false,
-                    isFlat = false,
-                    isSharp = true,
-                )
+            val sharpNote = createTestNote(swar = "S", centsDeviation = 20.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = sharpNote)
             testScheduler.advanceUntilIdle()
 
@@ -261,15 +239,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val wrongNoteFlat =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "R",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = -20.0,
-                    isPerfect = false,
-                    isFlat = true,
-                    isSharp = false,
-                )
+            val wrongNoteFlat = createTestNote(swar = "R", centsDeviation = -20.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = wrongNoteFlat)
             testScheduler.advanceUntilIdle()
 
@@ -284,15 +254,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
+            val perfectNote = createTestNote(swar = "S", centsDeviation = 0.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
             testScheduler.advanceUntilIdle()
 
@@ -403,15 +365,7 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
+            val perfectNote = createTestNote(swar = "S", centsDeviation = 0.0)
             mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
             testScheduler.advanceUntilIdle()
             testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
@@ -438,38 +392,22 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
-
             // First note (S) - combo should be 1, score = 100 + 50*1 = 150
-            mockPitchState.value = mockPitchState.value.copy(currentNote = perfectNote)
+            mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = "S", centsDeviation = 0.0))
             testScheduler.advanceUntilIdle()
             testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(150)
             assertThat(trainingViewModel.state.value.comboCount).isEqualTo(1)
 
             // Second note (R) - combo should be 2, score = 150 + 100 + 50*2 = 350
-            mockPitchState.value =
-                mockPitchState.value.copy(
-                    currentNote = perfectNote.copy(swar = "R"),
-                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = "R", centsDeviation = 0.0))
             testScheduler.advanceUntilIdle()
             testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(350)
             assertThat(trainingViewModel.state.value.comboCount).isEqualTo(2)
 
             // Third note (G) - combo should be 3, score = 350 + 100 + 50*3 = 600
-            mockPitchState.value =
-                mockPitchState.value.copy(
-                    currentNote = perfectNote.copy(swar = "G"),
-                )
+            mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = "G", centsDeviation = 0.0))
             testScheduler.advanceUntilIdle()
             testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(600)
@@ -482,23 +420,10 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
-
             // Level 1 has 7 notes - complete them all
             repeat(7) {
                 val expectedSwar = trainingViewModel.state.value.currentSwar
-                mockPitchState.value =
-                    mockPitchState.value.copy(
-                        currentNote = perfectNote.copy(swar = expectedSwar!!),
-                    )
+                mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = expectedSwar!!, centsDeviation = 0.0))
                 testScheduler.advanceUntilIdle()
                 testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
@@ -516,23 +441,10 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
-
             // Complete all 7 notes perfectly
             repeat(7) {
                 val expectedSwar = trainingViewModel.state.value.currentSwar
-                mockPitchState.value =
-                    mockPitchState.value.copy(
-                        currentNote = perfectNote.copy(swar = expectedSwar!!),
-                    )
+                mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = expectedSwar!!, centsDeviation = 0.0))
                 testScheduler.advanceUntilIdle()
                 testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
@@ -551,23 +463,10 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
-
             // First session: complete all 7 notes perfectly for high score
             repeat(7) {
                 val expectedSwar = trainingViewModel.state.value.currentSwar
-                mockPitchState.value =
-                    mockPitchState.value.copy(
-                        currentNote = perfectNote.copy(swar = expectedSwar!!),
-                    )
+                mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = expectedSwar!!, centsDeviation = 0.0))
                 testScheduler.advanceUntilIdle()
                 testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
@@ -591,23 +490,10 @@ class TrainingViewModelTest {
             trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, context = context)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
-            val perfectNote =
-                HindustaniNoteConverter.HindustaniNote(
-                    swar = "S",
-                    octave = HindustaniNoteConverter.Octave.MADHYA,
-                    centsDeviation = 0.0,
-                    isPerfect = true,
-                    isFlat = false,
-                    isSharp = false,
-                )
-
             // Complete first 3 notes for initial best score
             repeat(3) {
                 val expectedSwar = trainingViewModel.state.value.currentSwar
-                mockPitchState.value =
-                    mockPitchState.value.copy(
-                        currentNote = perfectNote.copy(swar = expectedSwar!!),
-                    )
+                mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = expectedSwar!!, centsDeviation = 0.0))
                 testScheduler.advanceUntilIdle()
                 testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
@@ -618,10 +504,7 @@ class TrainingViewModelTest {
             // Complete remaining 4 notes to finish session with higher score
             repeat(4) {
                 val expectedSwar = trainingViewModel.state.value.currentSwar
-                mockPitchState.value =
-                    mockPitchState.value.copy(
-                        currentNote = perfectNote.copy(swar = expectedSwar!!),
-                    )
+                mockPitchState.value = mockPitchState.value.copy(currentNote = createTestNote(swar = expectedSwar!!, centsDeviation = 0.0))
                 testScheduler.advanceUntilIdle()
                 testScheduler.advanceTimeBy(HOLD_DURATION_AND_BUFFER_MS)
                 testScheduler.advanceUntilIdle()
