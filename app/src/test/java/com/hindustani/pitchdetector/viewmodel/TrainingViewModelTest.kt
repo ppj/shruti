@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.hindustani.pitchdetector.data.PitchState
 import com.hindustani.pitchdetector.music.HindustaniNoteConverter
+import com.hindustani.pitchdetector.utils.TestClock
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +29,9 @@ class TrainingViewModelTest {
     private lateinit var pitchViewModel: PitchViewModel
     private lateinit var trainingViewModel: TrainingViewModel
     private lateinit var application: Application
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScheduler = TestCoroutineScheduler()
+    private val testDispatcher = UnconfinedTestDispatcher(testScheduler)
+    private lateinit var testClock: TestClock
 
     companion object {
         // Time to skip countdown (3 seconds) + small buffer
@@ -64,6 +67,7 @@ class TrainingViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         application = ApplicationProvider.getApplicationContext()
+        testClock = TestClock(testScheduler)
         pitchViewModel = mockk(relaxed = true)
         every { pitchViewModel.pitchState } returns mockPitchState
         every { pitchViewModel.isTanpuraPlaying } returns mockIsTanpuraPlaying
@@ -101,7 +105,7 @@ class TrainingViewModelTest {
     @Test
     fun `initialization_level1_startsWithCorrectLevel`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(1)
             assertThat(trainingViewModel.state.value.currentSwar).isEqualTo("S")
@@ -110,7 +114,7 @@ class TrainingViewModelTest {
     @Test
     fun `initialization_level2_startsWithCorrectLevel`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 2, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 2, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(2)
             assertThat(trainingViewModel.state.value.currentSwar).isNotNull()
@@ -119,7 +123,7 @@ class TrainingViewModelTest {
     @Test
     fun `initialization_level3_startsWithCorrectLevel`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 3, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 3, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(3)
             assertThat(trainingViewModel.state.value.currentSwar).isEqualTo("S")
@@ -128,7 +132,7 @@ class TrainingViewModelTest {
     @Test
     fun `initialization_level4_startsWithCorrectLevel`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 4, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 4, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.level).isEqualTo(4)
             assertThat(trainingViewModel.state.value.currentSwar).isNotNull()
@@ -137,7 +141,7 @@ class TrainingViewModelTest {
     @Test
     fun `initialization_setsTanpuraString1ToPa`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             verify { pitchViewModel.updateTanpuraString1("P") }
         }
@@ -147,7 +151,7 @@ class TrainingViewModelTest {
         runTest {
             mockIsTanpuraPlaying.value = false
 
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             verify { pitchViewModel.toggleTanpura() }
         }
@@ -157,7 +161,7 @@ class TrainingViewModelTest {
         runTest {
             mockIsTanpuraPlaying.value = true
 
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             verify(exactly = 0) { pitchViewModel.toggleTanpura() }
         }
@@ -165,7 +169,7 @@ class TrainingViewModelTest {
     @Test
     fun `initialization_startsCountdownAt3`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.countdown).isEqualTo(3)
         }
@@ -173,7 +177,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_correctNoteDetected_setsIsHoldingCorrectly`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val correctNote = createTestNote(swar = "S", centsDeviation = 0.0)
@@ -186,7 +190,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_incorrectNoteDetected_setsIsHoldingCorrectlyFalse`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val incorrectNote = createTestNote(swar = "R", centsDeviation = 0.0)
@@ -199,7 +203,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_noteNotPerfect_setsIsHoldingCorrectlyFalse`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val imperfectNote = createTestNote(swar = "S", centsDeviation = 20.0)
@@ -212,7 +216,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_correctSwarButFlat_setsIsFlatTrue`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val flatNote = createTestNote(swar = "S", centsDeviation = -20.0)
@@ -227,7 +231,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_correctSwarButSharp_setsIsSharpTrue`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val sharpNote = createTestNote(swar = "S", centsDeviation = 20.0)
@@ -242,7 +246,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_wrongSwarEvenIfFlat_doesNotSetIsFlat`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val wrongNoteFlat = createTestNote(swar = "R", centsDeviation = -20.0)
@@ -257,7 +261,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_perfectNote_setsBothFlatAndSharpFalse`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val perfectNote = createTestNote(swar = "S", centsDeviation = 0.0)
@@ -272,7 +276,7 @@ class TrainingViewModelTest {
     @Test
     fun `observePitch_nullNote_clearsDetectedSwarAndFlatSharpFlags`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             mockPitchState.value = mockPitchState.value.copy(currentNote = null)
@@ -286,7 +290,7 @@ class TrainingViewModelTest {
     @Test
     fun `resetSession_resetsCurrentNoteIndexTo0`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             trainingViewModel.resetSession()
             testScheduler.advanceUntilIdle()
@@ -297,7 +301,7 @@ class TrainingViewModelTest {
     @Test
     fun `resetSession_resetsHoldProgressTo0`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             trainingViewModel.resetSession()
             testScheduler.advanceUntilIdle()
@@ -308,7 +312,7 @@ class TrainingViewModelTest {
     @Test
     fun `toggleTanpura_ensuresString1IsSetToPa`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             clearMocks(pitchViewModel, answers = false)
 
@@ -321,7 +325,7 @@ class TrainingViewModelTest {
     @Test
     fun `state_initiallyNotComplete`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.isSessionComplete).isFalse()
         }
@@ -329,7 +333,7 @@ class TrainingViewModelTest {
     @Test
     fun `state_initialHoldProgressIsZero`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.holdProgress).isEqualTo(0f)
         }
@@ -337,10 +341,10 @@ class TrainingViewModelTest {
     @Test
     fun `state_exposesCorrectLevel`() =
         runTest {
-            val viewModel1 = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
-            val viewModel2 = TrainingViewModel(level = 2, pitchViewModel = pitchViewModel, application = application)
-            val viewModel3 = TrainingViewModel(level = 3, pitchViewModel = pitchViewModel, application = application)
-            val viewModel4 = TrainingViewModel(level = 4, pitchViewModel = pitchViewModel, application = application)
+            val viewModel1 = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
+            val viewModel2 = TrainingViewModel(level = 2, pitchViewModel = pitchViewModel, application = application, clock = testClock)
+            val viewModel3 = TrainingViewModel(level = 3, pitchViewModel = pitchViewModel, application = application, clock = testClock)
+            val viewModel4 = TrainingViewModel(level = 4, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(viewModel1.state.value.level).isEqualTo(1)
             assertThat(viewModel2.state.value.level).isEqualTo(2)
@@ -351,7 +355,7 @@ class TrainingViewModelTest {
     @Test
     fun `saNote_flowIsExposed`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.saNote.value).isEqualTo("C3")
         }
@@ -360,7 +364,7 @@ class TrainingViewModelTest {
     fun `isTanpuraPlaying_flowIsExposed`() =
         runTest {
             mockIsTanpuraPlaying.value = true
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.isTanpuraPlaying.value).isTrue()
         }
@@ -368,7 +372,7 @@ class TrainingViewModelTest {
     @Test
     fun `scoring_completingFirstPerfectNote_updatesScoreAndIncrementsCombo`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             val perfectNote = createTestNote(swar = "S", centsDeviation = 0.0)
@@ -384,7 +388,7 @@ class TrainingViewModelTest {
     @Test
     fun `scoring_initialState_hasZeroScore`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             assertThat(trainingViewModel.state.value.currentScore).isEqualTo(0)
             assertThat(trainingViewModel.state.value.comboCount).isEqualTo(0)
@@ -395,7 +399,7 @@ class TrainingViewModelTest {
     @Test
     fun `scoring_comboProgression_increasesWithConsecutivePerfectNotes`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             // First note (S) - combo should be 1, score = 100 + 50*1 = 150
@@ -423,7 +427,7 @@ class TrainingViewModelTest {
     @Test
     fun `sessionCompletion_allNotesCompleted_marksSessionComplete`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             // Level 1 has 7 notes - complete them all
@@ -444,7 +448,7 @@ class TrainingViewModelTest {
     @Test
     fun `sessionCompletion_calculatesStarsCorrectly_threeStars`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             // Complete all 7 notes perfectly
@@ -466,7 +470,7 @@ class TrainingViewModelTest {
     @Test
     fun `sessionBestScore_persistsAcrossReset`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             // First session: complete all 7 notes perfectly for high score
@@ -493,7 +497,7 @@ class TrainingViewModelTest {
     @Test
     fun `sessionBestScore_updatesWhenHigher`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
             testScheduler.advanceTimeBy(COUNTDOWN_AND_BUFFER_MS)
 
             // Complete first 3 notes for initial best score
@@ -542,7 +546,7 @@ class TrainingViewModelTest {
     @Test
     fun `playReferenceNote_withCurrentSwar_doesNotCrash`() =
         runTest {
-            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application)
+            trainingViewModel = TrainingViewModel(level = 1, pitchViewModel = pitchViewModel, application = application, clock = testClock)
 
             // Call playReferenceNote - should not crash
             // Note: ReferenceNotePlayer is created inside TrainingViewModel and can't be mocked
