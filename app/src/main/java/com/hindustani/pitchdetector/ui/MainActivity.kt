@@ -129,10 +129,10 @@ fun AppNavigation(
                 ),
         ) { backStackEntry ->
             val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: DEFAULT_TRAINING_LEVEL
-            val context = LocalContext.current
+            val application = LocalContext.current.applicationContext as android.app.Application
             val trainingViewModel: TrainingViewModel =
                 viewModel(
-                    factory = TrainingViewModel.provideFactory(level, viewModel, context),
+                    factory = TrainingViewModel.provideFactory(level, viewModel, application),
                 )
             TrainingScreen(
                 navController = navController,

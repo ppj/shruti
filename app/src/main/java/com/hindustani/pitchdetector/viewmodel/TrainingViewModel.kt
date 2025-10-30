@@ -1,6 +1,7 @@
 package com.hindustani.pitchdetector.viewmodel
 
-import android.content.Context
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -51,15 +52,15 @@ enum class TrainingLevel(val levelNumber: Int, val baseNotes: List<String>, val 
  *
  * @param level Training difficulty level (1-4, see TrainingLevel enum)
  * @param pitchViewModel Main PitchViewModel instance for accessing pitch data and controlling audio
- * @param context Application context for accessing audio resources
+ * @param application Application context for accessing audio resources
  */
 class TrainingViewModel(
     level: Int,
     private val pitchViewModel: PitchViewModel,
-    context: Context,
-) : ViewModel() {
+    application: Application,
+) : AndroidViewModel(application) {
     private val trainingLevel: TrainingLevel = TrainingLevel.fromInt(level)
-    private val referenceNotePlayer = ReferenceNotePlayer(context)
+    private val referenceNotePlayer = ReferenceNotePlayer(application)
 
     companion object {
         private const val HOLD_DURATION_MILLIS = 2000L
@@ -81,13 +82,13 @@ class TrainingViewModel(
         fun provideFactory(
             level: Int,
             pitchViewModel: PitchViewModel,
-            context: Context,
+            application: Application,
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(TrainingViewModel::class.java)) {
-                        return TrainingViewModel(level, pitchViewModel, context) as T
+                        return TrainingViewModel(level, pitchViewModel, application) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class")
                 }
