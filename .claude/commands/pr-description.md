@@ -6,6 +6,14 @@ Create or update PR description by analyzing commits in current branch.
 
 ```bash
 git branch --show-current  # Current branch
+
+# Check for unpushed commits
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "No upstream"
+git log @{upstream}..HEAD --oneline 2>/dev/null  # List unpushed commits
+
+# If unpushed commits exist, push first
+# If no upstream, push with: git push -u origin <branch>
+
 gh pr view --json number,title,body,baseRefName 2>/dev/null || echo "No PR"  # Check if PR exists
 git log main..HEAD --format="%H %s"  # All commits (SHA + message)
 git diff main...HEAD --stat  # Stats
@@ -76,6 +84,7 @@ gh pr view --web
 - No commits → "Make commits first"
 - On `main` → Ask which branch
 - Not authenticated → `gh auth login`
+- Unpushed commits → Push first with `git push -u origin <branch>`
 - PR missing Commits section → Regenerate from scratch
 - No new commits → Exit (no change needed)
 
