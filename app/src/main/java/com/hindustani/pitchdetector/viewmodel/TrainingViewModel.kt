@@ -1,11 +1,13 @@
 package com.hindustani.pitchdetector.viewmodel
 
-import android.content.Context
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.hindustani.pitchdetector.audio.ReferenceNotePlayer
 import com.hindustani.pitchdetector.data.TrainingState
+import com.hindustani.pitchdetector.utils.Clock
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,15 +53,17 @@ enum class TrainingLevel(val levelNumber: Int, val baseNotes: List<String>, val 
  *
  * @param level Training difficulty level (1-4, see TrainingLevel enum)
  * @param pitchViewModel Main PitchViewModel instance for accessing pitch data and controlling audio
- * @param context Application context for accessing audio resources
+ * @param application Application context for accessing audio resources
+ * @param clock Clock for time measurement (SystemClock in production, TestClock in tests)
  */
 class TrainingViewModel(
     level: Int,
     private val pitchViewModel: PitchViewModel,
-    context: Context,
-) : ViewModel() {
+    application: Application,
+    private val clock: Clock,
+) : AndroidViewModel(application) {
     private val trainingLevel: TrainingLevel = TrainingLevel.fromInt(level)
-    private val referenceNotePlayer = ReferenceNotePlayer(context)
+    private val referenceNotePlayer = ReferenceNotePlayer(application)
 
     companion object {
         private const val HOLD_DURATION_MILLIS = 2000L
@@ -81,13 +85,14 @@ class TrainingViewModel(
         fun provideFactory(
             level: Int,
             pitchViewModel: PitchViewModel,
-            context: Context,
+            application: Application,
+            clock: Clock,
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(TrainingViewModel::class.java)) {
-                        return TrainingViewModel(level, pitchViewModel, context) as T
+                        return TrainingViewModel(level, pitchViewModel, application, clock) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class")
                 }
@@ -225,14 +230,15 @@ class TrainingViewModel(
 
     /**
      * Start the 2-second hold timer, updating progress at 60fps
+     * Uses injected Clock for time measurement (respects virtual time in tests)
      */
     private fun startHoldTimer() {
         holdTimerJob?.cancel()
         holdTimerJob =
             viewModelScope.launch {
-                val startTime = System.currentTimeMillis()
-                while (System.currentTimeMillis() - startTime < HOLD_DURATION_MILLIS) {
-                    val elapsedMillis = System.currentTimeMillis() - startTime
+                val startTime = clock.now()
+                while (clock.now() - startTime < HOLD_DURATION_MILLIS) {
+                    val elapsedMillis = clock.now() - startTime
                     val progress = (elapsedMillis.toFloat() / HOLD_DURATION_MILLIS).coerceIn(0f, 1f)
                     _state.update { it.copy(holdProgress = progress) }
                     delay(TIMER_UPDATE_INTERVAL)

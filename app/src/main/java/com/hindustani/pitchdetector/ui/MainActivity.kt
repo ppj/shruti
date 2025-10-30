@@ -26,6 +26,7 @@ import com.hindustani.pitchdetector.ui.findsa.FindSaScreen
 import com.hindustani.pitchdetector.ui.theme.ShrutiTheme
 import com.hindustani.pitchdetector.ui.training.TrainingMenuScreen
 import com.hindustani.pitchdetector.ui.training.TrainingScreen
+import com.hindustani.pitchdetector.utils.SystemClock
 import com.hindustani.pitchdetector.viewmodel.FindSaViewModel
 import com.hindustani.pitchdetector.viewmodel.PitchViewModel
 import com.hindustani.pitchdetector.viewmodel.TrainingViewModel
@@ -129,10 +130,10 @@ fun AppNavigation(
                 ),
         ) { backStackEntry ->
             val level = backStackEntry.arguments?.getInt(AppRoutes.NavArgs.LEVEL) ?: DEFAULT_TRAINING_LEVEL
-            val context = LocalContext.current
+            val application = LocalContext.current.applicationContext as android.app.Application
             val trainingViewModel: TrainingViewModel =
                 viewModel(
-                    factory = TrainingViewModel.provideFactory(level, viewModel, context),
+                    factory = TrainingViewModel.provideFactory(level, viewModel, application, SystemClock()),
                 )
             TrainingScreen(
                 navController = navController,
