@@ -1,157 +1,91 @@
 # PR Description Command
 
-Create or update a Pull Request description by analyzing commits and changes in the current branch. Follow this workflow:
+Create or update PR description by analyzing commits in current branch.
 
-## Phase 1: Gather Branch Information
-
-Collect information about the current branch and its base:
+## Phase 1: Gather Info & Determine Strategy
 
 ```bash
-# Get current branch name
-git branch --show-current
+git branch --show-current  # Current branch
 
-# Check if PR already exists
-gh pr view --json number,title,body,baseRefName || echo "No PR found"
+# Check for unpushed commits
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "No upstream"
+git log @{upstream}..HEAD --oneline 2>/dev/null  # List unpushed commits
 
-# If no PR exists, determine base branch (usually 'main')
-# Get list of commits in current branch vs base
-git log main..HEAD --oneline
+# If unpushed commits exist, push first
+# If no upstream, push with: git push -u origin <branch>
 
-# Get all changed files with diff stats
-git diff main...HEAD --stat
-
-# Get detailed diff of changes
-git diff main...HEAD
+gh pr view --json number,title,body,baseRefName 2>/dev/null || echo "No PR"  # Check if PR exists
+git log main..HEAD --format="%H %s"  # All commits (SHA + message)
+git diff main...HEAD --stat  # Stats
+git diff main...HEAD  # Full diff
 ```
 
-Store this information:
-- Current branch name
-- Base branch name (default: main)
-- Whether PR exists
-- List of commits with messages
-- Changed files
-- Diff content
+**Strategy:**
+- **No PR:** Create new from overall diff (commits are implementation details)
+- **PR exists:** Compare SHAs in "## Commits" section vs current branch:
+  - SHAs changed (rebase/amend) → Regenerate from scratch
+  - Only new commits → Update with new changes only (`git diff <last-SHA>..HEAD`)
+  - No new commits → Exit (up to date)
 
-## Phase 2: Analyze Changes (Use Gemini CLI)
+## Phase 2: Analyze with Gemini
 
-Use Gemini CLI to analyze the branch changes and generate a comprehensive PR description:
-
+**For NEW PR:**
 ```bash
-gemini --prompt "Analyze the following git changes and create a comprehensive Pull Request description:
+gemini --prompt "Create PR description from git changes:
+Branch: [NAME], Base: main
+Files: [git diff --stat]
+Diff: [git diff]
+Commits: [git log] (reference only, focus on overall diff)
 
-**Current Branch:** [INSERT BRANCH NAME]
-**Base Branch:** [INSERT BASE BRANCH NAME]
+Structure:
+## Summary: 1-2 sentences
+## Changes: 5-7 bullets (one line each, group by area)
+## Technical Details: Only if noteworthy architectural decisions (otherwise OMIT)
+## Testing: One line (e.g., 'Unit tests added', 'Tested on Pixel 6')
+## Related Issues: 'Fixes #123' or 'None'
+## Commits: List all as '- <full-SHA>: <message>'
+## Checklist: Code conventions, tests, docs, device testing
 
-**Commits:**
-[INSERT git log OUTPUT]
-
-**Changed Files:**
-[INSERT git diff --stat OUTPUT]
-
-**Detailed Changes:**
-[INSERT git diff OUTPUT - include key sections]
-
-Generate a PR description with this structure:
-
-## Summary
-[2-3 sentences explaining what this PR does and why]
-
-## Changes
-[Bulleted list of key changes, organized by area/component]
-
-## Technical Details
-[Any important implementation details, architectural decisions, or technical notes]
-
-## Testing
-[What testing was done or should be done]
-
-## Related Issues
-[Look for issue references in commit messages like #123, or note 'None']
-
-## Checklist
-- [ ] Code follows project conventions
-- [ ] Tests added/updated
-- [ ] Documentation updated if needed
-- [ ] Tested on physical device (if applicable)
-
-Use clear, concise language. Focus on WHAT changed and WHY, not HOW (the code shows that).
-Make it easy for reviewers to understand the purpose and impact of these changes."
+Be concise, scannable, focus on WHAT/WHY not HOW."
 ```
 
-## Phase 3: Create or Update PR
+**For UPDATE (new commits):**
+```bash
+gemini --prompt "Update PR with new commits:
+Existing: [PR BODY]
+New commits: [LIST with SHA]
+New diff: [git diff <last-SHA>..HEAD]
 
-Based on whether a PR exists:
+Keep Summary (update if fundamental change). APPEND to Changes (one-line bullets). Update Technical Details/Testing if needed. UPDATE Commits section (all commits). Keep Issues/Checklist. Mark new: '**Update:** <brief>'. Stay concise."
+```
 
-### If NO PR exists:
+## Phase 3: Create/Update PR
 
 ```bash
-gh pr create \
-  --title "[GENERATE CONCISE TITLE FROM CHANGES]" \
-  --body "$(cat <<'EOF'
-[INSERT GENERATED PR DESCRIPTION]
-
+# Create new:
+gh pr create --title "[TITLE]" --body "$(cat <<'EOF'
+[DESCRIPTION]
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
-)" \
-  --base main
-```
+)" --base main
 
-### If PR exists:
-
-```bash
-gh pr edit [PR_NUMBER] --body "$(cat <<'EOF'
-[INSERT GENERATED PR DESCRIPTION]
-
+# Update existing:
+gh pr edit [NUM] --body "$(cat <<'EOF'
+[UPDATED DESCRIPTION]
 🤖 Updated with [Claude Code](https://claude.com/claude-code)
 EOF
 )"
-```
 
-## Phase 4: Confirm and Display
-
-After creating/updating:
-
-```bash
-# Display the PR
+# Display:
 gh pr view --web
 ```
 
-Show the user:
-- PR URL
-- PR title
-- Brief summary of what was included in the description
+**Error handling:**
+- No commits → "Make commits first"
+- On `main` → Ask which branch
+- Not authenticated → `gh auth login`
+- Unpushed commits → Push first with `git push -u origin <branch>`
+- PR missing Commits section → Regenerate from scratch
+- No new commits → Exit (no change needed)
 
-## Error Handling
-
-Handle common scenarios:
-
-1. **No commits in branch:**
-   - Message: "No commits found compared to main. Make some commits first."
-
-2. **Not on a feature branch:**
-   - If on `main`, ask user which branch to analyze
-
-3. **GitHub CLI not authenticated:**
-   - Message: "Please authenticate with GitHub: `gh auth login`"
-
-4. **No base branch found:**
-   - Default to `main`, but ask user to confirm
-
-## Execution Notes
-
-- **Use Gemini CLI for analysis** - Generate PR description from commits and diffs
-- **Use `gh` CLI for PR operations** - Create or update via GitHub CLI
-- **Smart title generation** - Extract intent from commits to create clear PR title
-- **Include context** - Reference commits, issues, and technical decisions
-- **Reviewer-friendly** - Make it easy to understand what changed and why
-- **Test checklist** - Include relevant testing checkboxes
-- **Claude Code attribution** - Add generation note at bottom
-
-## Best Practices
-
-- Keep summary concise (2-3 sentences max)
-- Group changes by component/area for clarity
-- Highlight breaking changes prominently
-- Reference related issues/PRs
-- Note testing approach (unit tests, manual testing, etc.)
-- If PR updates existing description, preserve any manual notes/context added by humans
+**Notes:** Always include "## Commits" section (full SHA + message) for tracking rebases. Focus overall diff for new PRs. Detect rebases by SHA comparison. Keep descriptions scannable (short bullets, omit fluff).
